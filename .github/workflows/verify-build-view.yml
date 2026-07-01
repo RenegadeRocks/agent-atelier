@@ -1,0 +1,21 @@
+name: verify-build-view
+
+# Enforces the drift guard server-side: if someone edits the PRD without regenerating the
+# derived files (build-view/, specs/contracts/, .agents/workflows/build-*.md), or hand-edits
+# a derived file, this fails. Fix locally with `python3 tools/build_view_split.py` then commit.
+# The splitter uses only the Python standard library — no dependencies to install.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify build-view / contracts / workflows are in sync with the PRD
+        run: python3 tools/build_view_split.py --verify

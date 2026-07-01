@@ -51,6 +51,14 @@ writes product code as it builds — it does not need to scaffold the governance
 1. Open the **`agent-atelier/` folder** as the project in Antigravity.
 2. It auto-loads `GEMINI.md`, whose §0 tells the agent to read
    `.agents/rules/build-protocol.md` first (each `build-*.md` workflow points there too).
+   So Antigravity already **knows the plan** the moment you open the folder — you just give
+   it the go-signal. **Your first message can be exactly:**
+   > *Read `GEMINI.md` and `.agents/rules/build-protocol.md`, check `BUILD-STATUS.md` for the
+   > next contract, then run `.agents/workflows/build-P0.md`.*
+
+   (After P0 is verified and you authorize the next one, the same message with `build-P1-A.md`,
+   and so on down `BUILD-STATUS.md`.) You never have to re-explain the project — it's all in
+   the repo.
 3. Check `BUILD-STATUS.md` for the next contract (it starts at **P0**), then run its
    workflow — e.g. tell Antigravity: **"Run `.agents/workflows/build-P0.md`."**
 4. The workflow tells it exactly which files to load (a small slice, not the whole PRD),
@@ -84,6 +92,9 @@ between machines, but committed files do.
   ```
   ln -sf ../../tools/git-hooks/pre-commit .git/hooks/pre-commit
   ```
+  **CI already enforces this server-side:** `.github/workflows/verify-build-view.yml` runs
+  `--verify` on every push/PR, so a PRD edit committed without its regenerated derived files
+  fails the check.
 - **Change the spec, not just the code.** If output is wrong, fix the spec artifact where
   it lives and log it in `specs/deviation_log.md` — see `.agents/workflows/change-request.md`.
 
