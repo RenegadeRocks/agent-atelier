@@ -1,0 +1,14 @@
+{
+  "_note": "Illustrative A2A Agent Card (PRD §13.3, Day 2). A2A is DEFAULT-OFF in this project: by default the Creative Director runs as an in-process ADK handoff, not a separate service. This card exists so the A2A capability is demonstrable, not theoretical (registered in Appendix D). Reserve it for a genuine deployment split (the simplicity guard, §6.3) — the CD is the natural first split (a stateless judge). Fields mirror the PRD §13.3 card verbatim; confirm the live A2A schema/field names against current docs at build time (§14.3).",
+  "name": "Creative Director",
+  "description": "Sole quality judge: Gate-0 Scroll Test + Gate-1 Compliance + post-render multimodal pass; returns a verdict, never edits.",
+  "url": "https://<deployment>/a2a/creative-director",
+  "skills": ["review-draft", "render-pass"],
+  "input_modes": ["application/json"],
+  "output_modes": ["application/json"],
+  "output_note": "verdict: approve|revise|reject + notes",
+  "auth": {
+    "scheme": "oauth2",
+    "scopes": ["read:draft", "write:review"]
+  }
+}

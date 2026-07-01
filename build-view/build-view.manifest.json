@@ -1,0 +1,377 @@
+{
+  "source": "specs/PRD-Agentic-Content-Studio.md",
+  "generated_by": "tools/build_view_split.py",
+  "core_section_ids": [
+    "0",
+    "3",
+    "5",
+    "17"
+  ],
+  "sections": [
+    {
+      "id": "0",
+      "title": "0. How to read this spec",
+      "file": "build-view/sections/00-how-to-read-this-spec.md",
+      "start_line": 16,
+      "end_line": 29,
+      "in_core": true
+    },
+    {
+      "id": "1",
+      "title": "1. Executive summary",
+      "file": "build-view/sections/01-executive-summary.md",
+      "start_line": 30,
+      "end_line": 41,
+      "in_core": false
+    },
+    {
+      "id": "2",
+      "title": "2. Background & motivation",
+      "file": "build-view/sections/02-background-motivation.md",
+      "start_line": 42,
+      "end_line": 67,
+      "in_core": false
+    },
+    {
+      "id": "3",
+      "title": "3. Goals, non-goals, success metrics",
+      "file": "build-view/sections/03-goals-non-goals-success-metrics.md",
+      "start_line": 68,
+      "end_line": 113,
+      "in_core": true
+    },
+    {
+      "id": "4",
+      "title": "4. Personas & primary user journeys",
+      "file": "build-view/sections/04-personas-primary-user-journeys.md",
+      "start_line": 114,
+      "end_line": 132,
+      "in_core": false
+    },
+    {
+      "id": "5",
+      "title": "5. Conceptual model",
+      "file": "build-view/sections/05-conceptual-model.md",
+      "start_line": 133,
+      "end_line": 159,
+      "in_core": true
+    },
+    {
+      "id": "6",
+      "title": "6. System architecture (substrate-agnostic) + recommended stack",
+      "file": "build-view/sections/06-system-architecture-substrate-agnostic.md",
+      "start_line": 160,
+      "end_line": 232,
+      "in_core": false
+    },
+    {
+      "id": "7",
+      "title": "7. The Brand Kit — product-agnostic configuration (core innovation)",
+      "file": "build-view/sections/07-the-brand-kit-product-agnostic-configuration.md",
+      "start_line": 233,
+      "end_line": 791,
+      "in_core": false
+    },
+    {
+      "id": "8",
+      "title": "8. The agent roster (generic, parameterized)",
+      "file": "build-view/sections/08-the-agent-roster-generic-parameterized.md",
+      "start_line": 792,
+      "end_line": 860,
+      "in_core": false
+    },
+    {
+      "id": "9",
+      "title": "9. The canon / engine documents (the harness's shared brain)",
+      "file": "build-view/sections/09-the-canon-engine-documents-the-harness-s-shared.md",
+      "start_line": 861,
+      "end_line": 1025,
+      "in_core": false
+    },
+    {
+      "id": "10",
+      "title": "10. The content production pipeline (state machine)",
+      "file": "build-view/sections/10-the-content-production-pipeline-state-machine.md",
+      "start_line": 1026,
+      "end_line": 1190,
+      "in_core": false
+    },
+    {
+      "id": "11",
+      "title": "11. Visual generation & typography subsystem",
+      "file": "build-view/sections/11-visual-generation-typography-subsystem.md",
+      "start_line": 1191,
+      "end_line": 1236,
+      "in_core": false
+    },
+    {
+      "id": "12",
+      "title": "12. Review, approval, publishing & system-of-record",
+      "file": "build-view/sections/12-review-approval-publishing-system-of-record.md",
+      "start_line": 1237,
+      "end_line": 1733,
+      "in_core": false
+    },
+    {
+      "id": "13",
+      "title": "13. Orchestration & scheduling",
+      "file": "build-view/sections/13-orchestration-scheduling.md",
+      "start_line": 1734,
+      "end_line": 1817,
+      "in_core": false
+    },
+    {
+      "id": "14",
+      "title": "14. Governance, safety & security",
+      "file": "build-view/sections/14-governance-safety-security.md",
+      "start_line": 1818,
+      "end_line": 2057,
+      "in_core": false
+    },
+    {
+      "id": "15",
+      "title": "15. Evaluation & quality",
+      "file": "build-view/sections/15-evaluation-quality.md",
+      "start_line": 2058,
+      "end_line": 2138,
+      "in_core": false
+    },
+    {
+      "id": "16",
+      "title": "16. Integrations & interfaces (MCP-first)",
+      "file": "build-view/sections/16-integrations-interfaces-mcp-first.md",
+      "start_line": 2139,
+      "end_line": 2188,
+      "in_core": false
+    },
+    {
+      "id": "17",
+      "title": "17. Data model",
+      "file": "build-view/sections/17-data-model.md",
+      "start_line": 2189,
+      "end_line": 2265,
+      "in_core": true
+    },
+    {
+      "id": "18",
+      "title": "18. Tech stack & build plan for Antigravity",
+      "file": "build-view/sections/18-tech-stack-build-plan-for-antigravity.md",
+      "start_line": 2266,
+      "end_line": 2354,
+      "in_core": false
+    },
+    {
+      "id": "19",
+      "title": "19. Milestones / phased roadmap",
+      "file": "build-view/sections/19-milestones-phased-roadmap.md",
+      "start_line": 2355,
+      "end_line": 2566,
+      "in_core": false
+    },
+    {
+      "id": "20",
+      "title": "20. Risks & open questions",
+      "file": "build-view/sections/20-risks-open-questions.md",
+      "start_line": 2567,
+      "end_line": 2578,
+      "in_core": false
+    },
+    {
+      "id": "21",
+      "title": "21. Capstone submission (Kaggle Vibe Coding — Agents for Business)",
+      "file": "build-view/sections/21-capstone-submission-kaggle-vibe-coding-agents.md",
+      "start_line": 2579,
+      "end_line": 2647,
+      "in_core": false
+    },
+    {
+      "id": "app-a",
+      "title": "Appendix A — Worked example: the Art of Living Ludhiana Brand Kit (filled)",
+      "file": "build-view/sections/app-a-worked-example-the-art-of-living-ludhiana-brand.md",
+      "start_line": 2648,
+      "end_line": 2738,
+      "in_core": false
+    },
+    {
+      "id": "app-b",
+      "title": "Appendix B — Course-concept mapping (capstone rubric)",
+      "file": "build-view/sections/app-b-course-concept-mapping-capstone-rubric.md",
+      "start_line": 2739,
+      "end_line": 2782,
+      "in_core": false
+    },
+    {
+      "id": "app-c",
+      "title": "Appendix C — Glossary",
+      "file": "build-view/sections/app-c-glossary.md",
+      "start_line": 2783,
+      "end_line": 2798,
+      "in_core": false
+    },
+    {
+      "id": "app-d",
+      "title": "Appendix D — `/specs` & `/brands` file map (authored artifacts)",
+      "file": "build-view/sections/app-d-specs-brands-file-map-authored-artifacts.md",
+      "start_line": 2799,
+      "end_line": 2837,
+      "in_core": false
+    }
+  ],
+  "contracts": [
+    {
+      "id": "P0",
+      "phase": "0",
+      "contract_file": "specs/contracts/P0.md",
+      "workflow": ".agents/workflows/build-P0.md",
+      "read_scope_text": "§18 (build workflow + governance), §16 (MCP contracts), Appendix D (file map)",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/18-tech-stack-build-plan-for-antigravity.md",
+        "build-view/sections/16-integrations-interfaces-mcp-first.md",
+        "build-view/sections/app-d-specs-brands-file-map-authored-artifacts.md"
+      ],
+      "park": "§7–§15 — later phases"
+    },
+    {
+      "id": "P1-A",
+      "phase": "1",
+      "contract_file": "specs/contracts/P1-A.md",
+      "workflow": ".agents/workflows/build-P1-A.md",
+      "read_scope_text": "§8 (roster + agent instruction files), §9.1–§9.4 (engine docs + linter), §10.1 (pipeline)",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/08-the-agent-roster-generic-parameterized.md",
+        "build-view/sections/09-the-canon-engine-documents-the-harness-s-shared.md",
+        "build-view/sections/10-the-content-production-pipeline-state-machine.md"
+      ],
+      "park": "§7 (Brand Kit), §12.4, §14 — later phases"
+    },
+    {
+      "id": "P1-B",
+      "phase": "1",
+      "contract_file": "specs/contracts/P1-B.md",
+      "workflow": ".agents/workflows/build-P1-B.md",
+      "read_scope_text": "§10.1 (pipeline), §11.2 (Caption-Composer), §12.2 (Sheets integrity), §16.1 (MCP contracts)",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/10-the-content-production-pipeline-state-machine.md",
+        "build-view/sections/11-visual-generation-typography-subsystem.md",
+        "build-view/sections/12-review-approval-publishing-system-of-record.md",
+        "build-view/sections/16-integrations-interfaces-mcp-first.md"
+      ],
+      "park": "§7, §12.4, §14 — later phases"
+    },
+    {
+      "id": "P2-A",
+      "phase": "2",
+      "contract_file": "specs/contracts/P2-A.md",
+      "workflow": ".agents/workflows/build-P2-A.md",
+      "read_scope_text": "§7.2 (Brand Kit schema), §7.2.1 (resolver), §7.3 (seeding map), Appendix A (worked kit)",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/07-the-brand-kit-product-agnostic-configuration.md",
+        "build-view/sections/app-a-worked-example-the-art-of-living-ludhiana-brand.md"
+      ],
+      "park": "§12.4, §14, §15 — later phases"
+    },
+    {
+      "id": "P2-B",
+      "phase": "2",
+      "contract_file": "specs/contracts/P2-B.md",
+      "workflow": ".agents/workflows/build-P2-B.md",
+      "read_scope_text": "§7.1 (intake + first-light), §7.8 (archetype starters), Appendix A",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/07-the-brand-kit-product-agnostic-configuration.md",
+        "build-view/sections/app-a-worked-example-the-art-of-living-ludhiana-brand.md"
+      ],
+      "park": "§12.4, §15.4 — later phases"
+    },
+    {
+      "id": "P3",
+      "phase": "3",
+      "contract_file": "specs/contracts/P3.md",
+      "workflow": ".agents/workflows/build-P3.md",
+      "read_scope_text": "§7.4 (Offerings), §9.4 (ledger-linter), §9.5 + §13 (cadence + control loop), §8.2",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/07-the-brand-kit-product-agnostic-configuration.md",
+        "build-view/sections/09-the-canon-engine-documents-the-harness-s-shared.md",
+        "build-view/sections/13-orchestration-scheduling.md",
+        "build-view/sections/08-the-agent-roster-generic-parameterized.md"
+      ],
+      "park": "§12.4, §14.2 — later phases"
+    },
+    {
+      "id": "P4-A",
+      "phase": "4",
+      "contract_file": "specs/contracts/P4-A.md",
+      "workflow": ".agents/workflows/build-P4-A.md",
+      "read_scope_text": "§14.2 (Policy Server + claim-grounding + fail-closed), §13.2 (circuit-breaker), §15.1–§15.3 + §18.2 (CI eval gate + golden set), §10.3 (blocker scenarios), policies.yaml",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/14-governance-safety-security.md",
+        "build-view/sections/13-orchestration-scheduling.md",
+        "build-view/sections/15-evaluation-quality.md",
+        "build-view/sections/18-tech-stack-build-plan-for-antigravity.md",
+        "build-view/sections/10-the-content-production-pipeline-state-machine.md",
+        "specs/policies.yaml"
+      ],
+      "park": "§12.4 and the publish-time referee (P4-B)"
+    },
+    {
+      "id": "P4-B",
+      "phase": "4",
+      "contract_file": "specs/contracts/P4-B.md",
+      "workflow": ".agents/workflows/build-P4-B.md",
+      "read_scope_text": "§14.2 (publish-time semantic referee), §14.7 (untrusted content), §15.4 (adversarial suite)",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/14-governance-safety-security.md",
+        "build-view/sections/15-evaluation-quality.md"
+      ],
+      "park": "the UI (P5)"
+    },
+    {
+      "id": "P5-A",
+      "phase": "5",
+      "contract_file": "specs/contracts/P5-A.md",
+      "workflow": ".agents/workflows/build-P5-A.md",
+      "read_scope_text": "§12.1 (Review app), §12.3 (publishing + Post Kit + mark-as-posted), §12.5 (approval protocol), §12.2 (Sheets integrity)",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/12-review-approval-publishing-system-of-record.md"
+      ],
+      "park": "§12.4 (Studio Floor → P5-B)"
+    },
+    {
+      "id": "P5-B",
+      "phase": "5",
+      "contract_file": "specs/contracts/P5-B.md",
+      "workflow": ".agents/workflows/build-P5-B.md",
+      "read_scope_text": "§12.4 (Studio Floor — the whole section), §5.3/§8.3 (progressive disclosure), §14.5 (observability spans)",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/12-review-approval-publishing-system-of-record.md",
+        "build-view/sections/05-conceptual-model.md",
+        "build-view/sections/08-the-agent-roster-generic-parameterized.md",
+        "build-view/sections/14-governance-safety-security.md"
+      ],
+      "park": "P6 material"
+    },
+    {
+      "id": "P6",
+      "phase": "6",
+      "contract_file": "specs/contracts/P6.md",
+      "workflow": ".agents/workflows/build-P6.md",
+      "read_scope_text": "§15.3 (post-publication audit + golden set), §12.2 (scaling/migration), §7.8 (multi-brand)",
+      "load_files": [
+        "build-view/core.md",
+        "build-view/sections/15-evaluation-quality.md",
+        "build-view/sections/12-review-approval-publishing-system-of-record.md",
+        "build-view/sections/07-the-brand-kit-product-agnostic-configuration.md"
+      ],
+      "park": "Final phase — nothing to park"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+<!-- DERIVED — regenerate with `python3 tools/build_view_split.py`. Do NOT hand-edit.
+The ten-field contract is specs/contracts/P3.md; the PRD (§19.1) is the source of truth. -->
+
+# /build-P3 — Contract P3 (Phase 3)
+
+Run this for **one** contract only, in a fresh context. Obey `.agents/rules/build-protocol.md`
+and `GEMINI.md`. If you are picking up a half-finished P3, run
+`.agents/workflows/resume.md` first.
+
+**Prereq:** the previous contract is verified, committed, and the owner authorized P3
+(check `BUILD-STATUS.md`).
+
+## STEP 1 — Load ONLY these (context-rot discipline)
+Read only the following. **Do NOT open the whole PRD.** `GEMINI.md` / `AGENTS.md` are
+already always-loaded by the tool.
+- `build-view/core.md`  — the always-load core (load every time)
+- `build-view/sections/07-the-brand-kit-product-agnostic-configuration.md`  — §7
+- `build-view/sections/09-the-canon-engine-documents-the-harness-s-shared.md`  — §9
+- `build-view/sections/13-orchestration-scheduling.md`  — §13
+- `build-view/sections/08-the-agent-roster-generic-parameterized.md`  — §8
+- `specs/contracts/P3.md`  — the ten-field BUNNY contract for this unit
+
+**Parked for later (do not read now):** §12.4, §14.2 — later phases.
+
+## STEP 2 — Honor the contract
+`specs/contracts/P3.md` is the contract. Its READ-SCOPE (verbatim from §19.1):
+> read §7.4 (Offerings), §9.4 (ledger-linter), §9.5 + §13 (cadence + control loop), §8.2.
+
+Follow INTENT · SCOPE · NON-GOALS · INPUTS · INVARIANTS · ACTION exactly. **NON-GOALS are
+hard boundaries** — do not build a later phase's work "while you're here."
+
+## STEP 3 — Test-first → build → verify (build-protocol §1)
+- Propose the files/structure first; wait for owner OK (no-YOLO).
+- Author the contract's ACCEPTANCE/VERIFY behaviour as a **failing** Gherkin suite first
+  (red), then implement to green. Add it to the growing regression suite.
+- **Mandatory before any publish path:** the ledger-linter test (a rotation-violating draft is rejected pre-CD) and the fail-closed safety test must exist and pass.
+- Build component-by-component to SCOPE/ACTION; show diffs; verify model IDs / deps
+  against live docs (GEMINI.md §4).
+- **VERIFY with captured evidence** (report-is-not-the-repo): run the piece / fire the negative test / capture the run.
+
+## STEP 4 — Gate
+GATE = the phase's test suite green **AND** the CI eval gate passes (build-protocol §1.6).
+Contract gate (from §19.1):
+> **GATE (§19 P3 exit):** a full week auto-plans/drafts/reviews/queues; a rotation-violating draft is rejected pre-CD; backpressure pauses routine materialisation on a deep queue + owner absence (§9.5). Authorize P4.
+
+## STEP 5 — Record & hand off (before you stop)
+- Commit when the owner asks: `P3: <what landed> — <gate state>`.
+- Update `BUILD-STATUS.md` — tick P3; next = P4-A.
+- Update `WORKLOG.md` (contract, done, remaining, **next action**) — always, even if continuing.
+- Log any deviation in `specs/deviation_log.md` (assumption → ground truth → decision).
+- Get owner **AUTHORIZATION** to release the next contract (you do not self-authorize).
+
+## Next
+On owner AUTHORIZATION, run `.agents/workflows/build-P4-A.md`.

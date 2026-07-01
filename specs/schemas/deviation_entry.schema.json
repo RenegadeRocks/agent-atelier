@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "specs/schemas/deviation_entry.schema.json",
+  "title": "conscious-deviation entry (Agent Atelier)",
+  "description": "The schema for one entry in specs/deviation_log.md (PRD §18.4.4). When the tool's actual layout/convention differs from a contract's assumption, or a spec artifact is changed mid-build, the agent CONFORMS to ground truth and records it here — never silently. Deviations are part of the audit surface (§14.5): conscious and visible. This schema mirrors the Markdown entry format used in deviation_log.md so the log stays machine-checkable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["date", "title", "scope", "assumption", "ground_truth", "decision"],
+  "properties": {
+    "date": { "type": "string", "description": "ISO-8601 (brand-local, §13.1)" },
+    "title": { "type": "string", "description": "short entry title" },
+    "scope": {
+      "type": "string",
+      "description": "the contract id this arose in (e.g. P1-B), or \"handoff\" for build-scaffolding decisions",
+      "pattern": "^(P0|P1-A|P1-B|P2-A|P2-B|P3|P4-A|P4-B|P5-A|P5-B|P6|handoff)$"
+    },
+    "assumption": { "type": "string", "description": "what the spec/contract expected" },
+    "ground_truth": { "type": "string", "description": "what was actually found in the tool, or why the change was needed" },
+    "decision": { "type": "string", "description": "what was done to conform" },
+    "why": { "type": "string", "description": "the rationale (§18.4.4 names 'why' among the four fields to record); optional here because the deviation_log.md format folds reason into ground_truth" },
+    "files_touched": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "repo-relative paths changed by this decision"
+    }
+  }
+}

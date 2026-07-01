@@ -1,0 +1,167 @@
+# =============================================================================
+# brand_kit.template.yaml
+# Agent Atelier — the entire product-specific configuration surface (PRD §7.2)
+# -----------------------------------------------------------------------------
+# This is a BLANK TEMPLATE. The Brand Onboarding Strategist (§7.1) fills it in
+# during the guided interview, then the owner confirms it. Everything that is
+# brand-specific lives here; the generic engine docs and agent instructions
+# reference these values via [[VARIABLE]] tokens resolved at prompt-assembly
+# time (§7.2.1 resolver contract). The studio is constant; the brand is config.
+#
+# Validate against: brand_kit.schema.json (same folder).
+#
+# CONVENTIONS
+#   [[TOKEN]]       Registry token the resolver substitutes into canon / agent
+#                   text (model-visible). Replace with the real value.
+#   "<...>"         Inline guidance for a free-text value with no token.
+#   FAIL CLOSED     Three safety fields plus their *_confirmed flags. The kit
+#                   will NOT pass schema validation, and the Policy Server will
+#                   block publish, until the owner has explicitly confirmed them
+#                   (empty/unconfirmed == "unknown" == block; §14.2, §15.1).
+#   Build-time      Model / provider names + API IDs are deferred to build time.
+#                   Confirm names/IDs against live docs before use (§14.3).
+#
+# ASSETS-FOLDER CONTRACT (sibling of this file; see brand_kit.schema.json
+# `assets_contract`). The kit references files by RELATIVE path inside assets/:
+#   assets/
+#     logo.png            # [[LOGO_ASSET]] — transparent PNG, brandmark
+#     fonts/              # headline + label font files (ttf/otf/woff2)
+#     people/             # REAL-person / leader photo pool. Used as compositing
+#                         #   sources; required if any post depicts a named real
+#                         #   person. (was preapproved_photo_pool)
+#     products/           # per-SKU / reference product images. REQUIRED when
+#                         #   visual_strategy == product_led (real product hero).
+# Secrets (image-provider / Google / Instagram tokens) are NOT stored here.
+# They live in a secrets vault, referenced by name, and resolve ONLY into the
+# tool/MCP auth layer at call time — never inlined into model-visible context
+# (§7 intro, §14.6).
+# =============================================================================
+
+brand_kit_version: 2
+
+# --- Identity ---------------------------------------------------------------
+brand_name: "[[BRAND_NAME]]"                  # e.g. Acme Coffee Roasters
+brand_short_name: "[[BRAND_SHORT_NAME]]"      # full brandmark line, e.g. "Acme · Springfield"
+                                              #   (distinct from wordmark_text, the short locator under the logo)
+tagline: "<one line>"
+locale: "[[LOCALE]]"                          # primary locale, e.g. en-IN / Pune, Maharashtra
+languages: [[LANGUAGES]]                      # list; primary = FIRST entry (§7.6 language rule)
+timezone: "<IANA tz, e.g. Asia/Kolkata>"
+mission: "[[MISSION]]"                        # 1-2 sentences: why this brand exists; anchors agent judgment
+brand_type: "[[BRAND_TYPE]]"                  # content-strategy archetype; selects hook/shape pack(s) (§9.1)
+                                              #   enum: educational | product_commerce
+
+# --- Audience ---------------------------------------------------------------
+audience_persona: "[[AUDIENCE_PERSONA]]"      # the one reader in the writer's head; concrete
+audience_pains: [[AUDIENCE_PAINS]]            # list of concrete pains
+scroll_test_persona: "[[SCROLL_TEST_PERSONA]]" # who must stop scrolling — used by the quality gate (Gate 0)
+
+# --- Brand voice (seeds brand_voice canon) ----------------------------------
+voice_descriptors: [[VOICE_DESCRIPTORS]]      # e.g. ["warm", "practical", "never preachy"]
+voice_do: [[VOICE_DO]]                        # e.g. ["lead with value", "name the life specifically"]
+voice_dont: [[VOICE_DONT]]                    # e.g. ["fear hooks", "listicle slop", "fake urgency"]
+reading_level: "[[READING_LEVEL]]"            # e.g. plain, conversational
+sample_lines_good: [[SAMPLE_LINES_GOOD]]      # 1-3 exemplar on-brand lines
+sample_lines_bad: [[SAMPLE_LINES_BAD]]        # 1-3 off-brand lines to avoid
+
+# --- Visual identity (seeds brand_assets + visual canon + Caption-Composer) --
+logo_asset: "[[LOGO_ASSET]]"                  # relative path, e.g. assets/logo.png
+wordmark_text: "[[WORDMARK_TEXT]]"            # short locator text under the logo
+palette_hex: [[PALETTE_HEX]]                  # the accent-rule gradient, e.g. ["#F07020", "#F2C12E"]
+accent_dark_bg: "[[ACCENT_DARK_BG]]"          # scrim/type accent on DARK photos
+accent_light_bg: "[[ACCENT_LIGHT_BG]]"        # scrim/type accent on LIGHT photos
+headline_font: "[[HEADLINE_FONT]]"            # serif headline font (file lives in assets/fonts/)
+label_font: "[[LABEL_FONT]]"                  # small-caps label font (file lives in assets/fonts/)
+visual_register: "[[VISUAL_REGISTER]]"        # e.g. premium, warm, real-life; NOT stock/spa
+visual_variety: "[[VISUAL_VARIETY]]"          # enum: balanced | high  (high narrows the §9.2 treatment menu)
+visual_strategy: "[[VISUAL_STRATEGY]]"        # enum: concept_led (default, generative) | product_led (real product hero)
+people_pool: "assets/people/"                 # FIXED path; real-person/leader pool (assets contract)
+product_pool: "assets/products/"              # FIXED path; per-SKU/reference images (required if product_led)
+image_provider: "[[IMAGE_PROVIDER]]"          # enum: gemini_image_pro (Gemini-native default; Nano Banana Pro)
+                                              #       | imagen | replicate_<model>
+                                              #   gemini_image_pro is a STABLE token; confirm marketing name +
+                                              #   API ID at build time (§14.3). Operational alias for non-image
+                                              #   ops work is gemini-flash-latest. Confirm names/IDs at build time.
+image_quality_tier: "[[IMAGE_QUALITY_TIER]]"  # enum: low | medium | high. This is the FLOOR/default; a CD
+                                              #   "premium" tag may UPGRADE a piece, never downgrade (§9.2)
+
+# --- Contact / CTA (used EXACTLY; never invented) ---------------------------
+cta_style: "[[CTA_STYLE]]"                    # enum: soft | direct | none
+contact_whatsapp: [[CONTACT_WHATSAPP]]        # list of numbers, used verbatim
+contact_instagram: "[[CONTACT_INSTAGRAM]]"    # @handle, used verbatim
+cta_forbidden_phrases: [[CTA_FORBIDDEN_PHRASES]] # e.g. ["register now","book now","sign up","limited spots"]
+
+# --- Channels & cadence (seeds cadence_plan) --------------------------------
+channels: [[CHANNELS]]                        # e.g. ["instagram", "facebook"]; instagram is the only launch publish adapter
+posts_per_week_target: [[POSTS_PER_WEEK_TARGET]]  # standing weekly volume
+standing_week: [[STANDING_WEEK]]              # map day -> {track, [language], [flag], [notes]}; see shape below.
+                                              #   track: "evergreen" | "offering:<id>" | "optional"
+                                              #   flag: "research_grounded" (only if research_post_min_per_week > 0)
+                                              #   language: optional per-slot pin (§7.6); else ME distributes as variety axis
+                                              #   Example:
+                                              #     mon: { track: "evergreen" }
+                                              #     tue: { track: "offering:<id-A>" }
+                                              #     wed: { track: "evergreen", flag: "research_grounded" }
+                                              #     thu: { track: "offering:<id-B>", language: "Punjabi" }
+                                              #     fri: { track: "evergreen" }
+                                              #     weekend: { track: "optional" }
+research_post_min_per_week: [[RESEARCH_POST_MIN_PER_WEEK]]  # 0 disables the standing research slot + its enforcement
+max_posts_per_week: [[MAX_POSTS_PER_WEEK]]    # per-brand HARD ceiling
+campaign_max_posts_per_week: 8                # optional per-campaign ceiling override (§9.5)
+seasonal_calendar: []                         # optional [{name, dates}] for standalone seasonal campaigns
+
+# --- Compliance & safety (seed safety hard-rules + Policy Server) ------------
+# >>> The three fields below FAIL CLOSED. Each requires its *_confirmed flag to
+# >>> be set TRUE by the owner; otherwise schema validation fails and publish is
+# >>> blocked and routed to a human (§14.2, §15.1). The Strategist must NEVER
+# >>> silently auto-draft these from marketing sources — it elicits each
+# >>> prohibition explicitly with 1-2 worked examples (§7.1).
+claims_allowed: [[CLAIMS_ALLOWED]]            # e.g. ["reduces stress, with citation"]
+claims_forbidden: [[CLAIMS_FORBIDDEN]]        # FAIL CLOSED — MUST be elicited explicitly
+claims_forbidden_confirmed: false             # FAIL CLOSED — owner must set true to validate/publish
+comparative_claims_allowed: [[COMPARATIVE_CLAIMS_ALLOWED]]  # false -> compiles to a 'no comparative claims' hard-rule
+political_content_allowed: [[POLITICAL_CONTENT_ALLOWED]]    # false -> compiles to a 'no political content' hard-rule
+non_disclosure_rules: [[NON_DISCLOSURE_RULES]]  # FAIL CLOSED — bind words AND image; MUST be elicited explicitly
+                                              #   e.g. ["the proprietary technique's exact mechanism"]
+non_disclosure_rules_confirmed: false         # FAIL CLOSED — owner must set true to validate/publish
+required_framing: [[REQUIRED_FRAMING]]        # FAIL CLOSED — mandatory hedges; list of {topic, framing}
+                                              #   e.g. [{ topic: "clinical-population claims",
+                                              #           framing: "'in clinical studies' + no treatment-replacement implication" }]
+required_framing_confirmed: false             # FAIL CLOSED — owner must set true to validate/publish
+regulatory_notes: "<e.g. wellness; no medical advice>"
+
+# --- Research policy (seeds research_bank) ----------------------------------
+source_allowlist: [[SOURCE_ALLOWLIST]]        # domain-appropriate authoritative/primary sources (e.g. PubMed/journals)
+source_denylist: [[SOURCE_DENYLIST]]          # e.g. ["blogs","forums","reddit","unverified social"]
+citation_required_for_claims: true
+require_second_source_for_quantitative: [[REQUIRE_SECOND_SOURCE_FOR_QUANTITATIVE]]  # high-stakes brands set true (§8.2)
+claim_reverify_months: [[CLAIM_REVERIFY_MONTHS]]  # decay/re-verify horizon, e.g. 6
+
+# --- Offerings (replaces hard-coded program briefs; §7.4) -------------------
+# One Offering Brief per entry (dynamic context for the single Offering Content
+# Agent role, keyed by `id`). Adding an offering = register a Brief + cadence
+# slot; no agent-tree change, no redeploy.
+offerings: [[OFFERINGS]]                      # list; see per-entry shape below:
+  # - id: "[[OFFERING_ID]]"                   #   stable slug, referenced by standing_week track "offering:<id>"
+  #   name: "[[OFFERING_NAME]]"
+  #   one_liner: "[[OFFERING_BRIEF]]"         #   accurate, never-trivialized
+  #   is_flagship: true
+  # - id: "<id-B>"
+  #   name: "<offering name>"
+  #   one_liner: "<...>"
+  #   funnels_from: "<id-A>"                  #   optional inter-offering funnel
+
+# --- Topical territory for the Evergreen agent (replaces hard-coded pillars) -
+evergreen_pillars: [[EVERGREEN_PILLARS]]      # the always-on content territory
+local_detail_bank: [[LOCAL_DETAIL_BANK]]      # concrete local anchors writers may use (anti-drab specificity)
+
+# --- Publishing & approval --------------------------------------------------
+approval_mode: "[[APPROVAL_MODE]]"            # enum: human | auto | auto_after_trust
+auto_publish_enabled: false                   # MASTER kill-switch (§12.3 precedence); auto needs this AND approval_mode
+system_of_record: "google_sheets"             # enum: google_sheets | builtin_db
+trust_threshold: [[TRUST_THRESHOLD]]          # gates auto_after_trust -> auto RECOMMENDATION only (§12.3, §14.4)
+                                              #   shape:
+                                              #     window_pieces: 20
+                                              #     min_approval_rate: 0.95
+                                              #     max_avg_human_edits: 0
+                                              #     zero_policy_violations: true

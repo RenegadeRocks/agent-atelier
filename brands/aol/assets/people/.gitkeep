@@ -1,0 +1,3 @@
+# Pre-approved people image pool for this brand (§6/§7 no-deepfake rule: real people
+# may appear only from this folder). Add approved images here; keep this file so the
+# empty dir travels via git.

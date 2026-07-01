@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-atelier.dev/specs/brand_kit.schema.json",
+  "title": "Agent Atelier Brand Kit",
+  "description": "Validation schema for brand_kit.yaml (PRD §7.2). The Brand Kit is the entire product-specific configuration surface; the generic engine docs and agents reference it via [[VARIABLE]] tokens resolved at runtime (§7.2.1). This schema enumerates required vs optional fields, closed enums, and the FAIL-CLOSED owner-confirmation flags that gate the three safety fields. A kit that does not validate against this schema MUST NOT be wired into a brand or used to publish (the resolver fails closed on unresolved required variables; §7.2.1, §14.2, §15.1). Model/provider names and API IDs are deferred to build time — confirm names/IDs against live docs before use (§14.3).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "brand_kit_version",
+    "brand_name",
+    "brand_short_name",
+    "locale",
+    "languages",
+    "mission",
+    "brand_type",
+    "audience_persona",
+    "audience_pains",
+    "scroll_test_persona",
+    "voice_descriptors",
+    "voice_do",
+    "voice_dont",
+    "reading_level",
+    "logo_asset",
+    "wordmark_text",
+    "palette_hex",
+    "accent_dark_bg",
+    "accent_light_bg",
+    "headline_font",
+    "label_font",
+    "visual_register",
+    "visual_variety",
+    "visual_strategy",
+    "image_provider",
+    "image_quality_tier",
+    "cta_style",
+    "contact_instagram",
+    "cta_forbidden_phrases",
+    "channels",
+    "posts_per_week_target",
+    "standing_week",
+    "research_post_min_per_week",
+    "max_posts_per_week",
+    "claims_allowed",
+    "claims_forbidden",
+    "claims_forbidden_confirmed",
+    "comparative_claims_allowed",
+    "political_content_allowed",
+    "non_disclosure_rules",
+    "non_disclosure_rules_confirmed",
+    "required_framing",
+    "required_framing_confirmed",
+    "source_allowlist",
+    "source_denylist",
+    "citation_required_for_claims",
+    "require_second_source_for_quantitative",
+    "claim_reverify_months",
+    "offerings",
+    "evergreen_pillars",
+    "approval_mode",
+    "auto_publish_enabled",
+    "system_of_record"
+  ],
+
+  "$comment": "FAIL-CLOSED contract: claims_forbidden_confirmed, non_disclosure_rules_confirmed, and required_framing_confirmed are const:true. A kit with any of them false/missing FAILS validation by design — empty or owner-unconfirmed safety fields are treated as 'unknown' and block publish, never as 'nothing forbidden' (§14.2 fail-closed, §15.1). The Strategist must elicit each prohibition explicitly with worked examples and MUST NOT silently auto-draft them from marketing sources (§7.1).",
+
+  "properties": {
+    "brand_kit_version": {
+      "description": "Schema/version of this Brand Kit format.",
+      "const": 2
+    },
+
+    "brand_name": { "type": "string", "minLength": 1, "description": "Public brand name, e.g. 'Acme Coffee Roasters'. Token [[BRAND_NAME]]." },
+    "brand_short_name": { "type": "string", "minLength": 1, "description": "Full brandmark line, e.g. 'Acme · Springfield'. Distinct from wordmark_text. Token [[BRAND_SHORT_NAME]]." },
+    "tagline": { "type": "string", "description": "Optional one-line tagline." },
+    "locale": { "type": "string", "minLength": 1, "description": "Primary locale, e.g. 'en-IN'. Token [[LOCALE]]." },
+    "languages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Content languages; primary = FIRST entry (§7.6). Token [[LANGUAGES]]."
+    },
+    "timezone": { "type": "string", "description": "IANA tz, e.g. 'Asia/Kolkata'. Optional (defaults from environment)." },
+    "mission": { "type": "string", "minLength": 1, "description": "1-2 sentences anchoring agent judgment. Token [[MISSION]]." },
+    "brand_type": {
+      "description": "Content-strategy archetype; selects the active Creative Engine hook/shape pack (§9.1). Two packs ship; extend the enum when a new pack is authored. Token [[BRAND_TYPE]].",
+      "enum": ["educational", "product_commerce"]
+    },
+
+    "audience_persona": { "type": "string", "minLength": 1, "description": "The one concrete reader in the writer's head. Token [[AUDIENCE_PERSONA]]." },
+    "audience_pains": {
+      "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 },
+      "description": "Concrete audience pains. Token [[AUDIENCE_PAINS]]."
+    },
+    "scroll_test_persona": { "type": "string", "minLength": 1, "description": "Who must stop scrolling; used by Gate 0. Token [[SCROLL_TEST_PERSONA]]." },
+
+    "voice_descriptors": {
+      "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 },
+      "description": "e.g. ['warm','practical','never preachy']. Token [[VOICE_DESCRIPTORS]]."
+    },
+    "voice_do": {
+      "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 },
+      "description": "Voice do-rules. Token [[VOICE_DO]]."
+    },
+    "voice_dont": {
+      "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 },
+      "description": "Voice don't-rules. Token [[VOICE_DONT]]."
+    },
+    "reading_level": { "type": "string", "minLength": 1, "description": "e.g. 'plain, conversational'. Token [[READING_LEVEL]]." },
+    "sample_lines_good": {
+      "type": "array", "items": { "type": "string" },
+      "description": "1-3 exemplar on-brand lines (optional but recommended). Token [[SAMPLE_LINES_GOOD]]."
+    },
+    "sample_lines_bad": {
+      "type": "array", "items": { "type": "string" },
+      "description": "1-3 off-brand lines to avoid (optional but recommended). Token [[SAMPLE_LINES_BAD]]."
+    },
+
+    "logo_asset": {
+      "type": "string", "minLength": 1,
+      "pattern": "^assets/",
+      "description": "Relative path under assets/ to the brandmark PNG, e.g. 'assets/logo.png'. Token [[LOGO_ASSET]]. See assets_contract."
+    },
+    "wordmark_text": { "type": "string", "minLength": 1, "description": "Short locator text under the logo. Token [[WORDMARK_TEXT]]." },
+    "palette_hex": {
+      "type": "array", "minItems": 1,
+      "items": { "type": "string", "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" },
+      "description": "Accent-rule gradient colors. Token [[PALETTE_HEX]]."
+    },
+    "accent_dark_bg": { "type": "string", "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", "description": "Scrim/type accent on DARK photos. Token [[ACCENT_DARK_BG]]." },
+    "accent_light_bg": { "type": "string", "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", "description": "Scrim/type accent on LIGHT photos. Token [[ACCENT_LIGHT_BG]]." },
+    "headline_font": { "type": "string", "minLength": 1, "description": "Serif headline font (file in assets/fonts/). Token [[HEADLINE_FONT]]." },
+    "label_font": { "type": "string", "minLength": 1, "description": "Small-caps label font (file in assets/fonts/). Token [[LABEL_FONT]]." },
+    "visual_register": { "type": "string", "minLength": 1, "description": "e.g. 'premium, warm, real-life; NOT stock/spa'. Token [[VISUAL_REGISTER]]." },
+    "visual_variety": {
+      "description": "Treatment-menu width (§9.2). 'high' narrows the menu for tight-aesthetic brands while still rotating subject/angle/composition. Token [[VISUAL_VARIETY]].",
+      "enum": ["balanced", "high"]
+    },
+    "visual_strategy": {
+      "description": "Image sourcing strategy (§9.2). product_led requires a populated assets/products/ pool. Token [[VISUAL_STRATEGY]].",
+      "enum": ["concept_led", "product_led"]
+    },
+    "people_pool": {
+      "type": "string", "const": "assets/people/",
+      "description": "FIXED path to the real-person/leader photo pool (assets contract). Required as a source if any post depicts a named real person."
+    },
+    "product_pool": {
+      "type": "string", "const": "assets/products/",
+      "description": "FIXED path to per-SKU/reference product images (assets contract). Required when visual_strategy == product_led."
+    },
+    "image_provider": {
+      "description": "Image model provider. 'gemini_image_pro' is the STABLE Gemini-native token (Nano Banana Pro / Gemini 3 Pro Image); confirm marketing name + API ID at build time (§14.3). 'replicate_<model>' selects a cross-provider Replicate model. Token [[IMAGE_PROVIDER]].",
+      "oneOf": [
+        { "enum": ["gemini_image_pro", "imagen"] },
+        { "type": "string", "pattern": "^replicate_[a-z0-9._/-]+$" }
+      ]
+    },
+    "image_quality_tier": {
+      "description": "FLOOR/default quality tier; a CD 'premium' tag may UPGRADE a piece, never downgrade (§9.2). Token [[IMAGE_QUALITY_TIER]].",
+      "enum": ["low", "medium", "high"]
+    },
+
+    "cta_style": {
+      "description": "CTA register. Used exactly; never invented. Token [[CTA_STYLE]].",
+      "enum": ["soft", "direct", "none"]
+    },
+    "contact_whatsapp": {
+      "type": "array", "items": { "type": "string", "minLength": 1 },
+      "description": "WhatsApp numbers, used verbatim (optional). Token [[CONTACT_WHATSAPP]]."
+    },
+    "contact_instagram": { "type": "string", "minLength": 1, "description": "@handle, used verbatim. Token [[CONTACT_INSTAGRAM]]." },
+    "cta_forbidden_phrases": {
+      "type": "array", "items": { "type": "string" },
+      "description": "Phrases the CTA must never use, e.g. ['register now','book now']. Token [[CTA_FORBIDDEN_PHRASES]]."
+    },
+
+    "channels": {
+      "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 },
+      "description": "Target channels, e.g. ['instagram','facebook']. Instagram is the only launch publish adapter; others are manual-only. Token [[CHANNELS]]."
+    },
+    "posts_per_week_target": { "type": "integer", "minimum": 0, "description": "Standing weekly volume. Token [[POSTS_PER_WEEK_TARGET]]." },
+    "standing_week": {
+      "type": "object",
+      "description": "Day -> slot config (§7.6, §9.5). Token [[STANDING_WEEK]].",
+      "minProperties": 1,
+      "propertyNames": { "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun", "weekend"] },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["track"],
+        "properties": {
+          "track": {
+            "type": "string",
+            "pattern": "^(evergreen|optional|offering:[a-z0-9._-]+)$",
+            "description": "'evergreen' | 'optional' | 'offering:<id>' (id must match an offerings[].id)."
+          },
+          "language": { "type": "string", "minLength": 1, "description": "Optional per-slot language pin (§7.6)." },
+          "flag": { "enum": ["research_grounded"], "description": "Only valid when research_post_min_per_week > 0." },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "research_post_min_per_week": {
+      "type": "integer", "minimum": 0,
+      "description": "Minimum research-grounded posts/week. 0 disables the standing research slot and its ledger/CD/digest enforcement. Token [[RESEARCH_POST_MIN_PER_WEEK]]."
+    },
+    "max_posts_per_week": { "type": "integer", "minimum": 1, "description": "Per-brand HARD ceiling. Token [[MAX_POSTS_PER_WEEK]]." },
+    "campaign_max_posts_per_week": { "type": "integer", "minimum": 1, "description": "Optional per-campaign ceiling override (§9.5)." },
+    "seasonal_calendar": {
+      "type": "array",
+      "description": "Optional standalone seasonal campaigns.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "dates"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "dates": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+
+    "claims_allowed": {
+      "type": "array", "items": { "type": "string" },
+      "description": "Allowed claim patterns, e.g. ['reduces stress, with citation']. Token [[CLAIMS_ALLOWED]]."
+    },
+    "claims_forbidden": {
+      "type": "array", "items": { "type": "string" },
+      "description": "FAIL CLOSED. Forbidden claims, elicited explicitly (§7.1). May be empty ONLY if the owner has affirmatively reviewed and set claims_forbidden_confirmed:true. Token [[CLAIMS_FORBIDDEN]]."
+    },
+    "claims_forbidden_confirmed": {
+      "const": true,
+      "description": "FAIL-CLOSED gate. Must be true (owner-confirmed) for the kit to validate and for publish to proceed; false/missing => block + route to human (§14.2, §15.1)."
+    },
+    "comparative_claims_allowed": { "type": "boolean", "description": "false compiles to a 'no comparative claims' hard-rule (§14.2). Token [[COMPARATIVE_CLAIMS_ALLOWED]]." },
+    "political_content_allowed": { "type": "boolean", "description": "false compiles to a 'no political content' hard-rule (§14.2). Token [[POLITICAL_CONTENT_ALLOWED]]." },
+    "non_disclosure_rules": {
+      "type": "array", "items": { "type": "string" },
+      "description": "FAIL CLOSED. Bind both words AND depicted image; elicited explicitly (§7.1). May be empty ONLY if non_disclosure_rules_confirmed:true. Token [[NON_DISCLOSURE_RULES]]."
+    },
+    "non_disclosure_rules_confirmed": {
+      "const": true,
+      "description": "FAIL-CLOSED gate. Must be true (owner-confirmed) for the kit to validate and for publish to proceed; false/missing => block + route to human (§14.2, §15.1)."
+    },
+    "required_framing": {
+      "type": "array",
+      "description": "FAIL CLOSED. Mandatory hedges; elicited explicitly (§7.1). May be empty ONLY if required_framing_confirmed:true. Token [[REQUIRED_FRAMING]].",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["topic", "framing"],
+        "properties": {
+          "topic": { "type": "string", "minLength": 1 },
+          "framing": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "required_framing_confirmed": {
+      "const": true,
+      "description": "FAIL-CLOSED gate. Must be true (owner-confirmed) for the kit to validate and for publish to proceed; false/missing => block + route to human (§14.2, §15.1)."
+    },
+    "regulatory_notes": { "type": "string", "description": "Free-text regulatory context, e.g. 'wellness; no medical advice'. Optional." },
+
+    "source_allowlist": {
+      "type": "array", "items": { "type": "string" },
+      "description": "Authoritative/primary source domains. Token [[SOURCE_ALLOWLIST]]."
+    },
+    "source_denylist": {
+      "type": "array", "items": { "type": "string" },
+      "description": "Disallowed source classes, e.g. ['blogs','forums','reddit']. Token [[SOURCE_DENYLIST]]."
+    },
+    "citation_required_for_claims": { "type": "boolean", "description": "Whether factual claims require a citation (typically true)." },
+    "require_second_source_for_quantitative": {
+      "type": "boolean",
+      "description": "High-stakes brands set true; quantitative claims then need a second corroborating source (§8.2). Token [[REQUIRE_SECOND_SOURCE_FOR_QUANTITATIVE]]."
+    },
+    "claim_reverify_months": { "type": "integer", "minimum": 1, "description": "Decay/re-verify horizon in months, e.g. 6. Token [[CLAIM_REVERIFY_MONTHS]]." },
+
+    "offerings": {
+      "type": "array",
+      "description": "One Offering Brief per entry; the single Offering Content Agent selects the brief per task by id (§7.4). Token [[OFFERINGS]]; per-entry tokens [[OFFERING_ID]] [[OFFERING_NAME]] [[OFFERING_BRIEF]].",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "one_liner"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9._-]+$", "description": "Stable slug; referenced by standing_week track 'offering:<id>'. Token [[OFFERING_ID]]." },
+          "name": { "type": "string", "minLength": 1, "description": "Offering name. Token [[OFFERING_NAME]]." },
+          "one_liner": { "type": "string", "minLength": 1, "description": "Accurate, never-trivialized one-liner. Token [[OFFERING_BRIEF]]." },
+          "is_flagship": { "type": "boolean", "description": "Optional flagship flag." },
+          "funnels_from": { "type": "string", "description": "Optional id of the offering this one funnels from (§7.4)." }
+        }
+      }
+    },
+
+    "evergreen_pillars": {
+      "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 },
+      "description": "Always-on topical territory for the Evergreen agent. Token [[EVERGREEN_PILLARS]]."
+    },
+    "local_detail_bank": {
+      "type": "array", "items": { "type": "string" },
+      "description": "Concrete local anchors for anti-drab specificity (optional). Token [[LOCAL_DETAIL_BANK]]."
+    },
+
+    "approval_mode": {
+      "description": "Approval posture. 'auto'/'auto_after_trust' also require auto_publish_enabled:true and a publish adapter (§12.3). Token [[APPROVAL_MODE]].",
+      "enum": ["human", "auto", "auto_after_trust"]
+    },
+    "auto_publish_enabled": { "type": "boolean", "description": "MASTER kill-switch (§12.3). Auto-publish requires this true AND approval_mode auto/auto_after_trust AND gates pass AND an adapter exists." },
+    "system_of_record": {
+      "description": "Where the queue/ledger/audit live. Token: system_of_record.",
+      "enum": ["google_sheets", "builtin_db"]
+    },
+    "trust_threshold": {
+      "type": "object",
+      "description": "Gates the auto_after_trust -> auto RECOMMENDATION only; never silently flips approval (§12.3, §14.4). Required when approval_mode == auto_after_trust. Token [[TRUST_THRESHOLD]].",
+      "additionalProperties": false,
+      "required": ["window_pieces", "min_approval_rate", "max_avg_human_edits", "zero_policy_violations"],
+      "properties": {
+        "window_pieces": { "type": "integer", "minimum": 1 },
+        "min_approval_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_avg_human_edits": { "type": "number", "minimum": 0 },
+        "zero_policy_violations": { "type": "boolean" }
+      }
+    },
+
+    "assets_contract": {
+      "type": "object",
+      "description": "Documentation-only block describing the required assets/ folder layout (the kit references files by relative path; this is not itself a data field). The folder is the sibling 'assets/' directory next to brand_kit.yaml.",
+      "additionalProperties": false,
+      "properties": {
+        "logo": { "type": "string", "description": "assets/logo.png — transparent PNG brandmark (referenced by logo_asset)." },
+        "fonts_dir": { "type": "string", "description": "assets/fonts/ — headline_font + label_font files (ttf/otf/woff2)." },
+        "people_dir": { "type": "string", "description": "assets/people/ — real-person/leader photo pool; compositing sources. Required if any post depicts a named real person." },
+        "products_dir": { "type": "string", "description": "assets/products/ — per-SKU/reference product images. REQUIRED when visual_strategy == product_led." }
+      }
+    }
+  },
+
+  "allOf": [
+    {
+      "$comment": "product_led requires the products/ pool to be declared.",
+      "if": { "properties": { "visual_strategy": { "const": "product_led" } } },
+      "then": { "required": ["product_pool"] }
+    },
+    {
+      "$comment": "auto_after_trust requires a trust_threshold block.",
+      "if": { "properties": { "approval_mode": { "const": "auto_after_trust" } } },
+      "then": { "required": ["trust_threshold"] }
+    },
+    {
+      "$comment": "Auto-publish requires the master kill-switch on and a non-human approval mode (§12.3 precedence).",
+      "if": { "properties": { "auto_publish_enabled": { "const": true } } },
+      "then": { "properties": { "approval_mode": { "enum": ["auto", "auto_after_trust"] } } }
+    }
+  ]
+}

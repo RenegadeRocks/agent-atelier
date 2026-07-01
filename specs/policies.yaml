@@ -1,0 +1,306 @@
+# =============================================================================
+# specs/policies.yaml
+# Agent Atelier — Policy Server configuration (DEFAULT-DENY)
+# Source of truth: PRD-Agentic-Content-Studio.md §14.1 (read/draft/act ladder)
+#                  and §14.2 (structural + claim-grounding + publish-time semantic).
+# -----------------------------------------------------------------------------
+# Generic engine artifact. Brand-specific values are registry tokens ([[TOKEN]])
+# resolved per brand from the Brand Kit at onboarding (G1). This file itself never
+# changes between brands — only the resolved token values do.
+#
+# ENFORCEMENT MODEL
+#   The Policy Server is middleware in front of EVERY tool call. For each call it
+#   resolves the tuple (role, tool, environment) and evaluates, in order:
+#     1. structural gate     — is the tool in this role's allowlist for this env?
+#     2. environment gate    — is the tool globally blocked in this env?
+#     3. publish_rules       — kill-switch / preview / adapter preconditions
+#     4. act_rules           — human checkpoint + audit for external-irreversible
+#     5. deterministic_checks— claim-grounding + fail-closed safety (compose/publish)
+#     6. semantic_checks     — LLM referee, PUBLISH-TIME ONLY (instagram_publish)
+#   ANY check that does not explicitly PASS results in BLOCK (route to human).
+#
+# DEFAULT-DENY (§14.2)
+#   `allowed_tools` is an EXHAUSTIVE allowlist. Any (role, tool, environment)
+#   combination not listed below — INCLUDING any role absent from this file — is
+#   blocked. There is no implicit inheritance and no wildcard grant.
+#
+# MODEL / TOOL-BINDING DISCIPLINE (§14.3) — confirm names/IDs at build time.
+#   image_generate          -> gemini_image_pro   (Nano Banana Pro, Gemini-native)
+#   semantic referee (LLM)  -> gemini-flash-latest (operational alias)
+#   A configured model that postdates the agent's training cutoff must NOT be
+#   refused or silently downgraded: only a live provider 404 is evidence of
+#   non-existence; on any other provider error, capture the verbatim error, stop,
+#   and escalate. Never fall back to a different model.
+# =============================================================================
+
+version: 2
+default_action: deny          # anything not explicitly allowed is blocked
+fail_closed: true             # missing/ambiguous inputs => BLOCK, route to human
+
+# -----------------------------------------------------------------------------
+# Tool registry — maps the granular policy verbs used below to the §16 MCP
+# servers and their default implementations. (Buildability reference only; the
+# allowlists are what the engine enforces.)
+# -----------------------------------------------------------------------------
+tool_registry:
+  # read-tier (Read — lenient ordering in trajectory eval)
+  read_queue:          { mcp: sheets,         tier: read,  external_irreversible: false }
+  read_digest:         { mcp: sheets,         tier: read,  external_irreversible: false }
+  read_ledger:         { mcp: sheets,         tier: read,  external_irreversible: false }
+  read_draft:          { mcp: drive,          tier: read,  external_irreversible: false }
+  research_fetch:      { mcp: research_fetch,  tier: read,  external_irreversible: false } # sanitized, [[SOURCE_ALLOWLIST]]-bound
+  research_lookup:     { mcp: sheets,         tier: read,  external_irreversible: false } # read-only Claim-Bank lookup
+  source_ingest:       { mcp: research_fetch,  tier: read,  external_irreversible: false } # onboarding source ingest
+
+  # draft-tier (Draft / internal-write — human-confirmed; never external)
+  create_task:         { mcp: sheets,         tier: draft, external_irreversible: false }
+  assign_task:         { mcp: sheets,         tier: draft, external_irreversible: false }
+  draft_doc:           { mcp: drive,          tier: draft, external_irreversible: false }
+  request_visual:      { mcp: sheets,         tier: draft, external_irreversible: false } # emits the visual brief (handoff)
+  request_review:      { mcp: sheets,         tier: draft, external_irreversible: false }
+  claim_bank_write:    { mcp: sheets,         tier: draft, external_irreversible: false } # INTERNAL CANON, not an external action; governed (§14.1)
+  write_review:        { mcp: sheets,         tier: draft, external_irreversible: false }
+  edit_canon_doc:      { mcp: drive,          tier: draft, external_irreversible: false } # CD owns the engine docs
+  brand_kit_write:     { mcp: drive,          tier: draft, external_irreversible: false }
+  offering_brief_write: { mcp: drive,         tier: draft, external_irreversible: false }
+  image_generate:      { mcp: image_generate,  tier: draft, external_irreversible: false, model: gemini_image_pro } # Nano Banana Pro; confirm name/ID at build time
+  caption_compose:     { mcp: caption_compose, tier: draft, external_irreversible: false } # internal render; gated by deterministic_checks
+  drive_upload:        { mcp: drive,          tier: draft, external_irreversible: false } # store/host assets, byte-serving for auto-publish
+  sheet_write:         { mcp: sheets,         tier: draft, external_irreversible: false } # queue/ledger row writes
+
+  # act-tier (Act / external-irreversible — Policy Server + human checkpoint + audit, strict)
+  set_budget:          { mcp: internal,        tier: act,   external_irreversible: true }  # spend/budget control (Managing Editor)
+  instagram_publish:   { mcp: instagram_publish,tier: act,  external_irreversible: true }  # the only launch publish adapter
+
+# -----------------------------------------------------------------------------
+# Environments — preview (safe sandbox) + production.
+# Global per-environment blocks apply on top of every role allowlist.
+# -----------------------------------------------------------------------------
+environments:
+  preview:
+    description: "Safe sandbox. No external-irreversible side effects. Used for dry-runs and eval."
+    blocked_tools:
+      - instagram_publish      # §14.2: preview can NEVER publish, regardless of role allowlist
+  production:
+    description: "Live environment. External-irreversible tools permitted only via act_rules + publish_rules."
+    blocked_tools: []
+
+# -----------------------------------------------------------------------------
+# Roles — all 8 §8 roles. Each role declares its read/draft/act tiers (for audit
+# clarity and trajectory eval) AND an explicit per-environment `allowed_tools`
+# allowlist (what the structural gate enforces). preview allowlists exclude any
+# globally-blocked tool (instagram_publish) so the lookup is exact end-to-end.
+# =============================================================================
+roles:
+
+  # 1) Managing Editor (CEO / orchestrator). Owns strategy, rhythm, delegation,
+  #    the human interface, unblocking. Does NO IC work: no draft_doc, no compose,
+  #    no publish. Holds the only spend/budget act-tier capability. (§8.2)
+  managing_editor:
+    tiers:
+      read:  [read_queue, read_digest, read_ledger]
+      draft: [create_task, assign_task]
+      act:   [set_budget]                 # strict: human checkpoint + audit
+    environments:
+      preview:
+        allowed_tools: [read_queue, read_digest, read_ledger, create_task, assign_task, set_budget]
+      production:
+        allowed_tools: [read_queue, read_digest, read_ledger, create_task, assign_task, set_budget]
+
+  # 2) Research Agent. Read sanitized web (allowlist-bound) + write the INTERNAL
+  #    Claim Bank (PENDING->VERIFIED->RETIRED). Claim-bank write is internal canon,
+  #    not an external action; clinical/sensitive claims are owner-gated. (§8.2/§14.1)
+  research_agent:
+    tiers:
+      read:  [research_fetch, research_lookup, read_ledger]
+      draft: [claim_bank_write]
+      act:   []
+    environments:
+      preview:
+        allowed_tools: [research_fetch, research_lookup, read_ledger, claim_bank_write]
+      production:
+        allowed_tools: [research_fetch, research_lookup, read_ledger, claim_bank_write]
+
+  # 3) Evergreen Content Agent. Always-on category voice; owns [[EVERGREEN_PILLARS]].
+  #    Drafts only; requests visuals and review. No publish, no compose. (§8.2)
+  evergreen_content_agent:
+    tiers:
+      read:  [read_ledger, research_lookup]
+      draft: [draft_doc, request_visual, request_review]
+      act:   []
+    environments:
+      preview:
+        allowed_tools: [read_ledger, research_lookup, draft_doc, request_visual, request_review]
+      production:
+        allowed_tools: [read_ledger, research_lookup, draft_doc, request_visual, request_review]
+
+  # 4) Offering Content Agent (one role, Offering Brief selected per task by
+  #    offering_id). Same capability surface as the evergreen agent. (§7.4/§8.2)
+  offering_content_agent:
+    tiers:
+      read:  [read_ledger, research_lookup]
+      draft: [draft_doc, request_visual, request_review]
+      act:   []
+    environments:
+      preview:
+        allowed_tools: [read_ledger, research_lookup, draft_doc, request_visual, request_review]
+      production:
+        allowed_tools: [read_ledger, research_lookup, draft_doc, request_visual, request_review]
+
+  # 5) Creative Director (sole quality judge). Reads drafts/ledger, writes verdicts,
+  #    owns/evolves the engine docs (edit_canon_doc). NEVER edits drafts, never
+  #    publishes. Gate-0/Gate-1 is the semantic judge at draft time (§14.2). (§8.2)
+  creative_director:
+    tiers:
+      read:  [read_ledger, read_draft]
+      draft: [write_review, edit_canon_doc]
+      act:   []
+    environments:
+      preview:
+        allowed_tools: [read_ledger, read_draft, write_review, edit_canon_doc]
+      production:
+        allowed_tools: [read_ledger, read_draft, write_review, edit_canon_doc]
+
+  # 6) Visual Production Agent. Generates text-free images, composites brand
+  #    typography, hosts assets. Reads the visual brief handoff (read_draft).
+  #    caption_compose here is gated by deterministic_checks. No publish. (§8.2/§9.2)
+  visual_agent:
+    tiers:
+      read:  [read_draft]                  # consumes the request_visual brief
+      draft: [image_generate, caption_compose, drive_upload]
+      act:   []
+    environments:
+      preview:
+        allowed_tools: [read_draft, image_generate, caption_compose, drive_upload]
+      production:
+        allowed_tools: [read_draft, image_generate, caption_compose, drive_upload]
+
+  # 7) Publishing & Operations Agent. Owns calendar/ledger/queue handoff + the only
+  #    external publish adapter. Reads sheet/ledger; writes queue rows; hosts assets;
+  #    instagram_publish is act-tier (strict) and blocked entirely in preview. (§8.2)
+  publishing_agent:
+    tiers:
+      read:  [read_ledger, read_queue]
+      draft: [sheet_write, drive_upload]
+      act:   [instagram_publish]           # external-irreversible; act_rules + publish_rules apply
+    environments:
+      preview:
+        allowed_tools: [read_ledger, read_queue, sheet_write, drive_upload]   # instagram_publish globally blocked in preview
+      production:
+        allowed_tools: [read_ledger, read_queue, sheet_write, drive_upload, instagram_publish]
+
+  # 8) Brand Onboarding Strategist. Conducts intake; compiles/maintains the Brand
+  #    Kit and Offering Briefs. Reads ingested sources; drafts canon config. Must
+  #    NOT auto-draft fail-closed safety fields (claims_forbidden /
+  #    non_disclosure_rules / required_framing) — those are elicited explicitly
+  #    (§4 revision note / §14.2). No content drafting, no publish. (§8.2)
+  brand_strategist:
+    tiers:
+      read:  [source_ingest]
+      draft: [brand_kit_write, offering_brief_write]
+      act:   []
+    environments:
+      preview:
+        allowed_tools: [source_ingest, brand_kit_write, offering_brief_write]
+      production:
+        allowed_tools: [source_ingest, brand_kit_write, offering_brief_write]
+
+# -----------------------------------------------------------------------------
+# Publish rules — preconditions evaluated before any external publish. ALL must
+# hold or the call is BLOCKED and the piece is queued for manual handoff. (§12.3)
+# -----------------------------------------------------------------------------
+publish_rules:
+  - id: kill_switch
+    rule: "No agent may publish when brand_kit.auto_publish_enabled is false."
+    reads: { auto_publish_enabled: "brand_kit.auto_publish_enabled" }   # MASTER kill-switch (§12.3 precedence)
+    on_fail: block_and_queue_manual
+  - id: no_publish_in_preview
+    rule: "No agent may publish in environment 'preview' (instagram_publish is globally blocked there)."
+    on_fail: block
+  - id: approval_mode_precedence
+    rule: >
+      Auto-publish occurs ONLY when auto_publish_enabled == true AND approval_mode is
+      'auto' (or 'auto_after_trust' with trust_threshold met) AND all gates pass AND a
+      publish adapter exists for the channel; otherwise queue for manual handoff.
+    reads:
+      approval_mode:    "[[APPROVAL_MODE]]"        # auto | auto_after_trust | manual
+      trust_threshold:  "[[TRUST_THRESHOLD]]"
+    on_fail: block_and_queue_manual
+  - id: adapter_exists
+    rule: "A publish adapter must exist for the target channel (launch: instagram only)."
+    on_fail: block_and_queue_manual
+
+# -----------------------------------------------------------------------------
+# Act rules — every external-irreversible (act-tier) tool requires a human
+# checkpoint and an append-only audit entry binding the action to the agent and
+# the approving human. (§14.1/§14.4/§14.5)
+# -----------------------------------------------------------------------------
+act_rules:
+  - on_tools: [instagram_publish, set_budget]
+    require_human_checkpoint: true          # Vibe-Diff for canon/config; batched to fight approval fatigue
+    require_append_only_audit: true         # separate from the editable queue sheet (§12.2/§14.5)
+    on_fail: block
+
+# -----------------------------------------------------------------------------
+# Deterministic checks — run on caption_compose AND instagram_publish in BOTH
+# environments. Pure code, no LLM. Numbers derive from the VERIFIED locked_sentence;
+# there is no separate published-numbers field. (§14.2)
+# -----------------------------------------------------------------------------
+deterministic_checks:
+  - id: claim_grounding
+    on_tools: [caption_compose, instagram_publish]
+    description: >
+      If a caption contains a statistic, percentage, study year, or research verb
+      (study | research | shows | found | reduced | ...), the claim span MUST be
+      linkable to a VERIFIED Claim-Bank entry by a near-verbatim normalized match of
+      the span to that entry's locked_sentence, AND every numeric/percentage/year
+      token in the span MUST exactly equal the numbers extracted from that
+      locked_sentence. Otherwise BLOCK.
+    trigger_lexicon:
+      research_verbs: [study, studies, research, shows, showed, found, finds, reduced, reduces, increased, decreased, proven, evidence]
+      patterns: ["percentage (\\d+%)", "statistic (\\d+ in \\d+)", "study_year (19xx/20xx)"]
+    requires:
+      claim_bank_status: VERIFIED
+      match: near_verbatim_normalized        # span vs locked_sentence
+      numeric_token_equality: exact           # every number/%/year must match locked_sentence
+    on_fail: block
+
+  - id: fail_closed_safety
+    on_tools: [caption_compose, instagram_publish]
+    description: >
+      If a relevant safety field is empty or owner-unconfirmed, the gate FAILS CLOSED:
+      block and route to human. These three fields are categorically fail-closed
+      (§14.2/§15.1).
+    requires_confirmed:
+      claims_forbidden:     "[[CLAIMS_FORBIDDEN]]"
+      non_disclosure_rules: "[[NON_DISCLOSURE_RULES]]"
+      required_framing:     "[[REQUIRED_FRAMING]]"
+    on_empty_or_unconfirmed: fail_closed       # block, route to human
+
+# -----------------------------------------------------------------------------
+# Semantic checks — LLM referee. PUBLISH-TIME ONLY (instagram_publish, auto mode).
+# Deliberately NOT run on draft_doc / caption_compose: the Creative Director's
+# Gate-0/Gate-1 is already the semantic judge there (avoids LLM-on-LLM duplication
+# and a Denial-of-Wallet surface). (§14.2)
+# -----------------------------------------------------------------------------
+semantic_checks:
+  - id: publish_time_referee
+    on_tools: [instagram_publish]              # publish-time only; NOT caption_compose/draft_doc
+    referee_model: gemini-flash-latest         # operational alias; confirm name/ID at build time
+    description: >
+      A secondary Gemini call inspects the action's content/intent against the brand's
+      safety policy and rejects on any violation.
+    check: >
+      Does the content violate claims_forbidden, non_disclosure_rules, required_framing,
+      comparative_claims_allowed:false, political_content_allowed:false, or contain any
+      cta_forbidden_phrases?
+    reads:
+      claims_forbidden:           "[[CLAIMS_FORBIDDEN]]"
+      claims_allowed:             "[[CLAIMS_ALLOWED]]"
+      non_disclosure_rules:       "[[NON_DISCLOSURE_RULES]]"
+      required_framing:           "[[REQUIRED_FRAMING]]"
+      comparative_claims_allowed: "[[COMPARATIVE_CLAIMS_ALLOWED]]"   # false => compiles to 'no comparative claims' hard-rule
+      political_content_allowed:  "[[POLITICAL_CONTENT_ALLOWED]]"    # false => compiles to 'no political content' hard-rule
+      cta_forbidden_phrases:      "[[CTA_FORBIDDEN_PHRASES]]"
+    on_violation: block                        # block, route to human
+    on_referee_error: fail_closed              # provider error (non-404) => stop + escalate, never silent-pass

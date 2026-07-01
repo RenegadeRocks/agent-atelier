@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "specs/schemas/notify_payload.schema.json",
+  "title": "notify payload (Agent Atelier)",
+  "description": "The INPUT payload for the `notify` MCP tool (PRD §16.2). `notify` is the only out-of-band human-reaching tool and is fully contracted: it is an act / external-irreversible capability (§14.1), governed and audited like publish. Idempotency is keyed by dedup_key over an open window (a re-send UPDATES, never duplicates). CRITICAL always breaks through quiet-hours/rate-caps (the dead-man's-switch channel, §14.5). Secrets note: recipient addresses / channel tokens resolve ONLY into the tool/MCP auth layer (§14.6) — they are NEVER passed in this payload or in body_markdown.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["brand_id", "severity", "event_type", "dedup_key", "title", "body_markdown", "recipients"],
+  "properties": {
+    "brand_id": { "type": "string" },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "action", "digest"],
+      "description": "§16.2 payload tiers. (The stored §17 Notification entity additionally carries an 'ambient' tier; the SEND payload uses these three.)"
+    },
+    "event_type": { "type": "string", "description": "e.g. run_failed | escalation | backpressure_pause | weekly_digest" },
+    "dedup_key": { "type": "string", "description": "collapses poll re-detections; a re-send over the open window updates, never duplicates" },
+    "title": { "type": "string" },
+    "body_markdown": {
+      "type": "string",
+      "description": "plain-language owner voice (§12.4) — NEVER a raw span dump, NEVER a secret"
+    },
+    "piece_id": { "type": "string", "description": "§17 join key, if the alert concerns one piece" },
+    "run_id": { "type": "string", "description": "§17, if the alert concerns one run" },
+    "deep_link": { "type": "string", "description": "link into the Review app / Studio Floor tray" },
+    "recipients": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "logical recipient ids/roles; the actual addresses/tokens are resolved in the auth layer, not here (§14.6)"
+    }
+  }
+}

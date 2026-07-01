@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "specs/schemas/mcp_tool_outputs.schema.json",
+  "title": "MCP tool OUTPUT schemas (Agent Atelier)",
+  "description": "Day-2 MCP contract (PRD §16.1): every tool ships a declared JSON OUTPUT schema, not just inputs. A live response that fails its declared schema FAILS CLOSED (the call errors; nothing proceeds). P1-B VERIFY runs each tool through the MCP Inspector and captures one raw JSON-RPC call as the report-is-not-the-repo proof. image_generate and research_fetch are PINNED verbatim from §16.1; the others are the authored contract grounded in §17 / §11.2 / §12.3 — confirm exact provider field names/limits against live docs at build time (§14.3). Brand values are registry tokens resolved per brand; this contract never changes between brands.",
+  "type": "object",
+  "properties": {
+    "tools": {
+      "type": "object",
+      "properties": {
+        "image_generate": {
+          "$comment": "PINNED verbatim from §16.1. Renders NO text (OCR-verified invariant, §11.2).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asset_url", "prediction_id", "provider", "tier", "width", "height"],
+          "properties": {
+            "asset_url": { "type": "string" },
+            "prediction_id": { "type": "string" },
+            "provider": { "type": "string", "enum": ["gemini_image_pro", "imagen", "replicate"] },
+            "tier": { "type": "string" },
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "research_fetch": {
+          "$comment": "PINNED verbatim from §16.1. Sanitized, allowlist-bound retrieval + grounding.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source_url", "fetched_text", "source_hash", "fetched_at"],
+          "properties": {
+            "source_url": { "type": "string" },
+            "fetched_text": { "type": "string" },
+            "source_hash": { "type": "string" },
+            "fetched_at": { "type": "string", "description": "ISO-8601" }
+          }
+        },
+        "caption_compose": {
+          "$comment": "Authored contract, grounded in §11.2. Text-free image in, brand type composited; OCR check; scrim behind every line; channel aspect ratio, short edge >= 1080px.",
+          "type": "object",
+          "required": ["asset_url", "ocr_text_free", "scrim_applied", "width", "height", "short_edge_px"],
+          "properties": {
+            "asset_url": { "type": "string" },
+            "ocr_text_free": { "type": "boolean", "description": "true = source image carried no baked glyphs (invariant, §11.2)" },
+            "scrim_applied": { "type": "boolean" },
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 },
+            "short_edge_px": { "type": "integer", "minimum": 1080 }
+          }
+        },
+        "drive": {
+          "$comment": "Authored contract, grounded in §12.3 byte-serving + §17 Asset. byte_url must serve raw image/* 200, not a Drive viewer page.",
+          "type": "object",
+          "required": ["file_id", "drive_url", "mime_type"],
+          "properties": {
+            "file_id": { "type": "string" },
+            "drive_url": { "type": "string" },
+            "byte_url": { "type": "string", "description": "raw byte-serving URL; validated image/* 200 at publish (§12.3)" },
+            "mime_type": { "type": "string" },
+            "bytes": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "sheets": {
+          "$comment": "Authored contract, grounded in §12.2. Orchestrator is the sole writer of derived status; ledger/audit are append-only.",
+          "type": "object",
+          "required": ["ok"],
+          "properties": {
+            "ok": { "type": "boolean" },
+            "updated_range": { "type": "string" },
+            "row_id": { "type": "string" },
+            "values": { "type": "array", "items": {} }
+          }
+        },
+        "instagram_publish": {
+          "$comment": "Authored contract, grounded in §12.3 + §17 QueueItem. The only launch adapter. Idempotent via the publish-once guard keyed by piece_id.",
+          "type": "object",
+          "required": ["external_media_id", "posted_permalink", "posted_at", "publish_method"],
+          "properties": {
+            "external_media_id": { "type": "string" },
+            "posted_permalink": { "type": "string" },
+            "posted_at": { "type": "string", "description": "ISO-8601" },
+            "publish_method": { "type": "string", "enum": ["auto"] },
+            "first_comment_posted": { "type": "boolean" }
+          }
+        },
+        "instagram_caption_edit": {
+          "$comment": "Authored contract, §14.3 post-publication correction. No new publish authority; behind the §14.4 checkpoint.",
+          "type": "object",
+          "required": ["external_media_id", "action", "done_at"],
+          "properties": {
+            "external_media_id": { "type": "string" },
+            "action": { "type": "string", "enum": ["caption_edit"] },
+            "done_at": { "type": "string", "description": "ISO-8601" }
+          }
+        },
+        "instagram_delete": {
+          "$comment": "Authored contract, §14.3 post-publication take-down. No new publish authority; behind the §14.4 checkpoint.",
+          "type": "object",
+          "required": ["external_media_id", "action", "done_at"],
+          "properties": {
+            "external_media_id": { "type": "string" },
+            "action": { "type": "string", "enum": ["delete"] },
+            "done_at": { "type": "string", "description": "ISO-8601" }
+          }
+        },
+        "handoff_export": {
+          "$comment": "Authored contract, §12.3.1 + §17 HandoffBundle. Packaging + validation only; adds NO publish authority.",
+          "type": "object",
+          "required": ["handoff_bundle_ref", "folder_url", "slide_count", "checklist"],
+          "properties": {
+            "handoff_bundle_ref": { "type": "string" },
+            "folder_url": { "type": "string" },
+            "qr_url": { "type": "string" },
+            "slide_count": { "type": "integer", "minimum": 1 },
+            "checklist": { "type": "array", "items": { "type": "string" } },
+            "export_precheck_pass": { "type": "boolean", "description": "deterministic platform-export pre-check (§14.2)" }
+          }
+        },
+        "notify": {
+          "$comment": "Authored contract, §16.2 + §17 Notification. See notify_payload.schema.json for the INPUT payload.",
+          "type": "object",
+          "required": ["notification_id", "state", "dedup_key"],
+          "properties": {
+            "notification_id": { "type": "string" },
+            "state": { "type": "string", "enum": ["sent", "failed", "coalesced", "suppressed_quiet_hours"] },
+            "dedup_key": { "type": "string" },
+            "sent_at": { "type": "string", "description": "ISO-8601" }
+          }
+        },
+        "calendar": {
+          "$comment": "Authored contract, optional tool. Schedule slots.",
+          "type": "object",
+          "required": ["event_id"],
+          "properties": {
+            "event_id": { "type": "string" },
+            "start": { "type": "string", "description": "ISO-8601" },
+            "end": { "type": "string", "description": "ISO-8601" }
+          }
+        }
+      }
+    }
+  },
+  "required": ["tools"]
+}
