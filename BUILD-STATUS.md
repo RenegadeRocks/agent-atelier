@@ -3,13 +3,13 @@
 The live build checklist. **Update it at every contract hand-off** (build-protocol §1.7).
 Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-and-proceed.
 
-> **▶ NEXT CONTRACT: P0** — run `.agents/workflows/build-P0.md`.
+> **▶ NEXT CONTRACT: P1-A** — run `.agents/workflows/build-P1-A.md`.
 
 ## Contracts (P0 → P6)
 
 | # | Contract | Phase | Status | Gate (short) |
 |---|----------|-------|--------|--------------|
-| 1 | P0   | 0 | ⬜ not started | CI green on stubs; structure approved |
+| 1 | P0   | 0 | ✅ verified, awaiting owner authorization | CI green on stubs; structure approved |
 | 2 | P1-A | 1 | ⬜ | one idea flows through all six agents, in role |
 | 3 | P1-B | 1 | ⬜ | one on-brand piece passes both gates + the linter → lands in the Sheets queue |
 | 4 | P2-A | 2 | ⬜ | P1 brand runs entirely from `brand_kit.yaml`; a 2nd toy brand via kit only; missing-var blocks |
