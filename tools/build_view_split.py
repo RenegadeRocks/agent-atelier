@@ -428,7 +428,17 @@ Follow INTENT · SCOPE · NON-GOALS · INPUTS · INVARIANTS · ACTION exactly. *
 hard boundaries** — do not build a later phase's work "while you're here."
 
 ## STEP 3 — Test-first → build → verify (build-protocol §1)
-- Propose the files/structure first; wait for owner OK (no-YOLO).
+- Propose the files/structure first; wait for owner OK (no-YOLO). **Your proposal MUST
+  open with three declarations — a plan missing any of them is invalid:**
+  1. **CONSUMES:** every pre-seeded artifact from STEP 1 you will wire in, by path. A plan
+     that marks `[NEW]` any path that already exists in the repo is auto-rejected —
+     reconcile/extend the existing file, never author a parallel copy.
+  2. **NON-GOALS:** restate what this contract does NOT build (from the contract) and
+     confirm you will not touch it.
+  3. **ON-FAIL:** what you will do when blocked (missing credential, API, SDK, account):
+     **STOP and ask the owner.** You never stub silently, never fake a green test, never
+     downgrade a SCOPE item to a mock without an owner-approved deviation-log entry
+     (§14.3 / §18.4.4 — honest refusal over silent fallback).
 {p0_note}- Author the contract's ACCEPTANCE/VERIFY behaviour as a **failing** Gherkin suite first
   (red), then implement to green. Add it to the growing regression suite.
 {publish_note}- Build component-by-component to SCOPE/ACTION; show diffs; verify model IDs / deps
