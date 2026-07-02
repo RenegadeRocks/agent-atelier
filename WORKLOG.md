@@ -12,12 +12,12 @@ done + authorized, clear it and tick the contract in `BUILD-STATUS.md`.
 
 ## Current
 
-- **Contract:** P0 (Done)
-- **Sub-tasks done:** Scaffold folder structure, MCP stubs, P0 tests, CI setup
-- **Sub-tasks remaining:** None for P0
-- **Current file state / where the code is:** `app/` folder created, test passed, CI wired.
-- **▶ NEXT ACTION (the one thing to do on resume):** Run `.agents/workflows/build-P1-A.md`.
-- **Open questions / waiting on owner:** —
+- **Contract:** P1-A (Done)
+- **Sub-tasks done:** Created tests, created spec instruction files, implemented ADK core agents, wired pipeline handoffs, verified trace.
+- **Sub-tasks remaining:** None for P1-A
+- **Current file state / where the code is:** `app/agents/` and `specs/agents/` populated, pipeline.py working, test_p1_a.py green.
+- **▶ NEXT ACTION (the one thing to do on resume):** Owner commit and then run `.agents/workflows/build-P1-B.md`.
+- **Open questions / waiting on owner:** Need authorization to proceed to P1-B.
 - **Last commit:** (Pending owner prompt to commit)
 - **Machine last worked on:** (Unknown/Current)
 

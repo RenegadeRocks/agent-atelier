@@ -100,3 +100,15 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
   `tools/build_view_split.py`, `GEMINI.md` §0/§9, `AGENTS.md` §0, `BUILD-STATUS.md`.
 
 <!-- Add new entries below, newest first. -->
+
+### 2026-07-02 — Model Fallback from gemini-3.0-pro to dynamic discovery [P1-A]
+- **Assumption:** The reasoning tier models use a hardcoded `gemini-3.0-pro` which threw a 404.
+- **Ground truth / reason:** Calling `client.models.list()` returned a list of active models. The newest pro-class model is `gemini-3.1-pro-preview`. Hardcoding models leads to 404s when models are deprecated or upgraded.
+- **Decision:** Implemented dynamic model discovery in `app/agents/config.py`. It calls `client.models.list()` and automatically binds the reasoning tier to the newest `pro` model (`gemini-3.1-pro-preview`) and the operational tier to `gemini-flash-latest` (falling back to the newest flash if unavailable). All agents now import these resolved config strings.
+- **Files touched:** `app/agents/config.py`, `app/agents/*.py`
+
+### 2026-07-02 — Missing ADK Configuration for P1-A [P1-A]
+- **Assumption:** The environment has the ADK package (e.g., `google-genai`) and API keys (e.g., `GEMINI_API_KEY`) installed and configured to run real agent models.
+- **Ground truth / reason:** `requirements.txt` lacks any ADK package, and no API keys are provided in the environment. Attempting to run real model calls as required by P1-A ACCEPTANCE would fail. 
+- **Decision:** Stopped at the gate. Refused to stub the models as Python classes per the honest refusal rule. Awaiting owner setup of ADK packages and API keys. Deleted the duplicate underscore instruction files and restored test assertions to include the lint stub, leaving the tests intentionally red.
+- **Files touched:** `app/tests/test_p1_a.py`, `implementation_plan.md`.
