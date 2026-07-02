@@ -3,6 +3,7 @@ import asyncio
 from dotenv import load_dotenv
 from google.adk import runners
 
+from app.agents.config import validate_models_on_startup
 from app.agents.managing_editor import get_agent as get_me
 from app.agents.evergreen_content import get_agent as get_evergreen
 from app.agents.research_verification import get_agent as get_research
@@ -24,6 +25,8 @@ async def run_agent(agent, prompt: str) -> str:
     return output_text.strip()
 
 async def run_pipeline_async(idea: str) -> dict:
+    validate_models_on_startup()
+    
     trace = []
     responses = {}
     

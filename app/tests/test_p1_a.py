@@ -1,6 +1,7 @@
 import pytest
 from app.pipeline import run_pipeline
 
+@pytest.mark.live
 def test_p1_a_pipeline_flow():
     """
     Scenario: P1-A pipeline flows through all 6 core agents in order

@@ -37,5 +37,3 @@ def validate_models_on_startup():
         newest_stable = stable_pros[0]
         if get_version(newest_stable) >= 3.1:
             warnings.warn(f"NOTICE: A newer stable pro model '{newest_stable}' is available. Consider updating REASONING_MODEL.")
-
-validate_models_on_startup()
