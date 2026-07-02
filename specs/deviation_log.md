@@ -16,6 +16,12 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 
 ---
 
+### 2026-07-02 — Split MCP servers into individual modules [P0]
+- **Assumption:** A single monolithic `mcp_server.py` handles all MCP tools.
+- **Ground truth / reason:** §16.1 declares transport per server (stdio for local tools, SSE/HTTP for remote ones). A single central server bakes in a shape P1-B would have to break apart.
+- **Decision:** Split the monolithic server into one module per §16 MCP server. Created `app/tools/base.py` to hold the shared scaffolding for `create_stub_server`.
+- **Files touched:** `app/tools/base.py`, `app/tools/*_server.py`, `app/tests/test_p0.py`.
+
 ### 2026-07-02 — Demo playbook + demo brand pack + CD dead-rubric  [handoff]
 - **Assumption:** the PRD's demo path (§21: ≤5-min recorded video) and P3's "run a
   simulated week" VERIFY were operationalized somewhere.
