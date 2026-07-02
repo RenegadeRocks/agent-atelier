@@ -12,14 +12,14 @@ done + authorized, clear it and tick the contract in `BUILD-STATUS.md`.
 
 ## Current
 
-- **Contract:** _(none yet — build not started; next is P0)_
-- **Sub-tasks done:** —
-- **Sub-tasks remaining:** —
-- **Current file state / where the code is:** —
-- **▶ NEXT ACTION (the one thing to do on resume):** Run `.agents/workflows/build-P0.md`.
+- **Contract:** P0 (Done)
+- **Sub-tasks done:** Scaffold folder structure, MCP stubs, P0 tests, CI setup
+- **Sub-tasks remaining:** None for P0
+- **Current file state / where the code is:** `app/` folder created, test passed, CI wired.
+- **▶ NEXT ACTION (the one thing to do on resume):** Run `.agents/workflows/build-P1-A.md`.
 - **Open questions / waiting on owner:** —
-- **Last commit:** —
-- **Machine last worked on:** —
+- **Last commit:** (Pending owner prompt to commit)
+- **Machine last worked on:** (Unknown/Current)
 
 ---
 
