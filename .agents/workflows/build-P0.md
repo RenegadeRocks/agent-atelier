@@ -17,6 +17,8 @@ already always-loaded by the tool.
 - `build-view/sections/18-tech-stack-build-plan-for-antigravity.md`  — §18
 - `build-view/sections/16-integrations-interfaces-mcp-first.md`  — §16
 - `build-view/sections/app-d-specs-brands-file-map-authored-artifacts.md`  — Appendix D
+- `specs/schemas/mcp_tool_outputs.schema.json`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/schemas/notify_payload.schema.json`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
 - `specs/contracts/P0.md`  — the ten-field BUNNY contract for this unit
 
 Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside
@@ -51,7 +53,10 @@ Contract gate (from §19.1):
 - Update `BUILD-STATUS.md` — tick P0; next = P1-A.
 - Update `WORKLOG.md` (contract, done, remaining, **next action**) — always, even if continuing.
 - Log any deviation in `specs/deviation_log.md` (assumption → ground truth → decision).
-- Get owner **AUTHORIZATION** to release the next contract (you do not self-authorize).
+- The owner then runs the **Validator pass** (`.agents/workflows/validate.md`) in a fresh
+  conversation and applies its findings before closing the gate.
+- Get owner **AUTHORIZATION** to release the next contract (you do not self-authorize;
+  "authorized" in `BUILD-STATUS.md` is the owner's mark, never yours).
 
 ## Next
 On owner AUTHORIZATION, run `.agents/workflows/build-P1-A.md`.

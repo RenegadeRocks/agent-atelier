@@ -18,6 +18,8 @@ already always-loaded by the tool.
 - `build-view/sections/11-visual-generation-typography-subsystem.md`  — §11
 - `build-view/sections/12-review-approval-publishing-system-of-record.md`  — §12
 - `build-view/sections/16-integrations-interfaces-mcp-first.md`  — §16
+- `specs/schemas/mcp_tool_outputs.schema.json`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/schemas/notify_payload.schema.json`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
 - `specs/contracts/P1-B.md`  — the ten-field BUNNY contract for this unit
 
 Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside
@@ -51,7 +53,10 @@ Contract gate (from §19.1):
 - Update `BUILD-STATUS.md` — tick P1-B; next = P2-A.
 - Update `WORKLOG.md` (contract, done, remaining, **next action**) — always, even if continuing.
 - Log any deviation in `specs/deviation_log.md` (assumption → ground truth → decision).
-- Get owner **AUTHORIZATION** to release the next contract (you do not self-authorize).
+- The owner then runs the **Validator pass** (`.agents/workflows/validate.md`) in a fresh
+  conversation and applies its findings before closing the gate.
+- Get owner **AUTHORIZATION** to release the next contract (you do not self-authorize;
+  "authorized" in `BUILD-STATUS.md` is the owner's mark, never yours).
 
 ## Next
 On owner AUTHORIZATION, run `.agents/workflows/build-P2-A.md`.

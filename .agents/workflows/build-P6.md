@@ -51,7 +51,10 @@ Contract gate (from §19.1):
 - Update `BUILD-STATUS.md` — tick P6 (final).
 - Update `WORKLOG.md` (contract, done, remaining, **next action**) — always, even if continuing.
 - Log any deviation in `specs/deviation_log.md` (assumption → ground truth → decision).
-- Get owner **AUTHORIZATION** to release the next contract (you do not self-authorize).
+- The owner then runs the **Validator pass** (`.agents/workflows/validate.md`) in a fresh
+  conversation and applies its findings before closing the gate.
+- Get owner **AUTHORIZATION** to release the next contract (you do not self-authorize;
+  "authorized" in `BUILD-STATUS.md` is the owner's mark, never yours).
 
 ## Next
 This is the final contract. On its gate, the system is **feature-complete vs the PRD** (§19.3, §21).

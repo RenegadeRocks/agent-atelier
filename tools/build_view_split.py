@@ -67,7 +67,8 @@ CORE_SECTION_IDS = ["0", "3", "5", "17"]
 # read_secs resolves to build-view section files; artifacts are non-PRD files.
 CONTRACTS = [
     {"id": "P0", "phase": "0",
-     "read_secs": ["18", "16", "app-d"], "artifacts": [],
+     "read_secs": ["18", "16", "app-d"],
+     "artifacts": ["specs/schemas/mcp_tool_outputs.schema.json", "specs/schemas/notify_payload.schema.json"],
      "read": "§18 (build workflow + governance), §16 (MCP contracts), Appendix D (file map)",
      "park": "§7–§15 — later phases"},
     {"id": "P1-A", "phase": "1",
@@ -75,7 +76,8 @@ CONTRACTS = [
      "read": "§8 (roster + agent instruction files), §9.1–§9.4 (engine docs + linter), §10.1 (pipeline)",
      "park": "§7 (Brand Kit), §12.4, §14 — later phases"},
     {"id": "P1-B", "phase": "1",
-     "read_secs": ["10", "11", "12", "16"], "artifacts": [],
+     "read_secs": ["10", "11", "12", "16"],
+     "artifacts": ["specs/schemas/mcp_tool_outputs.schema.json", "specs/schemas/notify_payload.schema.json"],
      "read": "§10.1 (pipeline), §11.2 (Caption-Composer), §12.2 (Sheets integrity), §16.1 (MCP contracts)",
      "park": "§7, §12.4, §14 — later phases"},
     {"id": "P2-A", "phase": "2",
@@ -434,7 +436,10 @@ Contract gate (from §19.1):
 - Update `BUILD-STATUS.md` — tick {cid}{"; next = " + nxt if nxt else " (final)"}.
 - Update `WORKLOG.md` (contract, done, remaining, **next action**) — always, even if continuing.
 - Log any deviation in `specs/deviation_log.md` (assumption → ground truth → decision).
-- Get owner **AUTHORIZATION** to release the next contract (you do not self-authorize).
+- The owner then runs the **Validator pass** (`.agents/workflows/validate.md`) in a fresh
+  conversation and applies its findings before closing the gate.
+- Get owner **AUTHORIZATION** to release the next contract (you do not self-authorize;
+  "authorized" in `BUILD-STATUS.md` is the owner's mark, never yours).
 
 ## Next
 {nxt_line}

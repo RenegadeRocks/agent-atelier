@@ -228,7 +228,9 @@
         "build-view/core.md",
         "build-view/sections/18-tech-stack-build-plan-for-antigravity.md",
         "build-view/sections/16-integrations-interfaces-mcp-first.md",
-        "build-view/sections/app-d-specs-brands-file-map-authored-artifacts.md"
+        "build-view/sections/app-d-specs-brands-file-map-authored-artifacts.md",
+        "specs/schemas/mcp_tool_outputs.schema.json",
+        "specs/schemas/notify_payload.schema.json"
       ],
       "park": "§7–§15 — later phases"
     },
@@ -257,7 +259,9 @@
         "build-view/sections/10-the-content-production-pipeline-state-machine.md",
         "build-view/sections/11-visual-generation-typography-subsystem.md",
         "build-view/sections/12-review-approval-publishing-system-of-record.md",
-        "build-view/sections/16-integrations-interfaces-mcp-first.md"
+        "build-view/sections/16-integrations-interfaces-mcp-first.md",
+        "specs/schemas/mcp_tool_outputs.schema.json",
+        "specs/schemas/notify_payload.schema.json"
       ],
       "park": "§7, §12.4, §14 — later phases"
     },
