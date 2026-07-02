@@ -88,10 +88,13 @@ between machines, but committed files do.
   python3 tools/build_view_split.py            # regenerate after a PRD edit
   python3 tools/build_view_split.py --verify   # check the tree matches the PRD (CI / after git pull)
   ```
-  Optional but recommended — install the pre-commit guard so this can't be forgotten:
+  Optional but recommended — install the pre-commit guard so this can't be forgotten
+  (one command, works on Windows / macOS / Linux):
   ```
-  ln -sf ../../tools/git-hooks/pre-commit .git/hooks/pre-commit
+  git config core.hooksPath tools/git-hooks
   ```
+  **Windows note:** wherever these docs say `python3`, use `python` (the splitter runs on
+  either; the hook auto-detects).
   **CI already enforces this server-side:** `.github/workflows/verify-build-view.yml` runs
   `--verify` on every push/PR, so a PRD edit committed without its regenerated derived files
   fails the check.

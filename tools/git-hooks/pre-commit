@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
 # Pre-commit guard: block a commit whose derived files are out of sync with the PRD.
-# Install once per clone:   ln -sf ../../tools/git-hooks/pre-commit .git/hooks/pre-commit
-# (or copy it there and `chmod +x .git/hooks/pre-commit`).
+# Install once per clone (cross-platform, works on Windows/macOS/Linux):
+#   git config core.hooksPath tools/git-hooks
 #
 # It runs the splitter in NON-MUTATING verify mode. If someone edited the PRD without
 # re-running the splitter (so build-view/ · specs/contracts/ · .agents/workflows/build-*.md
 # are stale), the commit is refused with instructions.
 set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
-if ! python3 "$ROOT/tools/build_view_split.py" --verify; then
+# Windows installs usually expose `python`, Unix `python3` — take whichever exists.
+PY="$(command -v python3 || command -v python)"
+if [ -z "$PY" ]; then
+  echo "pre-commit: python not found on PATH — skipping drift check (CI still enforces it)."
+  exit 0
+fi
+if ! "$PY" "$ROOT/tools/build_view_split.py" --verify; then
   echo ""
   echo "commit refused: derived files are out of sync with the PRD."
-  echo "run:  python3 tools/build_view_split.py    # regenerate"
+  echo "run:  python tools/build_view_split.py    # regenerate"
   echo "then: git add -A && commit again (PRD edit + regenerated derived files together)."
   exit 1
 fi
