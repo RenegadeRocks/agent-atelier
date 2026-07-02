@@ -107,7 +107,10 @@ from the verify-live rule).
 `image_generate` (`gemini_image_pro` / Imagen / Replicate) · `caption_compose` (Caption-Composer) · `drive`
 (Drive/GCS) · `sheets` (calendar, ledger, queue, approval, audit) · `research_fetch` (sanitized,
 allowlist-bound) · `instagram_publish` (Instagram Platform content-publishing API — the only launch adapter) ·
-`notify` *(optional)* · `calendar` *(optional)*. The cost circuit-breaker wraps the **runner**, not a tool.
+`instagram_caption_edit` / `instagram_delete` (post-publication correction, §14.3 — owner-authorized, behind the
+§14.4 checkpoint, no new publish authority) · `handoff_export` (the §12.3.1 manual Post Kit + export pre-check —
+packaging only, no publish authority) · `notify` *(optional; fully contracted, §16.2 — severity-tiered, deduped,
+rate-capped)* · `calendar` *(optional)*. The cost circuit-breaker wraps the **runner**, not a tool.
 
 ---
 

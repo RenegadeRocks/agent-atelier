@@ -17,6 +17,10 @@ already always-loaded by the tool.
 - `build-view/sections/12-review-approval-publishing-system-of-record.md`  — §12
 - `specs/contracts/P5-A.md`  — the ten-field BUNNY contract for this unit
 
+Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside
+the loaded file and skip its siblings — a section file can contain later-phase material
+(e.g. §12.4 lives in the §12 file but belongs to P5-B).
+
 **Parked for later (do not read now):** §12.4 (Studio Floor → P5-B).
 
 ## STEP 2 — Honor the contract
@@ -30,7 +34,7 @@ hard boundaries** — do not build a later phase's work "while you're here."
 - Propose the files/structure first; wait for owner OK (no-YOLO).
 - Author the contract's ACCEPTANCE/VERIFY behaviour as a **failing** Gherkin suite first
   (red), then implement to green. Add it to the growing regression suite.
-- **Mandatory before any publish path:** the ledger-linter test (a rotation-violating draft is rejected pre-CD) and the fail-closed safety test must exist and pass.
+- **Standing gate (GEMINI §3.3):** the ledger-linter test (a rotation-violating draft is rejected pre-CD) and the fail-closed safety test must both exist and pass **before any publish path is wired (P5-A)** — author each in the phase that builds its gate (linter: P3; fail-closed: P4-A) and keep both green from then on.
 - Build component-by-component to SCOPE/ACTION; show diffs; verify model IDs / deps
   against live docs (GEMINI.md §4).
 - **VERIFY with captured evidence** (report-is-not-the-repo): run the piece / fire the negative test / capture the run.

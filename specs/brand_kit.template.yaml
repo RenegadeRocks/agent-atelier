@@ -48,13 +48,24 @@ locale: "[[LOCALE]]"                          # primary locale, e.g. en-IN / Pun
 languages: [[LANGUAGES]]                      # list; primary = FIRST entry (§7.6 language rule)
 timezone: "<IANA tz, e.g. Asia/Kolkata>"
 mission: "[[MISSION]]"                        # 1-2 sentences: why this brand exists; anchors agent judgment
-brand_type: "[[BRAND_TYPE]]"                  # content-strategy archetype; selects hook/shape pack(s) (§9.1)
-                                              #   enum: educational | product_commerce
+brand_type: "[[BRAND_TYPE]]"                  # content-strategy archetype (§7.8 catalog); maps to ONE §9.1 pack
+                                              #   enum: educational | product_commerce | nonprofit_ngo | saas_b2b |
+                                              #         hospitality_local | clinic_health | coaching_creator |
+                                              #         ecommerce_dtc | school_education | custom
 
 # --- Audience ---------------------------------------------------------------
 audience_persona: "[[AUDIENCE_PERSONA]]"      # the one reader in the writer's head; concrete
 audience_pains: [[AUDIENCE_PAINS]]            # list of concrete pains
 scroll_test_persona: "[[SCROLL_TEST_PERSONA]]" # who must stop scrolling — used by the quality gate (Gate 0)
+
+# --- Intent (north-star capture, §7.1) ---------------------------------------
+intent_statement: "<[brand] helps [audience] [outcome] so they feel [feeling]; the next step is [CTA]>"
+                                              # the single explicit 'on-brand' referent; read by §9.1/§9.2/§15.1;
+                                              #   editing it stales the golden set (§15.3)
+desired_feeling: "<the one feeling a stranger should have in 1s>"   # seeds voice_descriptors + the §9.2 'feel in one second'
+primary_cta: "<the one action; used EXACTLY, never invented (contact rule)>"
+cta_destination: "dm"                         # enum: dm | whatsapp | link | visit | call
+off_brand_notes: ["<taste-level 'not us' — DISTINCT from the fail-closed safety fields; never gates publish>"]
 
 # --- Brand voice (seeds brand_voice canon) ----------------------------------
 voice_descriptors: [[VOICE_DESCRIPTORS]]      # e.g. ["warm", "practical", "never preachy"]
@@ -82,8 +93,8 @@ image_provider: "[[IMAGE_PROVIDER]]"          # enum: gemini_image_pro (Gemini-n
                                               #   gemini_image_pro is a STABLE token; confirm marketing name +
                                               #   API ID at build time (§14.3). Operational alias for non-image
                                               #   ops work is gemini-flash-latest. Confirm names/IDs at build time.
-image_quality_tier: "[[IMAGE_QUALITY_TIER]]"  # enum: low | medium | high. This is the FLOOR/default; a CD
-                                              #   "premium" tag may UPGRADE a piece, never downgrade (§9.2)
+image_quality_tier: "[[IMAGE_QUALITY_TIER]]"  # enum: medium | high. This is the FLOOR/default; a CD
+                                              #   "premium" tag may UPGRADE a piece to high, never downgrade (§9.2)
 
 # --- Contact / CTA (used EXACTLY; never invented) ---------------------------
 cta_style: "[[CTA_STYLE]]"                    # enum: soft | direct | none
@@ -94,10 +105,12 @@ cta_forbidden_phrases: [[CTA_FORBIDDEN_PHRASES]] # e.g. ["register now","book no
 # --- Channels & cadence (seeds cadence_plan) --------------------------------
 channels: [[CHANNELS]]                        # e.g. ["instagram", "facebook"]; instagram is the only launch publish adapter
 posts_per_week_target: [[POSTS_PER_WEEK_TARGET]]  # standing weekly volume
-standing_week: [[STANDING_WEEK]]              # map day -> {track, [language], [flag], [notes]}; see shape below.
-                                              #   track: "evergreen" | "offering:<id>" | "optional"
+standing_week: [[STANDING_WEEK]]              # map day -> the §7.1.1 slot grammar { track, language?, flag?, format?, channel?, notes? }
+                                              #   track: "evergreen" | "offering:<id>" | "optional" | "quiet"
+                                              #     (quiet = first-class no-post day; the research slot stays flag: research_grounded on an evergreen track)
                                               #   flag: "research_grounded" (only if research_post_min_per_week > 0)
                                               #   language: optional per-slot pin (§7.6); else ME distributes as variety axis
+                                              #   a slot whose format lacks an auto-publish adapter is materialized manual_publish_only (§12.3)
                                               #   Example:
                                               #     mon: { track: "evergreen" }
                                               #     tue: { track: "offering:<id-A>" }
@@ -107,8 +120,19 @@ standing_week: [[STANDING_WEEK]]              # map day -> {track, [language], [
                                               #     weekend: { track: "optional" }
 research_post_min_per_week: [[RESEARCH_POST_MIN_PER_WEEK]]  # 0 disables the standing research slot + its enforcement
 max_posts_per_week: [[MAX_POSTS_PER_WEEK]]    # per-brand HARD ceiling
-campaign_max_posts_per_week: 8                # optional per-campaign ceiling override (§9.5)
+campaign_max_posts_per_week: 8                # brand-level default campaign ceiling; per-campaign override on CampaignPlan.max_posts_per_week_override (§17/§9.5)
 seasonal_calendar: []                         # optional [{name, dates}] for standalone seasonal campaigns
+max_queue_depth: null                         # backpressure cap (§9.5); null -> default 2 x posts_per_week_target; else integer >= posts_per_week_target
+owner_absence_pause_days: 7                   # §9.5 — pause standing-week materialisation after N days with no Owner Action + a deep queue (integer >= 1)
+campaign_overrides_backpressure: false        # if true, a dated campaign slot + the research minimum still materialise through a backpressure pause (§9.5)
+quiet_days: []                                # recurring no-post weekday tokens; first-class (track: quiet), distinct from weekend:optional
+blackout_dates: []                            # [{name, dates}] brand-closed windows (holidays, closures); win at materialization (§9.5)
+evergreen_rotation: "no_repeat_within: 3"     # cadence INTENT for pillar variety; the §9.4 ledger-linter ENFORCES
+
+# --- Intent & capacity (feed the §7.1.1 cadence proposal) --------------------
+posting_goal: "awareness"                     # enum: awareness | community | conversion | launch — biases the cadence proposal
+weekly_capacity: "sustainable"                # owner's sustainable volume; the proposal stays at/below this
+cadence_source: "proposed_archetype"          # enum: owner_stated | proposed_archetype | edited — provenance of standing_week
 
 # --- Compliance & safety (seed safety hard-rules + Policy Server) ------------
 # >>> The three fields below FAIL CLOSED. Each requires its *_confirmed flag to
@@ -155,9 +179,28 @@ offerings: [[OFFERINGS]]                      # list; see per-entry shape below:
 evergreen_pillars: [[EVERGREEN_PILLARS]]      # the always-on content territory
 local_detail_bank: [[LOCAL_DETAIL_BANK]]      # concrete local anchors writers may use (anti-drab specificity)
 
+# --- Notifications & alerts (seeds the §14.4.1 model; §16.2 notify contract) -
+# All optional; safe defaults below.
+notifications:
+  channel: "none"                             # enum: none | email | chat  (none = Sheets ALERTS row + Studio Floor only; §6.3 minimal mode)
+  recipients: ["<owner email/space>"]         # all notified; FIRST acknowledgement resolves for everyone (§14.4.1)
+  severity_floor: "action"                    # enum: critical | action | digest — lowest tier pushed out-of-band
+                                              #   (the scheduled digest below always sends on its own schedule regardless)
+  quiet_hours: { tz: "<defaults to brand timezone>", start: "21:00", end: "08:00" }   # CRITICAL always breaks through
+  digest: { day: "fri", hour: "16:00" }       # the §8.2 digest schedule
+  batch_max_wait_minutes: 120
+  batch_max_items: 6
+  reminder_after_hours: 24                    # an unacked ACTION re-notifies once, then folds into the digest
+  critical_reminder_minutes: 60
+  max_sends_per_hour: 12                      # rate cap (Denial-of-Wallet); excess non-CRITICAL coalesces
+
 # --- Publishing & approval --------------------------------------------------
 approval_mode: "[[APPROVAL_MODE]]"            # enum: human | auto | auto_after_trust
 auto_publish_enabled: false                   # MASTER kill-switch (§12.3 precedence); auto needs this AND approval_mode
+approver_allowlist: []                        # google accounts/emails allowed to approve for this brand (§12.5);
+                                              #   [] -> owner-only; a non-allowlisted operator is refused FAIL-CLOSED
+delegation: null                              # optional { delegate_operator_id, scope, expires_at } — §12.5 scoped,
+                                              #   expiring approval authority; scope enum: approve | request_changes_only | publish
 system_of_record: "google_sheets"             # enum: google_sheets | builtin_db
 trust_threshold: [[TRUST_THRESHOLD]]          # gates auto_after_trust -> auto RECOMMENDATION only (§12.3, §14.4)
                                               #   shape:

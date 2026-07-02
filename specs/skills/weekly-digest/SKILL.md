@@ -29,7 +29,10 @@ link so nothing rots invisibly.
 4. **Research minimum.** When `[[RESEARCH_POST_MIN_PER_WEEK]] > 0`, report whether the
    research-grounded minimum was met (omit when 0).
 5. **Paused routines / pending approvals.** List each with a link and the reason it is waiting
-   (e.g. fail-closed safety field unconfirmed, round-3 escalation, provider error).
+   (e.g. fail-closed safety field unconfirmed, round-3 escalation, provider error). Include a
+   **§9.5 backpressure line** when materialisation is paused (queue depth, days since last
+   owner action, "any action resumes it") and call out any `Stale-Dated` or `posted_unverified`
+   pieces awaiting the owner.
 6. **Image spend.** Sum image generation cost and total tokens from `Run` records for the week.
 7. **CD↔owner agreement rate.** Compute agreement rate + false-approve count from CD verdicts
    vs owner actions. This is the explicit trust signal gating `auto_after_trust → auto`

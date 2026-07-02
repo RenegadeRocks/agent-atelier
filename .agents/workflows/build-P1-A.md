@@ -19,6 +19,10 @@ already always-loaded by the tool.
 - `build-view/sections/10-the-content-production-pipeline-state-machine.md`  — §10
 - `specs/contracts/P1-A.md`  — the ten-field BUNNY contract for this unit
 
+Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside
+the loaded file and skip its siblings — a section file can contain later-phase material
+(e.g. §12.4 lives in the §12 file but belongs to P5-B).
+
 **Parked for later (do not read now):** §7 (Brand Kit), §12.4, §14 — later phases.
 
 ## STEP 2 — Honor the contract

@@ -67,10 +67,14 @@ tool_registry:
   caption_compose:     { mcp: caption_compose, tier: draft, external_irreversible: false } # internal render; gated by deterministic_checks
   drive_upload:        { mcp: drive,          tier: draft, external_irreversible: false } # store/host assets, byte-serving for auto-publish
   sheet_write:         { mcp: sheets,         tier: draft, external_irreversible: false } # queue/ledger row writes
+  handoff_export:      { mcp: handoff_export,  tier: draft, external_irreversible: false } # §12.3.1/§16 Post Kit packaging + platform-export pre-check; reads THROUGH drive/sheets/notify; adds NO publish authority — on the manual path the HUMAN remains the "act"
 
   # act-tier (Act / external-irreversible — Policy Server + human checkpoint + audit, strict)
   set_budget:          { mcp: internal,        tier: act,   external_irreversible: true }  # spend/budget control (Managing Editor)
   instagram_publish:   { mcp: instagram_publish,tier: act,  external_irreversible: true }  # the only launch publish adapter
+  instagram_caption_edit: { mcp: instagram_publish, tier: act, external_irreversible: true } # §14.3/§16 post-publication correct-in-place on a LIVE piece; owner-authorized, behind the §14.4 checkpoint; NO new publish authority
+  instagram_delete:    { mcp: instagram_publish, tier: act,  external_irreversible: true }  # §14.3/§16 post-publication take-down of a LIVE piece; owner-authorized, behind the §14.4 checkpoint
+  notify:              { mcp: notify,          tier: act,   external_irreversible: true }  # §16.2 out-of-band owner-reaching send; governed by notify_rules below (dedup/rate-cap/audit), NOT by a pre-send human checkpoint — it IS the channel to the human
 
 # -----------------------------------------------------------------------------
 # Environments — preview (safe sandbox) + production.
@@ -81,6 +85,9 @@ environments:
     description: "Safe sandbox. No external-irreversible side effects. Used for dry-runs and eval."
     blocked_tools:
       - instagram_publish      # §14.2: preview can NEVER publish, regardless of role allowlist
+      - instagram_caption_edit # acts on a LIVE post — nothing is live in preview
+      - instagram_delete       # acts on a LIVE post — nothing is live in preview
+      - notify                 # external send = external side effect; preview/eval runs fall back to the pinned Sheets ALERTS row (§16.2)
   production:
     description: "Live environment. External-irreversible tools permitted only via act_rules + publish_rules."
     blocked_tools: []
@@ -100,12 +107,12 @@ roles:
     tiers:
       read:  [read_queue, read_digest, read_ledger]
       draft: [create_task, assign_task]
-      act:   [set_budget]                 # strict: human checkpoint + audit
+      act:   [set_budget, notify]         # set_budget strict (human checkpoint + audit); notify governed by notify_rules — the ME emits the §15.1 "Needs You" escalations + the §9.5 backpressure / §13.2 crashed-run CRITICALs
     environments:
       preview:
-        allowed_tools: [read_queue, read_digest, read_ledger, create_task, assign_task, set_budget]
+        allowed_tools: [read_queue, read_digest, read_ledger, create_task, assign_task, set_budget]   # notify globally blocked in preview (Sheets ALERTS row fallback)
       production:
-        allowed_tools: [read_queue, read_digest, read_ledger, create_task, assign_task, set_budget]
+        allowed_tools: [read_queue, read_digest, read_ledger, create_task, assign_task, set_budget, notify]
 
   # 2) Research Agent. Read sanitized web (allowlist-bound) + write the INTERNAL
   #    Claim Bank (PENDING->VERIFIED->RETIRED). Claim-bank write is internal canon,
@@ -181,13 +188,13 @@ roles:
   publishing_agent:
     tiers:
       read:  [read_ledger, read_queue]
-      draft: [sheet_write, drive_upload]
-      act:   [instagram_publish]           # external-irreversible; act_rules + publish_rules apply
+      draft: [sheet_write, drive_upload, handoff_export]   # handoff_export = the §12.3.1 Post Kit; packaging only, no publish authority
+      act:   [instagram_publish, instagram_caption_edit, instagram_delete, notify]   # publish + §14.3 post-publication corrections (behind the §14.4 checkpoint) + the §8.2 Friday digest send (notify_rules)
     environments:
       preview:
-        allowed_tools: [read_ledger, read_queue, sheet_write, drive_upload]   # instagram_publish globally blocked in preview
+        allowed_tools: [read_ledger, read_queue, sheet_write, drive_upload, handoff_export]   # instagram_* and notify globally blocked in preview
       production:
-        allowed_tools: [read_ledger, read_queue, sheet_write, drive_upload, instagram_publish]
+        allowed_tools: [read_ledger, read_queue, sheet_write, drive_upload, handoff_export, instagram_publish, instagram_caption_edit, instagram_delete, notify]
 
   # 8) Brand Onboarding Strategist. Conducts intake; compiles/maintains the Brand
   #    Kit and Offering Briefs. Reads ingested sources; drafts canon config. Must
@@ -240,6 +247,41 @@ act_rules:
     require_human_checkpoint: true          # Vibe-Diff for canon/config; batched to fight approval fatigue
     require_append_only_audit: true         # separate from the editable queue sheet (§12.2/§14.5)
     on_fail: block
+  - on_tools: [instagram_caption_edit, instagram_delete]
+    require_human_checkpoint: true          # §14.3/§16: post-publication correction is OWNER-authorized, behind the §14.4 checkpoint
+    require_append_only_audit: true         # the AuditEntry links back via incident_of to the original publish (§17)
+    on_fail: block
+
+# -----------------------------------------------------------------------------
+# High-stakes tools + protected fields (§14.2 "policies.yaml (cont.)"). A
+# requires_human_checkpoint tool cannot complete without an
+# AuditEntry.approver_human + a §14.4 Vibe-Diff, REGARDLESS of role.
+# -----------------------------------------------------------------------------
+high_stakes_tools:
+  - { tool: edit_canon_doc,         requires_human_checkpoint: true }   # holder: creative_director
+  - { tool: set_budget,             requires_human_checkpoint: true }   # holder: managing_editor
+  - { tool: set_publish_mode,       requires_human_checkpoint: true, holder: owner-only }   # owner-only UI action, held by NO agent role (default-deny for agents is intentional); the SOLE path that flips approval_mode / auto_publish_enabled
+  - { tool: instagram_caption_edit, requires_human_checkpoint: true }   # holder: publishing_agent; §14.3 post-publication correction
+  - { tool: instagram_delete,       requires_human_checkpoint: true }   # holder: publishing_agent; §14.3 take-down
+
+brand_kit_protected_fields: [approval_mode, auto_publish_enabled, trust_threshold]
+  # editing any of these is itself an autonomy-class §14.4 change (owner-only, Vibe-Diff,
+  # never from the structured view) — set_publish_mode is the only flip path; there is
+  # no "edit the YAML to skip the trust ladder" path (§14.2).
+
+# -----------------------------------------------------------------------------
+# Notify rules — notify is act-tier/external for AUDIT purposes, but its guard is
+# dedup + severity routing + rate caps + audit (§16.2), NOT a pre-send human
+# checkpoint: it is the channel TO the human (a checkpoint would be circular).
+# -----------------------------------------------------------------------------
+notify_rules:
+  - on_tools: [notify]
+    dedup: "keyed by dedup_key over an open window — a re-send UPDATES, never duplicates (§16.2)"
+    severity_routing: "tiers map to brand_kit.notifications (quiet_hours, severity_floor, digest schedule); CRITICAL always breaks through — the dead-man's-switch channel (§14.5)"
+    rate_cap: "honors notifications.max_sends_per_hour; excess non-CRITICAL coalesces; CRITICAL exempt (Denial-of-Wallet, §14.4.1)"
+    require_append_only_audit: true         # every send AND failure writes an AuditEntry (action = notify:{severity})
+    secrets: "recipient addresses / channel tokens resolve ONLY into the tool/MCP auth layer (§14.6) — never into prompts or body_markdown"
+    delivery: "retry-with-backoff on transient failure; on hard failure fall back to the pinned Sheets ALERTS row and log loudly — a notify failure never blocks the pipeline (fail-open) but is never silent (fail-loud in audit)"
 
 # -----------------------------------------------------------------------------
 # Deterministic checks — run on caption_compose AND instagram_publish in BOTH
@@ -256,13 +298,20 @@ deterministic_checks:
       the span to that entry's locked_sentence, AND every numeric/percentage/year
       token in the span MUST exactly equal the numbers extracted from that
       locked_sentence. Otherwise BLOCK.
-    trigger_lexicon:
-      research_verbs: [study, studies, research, shows, showed, found, finds, reduced, reduces, increased, decreased, proven, evidence]
-      patterns: ["percentage (\\d+%)", "statistic (\\d+ in \\d+)", "study_year (19xx/20xx)"]
+    claim_trigger_lexicon:                    # §14.2 — versioned here; the EXACT verb/phrase list
+      version: 1
+      terms: [study, studies, research, shows, showed, found, reduces, reduced, improves, proven, clinically, "%"]
+      extending_is: safety                    # adding terms is a §14.4 Vibe-Diff (safety class)
+    trigger_rule: >
+      A number triggers grounding only if (a) it is a percentage/ratio/per-X statistic, OR
+      (b) it co-occurs with a lexicon term inside the same claim span (the sentence).
+      Incidental numbers — durations, clock times, counts, prices, phone numbers — do NOT
+      trigger alone (§14.2).
     requires:
       claim_bank_status: VERIFIED
-      match: near_verbatim_normalized        # span vs locked_sentence
-      numeric_token_equality: exact           # every number/%/year must match locked_sentence
+      match: near_verbatim_normalized        # NFKC, lowercase, strip punctuation except %, collapse whitespace (§14.2)
+      match_threshold: 90                     # token_set_ratio >= this, vs the VERIFIED locked_sentence — §14.2 says "pinned in policies.yaml"; 90 is the documented starting pin, tune at build time via a §14.4 safety-class Vibe-Diff
+      numeric_token_equality: exact           # the claim span's numeric MULTISET must exactly equal the locked_sentence's numbers
     on_fail: block
 
   - id: fail_closed_safety

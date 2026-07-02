@@ -156,8 +156,10 @@ Every external capability is exposed over **MCP** (one integration, every framew
 | `sheets` | calendar, ledger, queue, async approval, append-only audit | Google Sheets |
 | `research_fetch` | sanitized, allowlist-bound source retrieval + grounding | Search grounding / sanitized fetcher |
 | `instagram_publish` | publish to Instagram (the only launch adapter) | Instagram Platform content-publishing API |
-| `notify` *(optional)* | owner notifications | Gmail / Google Chat |
+| `instagram_caption_edit` / `instagram_delete` | post-publication correct-in-place / take-down of a live piece (§14.3) — owner-authorized, behind the §14.4 checkpoint, **no new publish authority** | Instagram Platform content-publishing API |
+| `notify` *(optional; fully contracted — §16.2)* | owner-reaching alerts, digests & escalations (severity-tiered, deduped, rate-capped) | Gmail / Google Chat |
 | `calendar` *(optional)* | schedule slots | Google Calendar |
+| `handoff_export` | materialize the manual **Post Kit** (§12.3.1) + the deterministic platform-export pre-check — packaging + validation only, **no publish authority** | Drive/GCS folder + Review-app/Studio-Floor view |
 
 The cost circuit-breaker (§7) wraps the **runner**, not a tool.
 

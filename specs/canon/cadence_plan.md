@@ -15,13 +15,19 @@ The standing week is resolved from **[[STANDING_WEEK]]** in the Brand Kit and wr
 
 This yields a steady evergreen drumbeat plus one spotlight per active offering per week — hype without dates, exactly as intended. The standing weekly volume targets **[[POSTS_PER_WEEK_TARGET]]** posts and never exceeds the per-brand ceiling of **[[MAX_POSTS_PER_WEEK]]** (§2). Cross-post each piece to the other surfaces in [[CHANNELS]] using each channel's style adaptation where it adds value — never a blind copy-paste of captions or hashtags.
 
+**First-class no-post days.** `quiet_days` (recurring weekday tokens, `track: quiet`) and `blackout_dates` (dated brand-closed windows) are honored at materialization and **win over everything** — a quiet/blackout day carries no track. They are distinct from `weekend: optional` (which MAY fill).
+
+**The cadence validator (gates every cadence edit, PRD §9.5).** A committed cadence change must pass or it is blocked with the violation named inline: Σ active slots ≤ `max_posts_per_week` · at least `research_post_min_per_week` research-grounded slots when > 0 · every `offering:<id>` resolves to a real, non-retired offering · campaign overrides honor `campaign_max_posts_per_week` · any per-slot language ∈ [[LANGUAGES]] · quiet/blackout days carry no track · `max_queue_depth` is null or ≥ `posts_per_week_target` and `owner_absence_pause_days` ≥ 1. A cadence change is a `material`-class edit (Impact Preview + owner confirm) and **takes effect at the next Monday tick** — already-drafted or queued pieces never retroactively move.
+
 ## 2. Campaign mode (dates or a seasonal occasion exist)
 
 Campaign mode is **general**: a campaign may attach to an offering from [[OFFERINGS]] **or stand alone** (catalog-wide / seasonal / promo), with an optional `type` hint (`launch | promo | seasonal | collab | ugc | other`).
 
 Triggered by an owner prompt or task carrying the campaign details (offering or standalone occasion, dates where they exist, registration/contact channel, and the per-piece language mix from [[LANGUAGES]]). The Managing Editor activates the **campaign ladder** (awareness → consideration → conversion, per the Offering Content Agent's phases), **layered on top of** the standing week — the steady cadence does not stop during campaigns; it is the trust backdrop that makes campaign posts land. Standalone seasonal campaigns draw from the optional seasonal calendar.
 
-During a campaign week the relevant spotlight slot becomes a campaign slot, and additional campaign posts may be added. The per-brand hard ceiling is **[[MAX_POSTS_PER_WEEK]]**; a campaign may optionally raise it via the campaign override (`campaign_max_posts_per_week`). Beyond a sensible ceiling, engagement cannibalizes — the ceiling is deliberate. Truthful scarcity only; CTAs follow [[CTA_STYLE]] and never use [[CTA_FORBIDDEN_PHRASES]].
+During a campaign week the relevant spotlight slot becomes a campaign slot, and additional campaign posts may be added. Overlays apply per the campaign's **`overlay_mode`** (§9.5): **`add`** appends campaign slots up to the campaign ceiling · **`replace`** lets campaign slots take evergreen days first (total volume unchanged) · **`boost`** raises the named offering's spotlight frequency for the window. The per-brand hard ceiling is **[[MAX_POSTS_PER_WEEK]]**; a campaign may optionally raise it via the campaign override (`campaign_max_posts_per_week`, or a per-campaign `max_posts_per_week_override`). **On over-ceiling, drop lowest-priority first (evergreen → non-flagship offering), NEVER a research-grounded slot while the minimum > 0, and surface the trim to the owner** (Planner + Friday digest). Beyond a sensible ceiling, engagement cannibalizes — the ceiling is deliberate. Truthful scarcity only; CTAs follow [[CTA_STYLE]] and never use [[CTA_FORBIDDEN_PHRASES]].
+
+**Dated pieces go stale, never silently late (§9.5).** A piece whose `target_date` + grace has passed while it waited (e.g. in the approval queue) is set `exception = Stale-Dated` and routed to the owner with three choices — **Re-date · Publish anyway · Archive** — never auto-published late.
 
 ## 3. Monthly anchors
 
@@ -29,11 +35,11 @@ During a campaign week the relevant spotlight slot becomes a campaign slot, and 
 - **One vetted testimonial / proof piece** — consent-flagged pool only; honors [[NON_DISCLOSURE_RULES]] and [[REQUIRED_FRAMING]].
 - **Creative Director monthly retro** — reads the ledger, retires tired hooks/shapes, adds new ones to the Creative Engine, and reports to the owner what's working (with engagement numbers only where the owner has shared them).
 
-## 4. Who wakes whom
+## 4. Who wakes whom (the Monday tick)
 
-- The **Managing Editor (orchestrator)** owns a **weekly editorial-calendar task**, created each week: the week's slots, assigned agent roles, and any campaign overlays (including the per-piece language axis from [[LANGUAGES]]). Paused routines resume from here.
+- The **Managing Editor (orchestrator)** composes the week **deterministically at the Monday tick** (§9.5): backpressure precondition → base `standing_week` → remove quiet/blackout → overlay active campaigns → clamp to the ceiling → pin `brand_kit_version` on every Task → emit one Task per surviving slot — **idempotent per (brand_id, week_of) via a WeekPlan record** (re-running the tick never double-materialises). Slots whose format lacks an auto-publish adapter are marked `manual_publish_only` (§12.3). Paused routines resume from here.
 - Per-agent routines stay registered but plan against this document's slots.
-- **No first-piece self-pause.** Routines keep producing into the approval queue; the human gate is at **publish**, not at production. Nothing publishes without the owner approving in the system of record (Google Sheets/Drive) per [[APPROVAL_MODE]] — so agents can safely keep producing into the queue. A piece without its ledger row, alt text, or a clean lint bounces back before it reaches the queue.
+- **No first-piece self-pause — with ONE bounded exception (§9.5 backpressure).** Routines keep producing into the approval queue; the human gate is at **publish**, not at production. Nothing publishes without the owner approving in the system of record (Google Sheets/Drive) per [[APPROVAL_MODE]] — so agents can safely keep producing into the queue. **Exception:** when queue depth exceeds `max_queue_depth` AND no owner action for `owner_absence_pause_days`, the Monday tick pauses routine materialisation — loud (CRITICAL alert + backpressure AuditEntry + Studio-Floor banner + digest line), reversible (any owner action resumes it), never a silent stall. A piece without its ledger row, alt text, or a clean lint bounces back before it reaches the queue.
 
 ## 5. Owner on-demand asks
 

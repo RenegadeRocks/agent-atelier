@@ -79,7 +79,8 @@ CONTRACTS = [
      "read": "§10.1 (pipeline), §11.2 (Caption-Composer), §12.2 (Sheets integrity), §16.1 (MCP contracts)",
      "park": "§7, §12.4, §14 — later phases"},
     {"id": "P2-A", "phase": "2",
-     "read_secs": ["7", "app-a"], "artifacts": [],
+     "read_secs": ["7", "app-a"],
+     "artifacts": ["specs/brand_kit.schema.json", "specs/brand_kit.template.yaml", "specs/resolver.md"],
      "read": "§7.2 (Brand Kit schema), §7.2.1 (resolver), §7.3 (seeding map), Appendix A (worked kit)",
      "park": "§12.4, §14, §15 — later phases"},
     {"id": "P2-B", "phase": "2",
@@ -91,7 +92,7 @@ CONTRACTS = [
      "read": "§7.4 (Offerings), §9.4 (ledger-linter), §9.5 + §13 (cadence + control loop), §8.2",
      "park": "§12.4, §14.2 — later phases"},
     {"id": "P4-A", "phase": "4",
-     "read_secs": ["14", "13", "15", "18", "10"], "artifacts": ["specs/policies.yaml"],
+     "read_secs": ["14", "13", "15", "18", "10"], "artifacts": ["specs/policies.yaml", "specs/golden_set.md"],
      "read": "§14.2 (Policy Server + claim-grounding + fail-closed), §13.2 (circuit-breaker), "
              "§15.1–§15.3 + §18.2 (CI eval gate + golden set), §10.3 (blocker scenarios), policies.yaml",
      "park": "§12.4 and the publish-time referee (P4-B)"},
@@ -367,11 +368,14 @@ def render_workflows(sections, blocks):
             disp = f"§{sid}" if sid.isdigit() else f"Appendix {sid.split('-')[-1].upper()}"
             load_lines.append(f"- `build-view/sections/{fn}`  — {disp}")
         for a in c["artifacts"]:
-            load_lines.append(f"- `{a}`  — authored artifact")
-        publish_note = ("" if cid in ("P0", "P1-A") else
-                        "- **Mandatory before any publish path:** the ledger-linter test "
-                        "(a rotation-violating draft is rejected pre-CD) and the fail-closed "
-                        "safety test must exist and pass.\n")
+            load_lines.append(f"- `{a}`  — authored artifact (PRE-SEEDED: reconcile against the "
+                              "loaded §§ and extend it — do not author a blind duplicate)")
+        publish_note = ("- **Standing gate (GEMINI §3.3):** the ledger-linter test (a "
+                        "rotation-violating draft is rejected pre-CD) and the fail-closed safety "
+                        "test must both exist and pass **before any publish path is wired "
+                        "(P5-A)** — author each in the phase that builds its gate (linter: P3; "
+                        "fail-closed: P4-A) and keep both green from then on.\n"
+                        if cid in ("P3", "P4-A", "P4-B", "P5-A", "P5-B", "P6") else "")
         p0_note = ("- **Naming:** the proposed product source tree must NOT use directory names "
                    "the repo `.gitignore` excludes (`build/`, `dist/`, `node_modules/`) or that "
                    "source would be silently untracked and lost on `git pull`. Prefer a named "
@@ -398,6 +402,10 @@ Read only the following. **Do NOT open the whole PRD.** `GEMINI.md` / `AGENTS.md
 already always-loaded by the tool.
 {chr(10).join(load_lines)}
 - `specs/contracts/{cid}.md`  — the ten-field BUNNY contract for this unit
+
+Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside
+the loaded file and skip its siblings — a section file can contain later-phase material
+(e.g. §12.4 lives in the §12 file but belongs to P5-B).
 
 **Parked for later (do not read now):** {c['park']}.
 

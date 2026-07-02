@@ -18,6 +18,10 @@ already always-loaded by the tool.
 - `build-view/sections/app-a-worked-example-the-art-of-living-ludhiana-brand.md`  — Appendix A
 - `specs/contracts/P2-B.md`  — the ten-field BUNNY contract for this unit
 
+Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside
+the loaded file and skip its siblings — a section file can contain later-phase material
+(e.g. §12.4 lives in the §12 file but belongs to P5-B).
+
 **Parked for later (do not read now):** §12.4, §15.4 — later phases.
 
 ## STEP 2 — Honor the contract
@@ -31,7 +35,6 @@ hard boundaries** — do not build a later phase's work "while you're here."
 - Propose the files/structure first; wait for owner OK (no-YOLO).
 - Author the contract's ACCEPTANCE/VERIFY behaviour as a **failing** Gherkin suite first
   (red), then implement to green. Add it to the growing regression suite.
-- **Mandatory before any publish path:** the ledger-linter test (a rotation-violating draft is rejected pre-CD) and the fail-closed safety test must exist and pass.
 - Build component-by-component to SCOPE/ACTION; show diffs; verify model IDs / deps
   against live docs (GEMINI.md §4).
 - **VERIFY with captured evidence** (report-is-not-the-repo): run the piece / fire the negative test / capture the run.

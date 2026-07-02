@@ -54,15 +54,26 @@ documents.
    unconfirmed = block publish, route to human.
 4. **Validate.** Produce `brand_kit.yaml` + an `assets/` folder + a secrets reference; run
    schema validation; produce a short human-readable "brand one-pager."
-5. **First light.** Commission one test post end-to-end through the same pipeline and show it
-   to the owner. Deliberately generate a **near-violation** to surface unstated prohibitions
-   before go-live.
+5. **First light — TWO probes, both shown (§7.1).** Commission one test post end-to-end
+   through the same pipeline (environment = `preview`; publish blocked at the gate) and show it
+   to the owner. Run **one declared + one undeclared probe per run**:
+   - **Declared probe:** steer toward a fault line the owner DID flag — for a `claims_forbidden`
+     entry, write the caption that would violate it by one degree. Show **both artifacts**: the
+     correctly-hedged safe output AND the blocked near-miss variant.
+   - **Undeclared probe:** pick one category from the **§7.8 archetype safety starting-points
+     column the owner did NOT confirm** (for `custom`, use the generic cross-vertical risk
+     list) and probe it the same way — this surfaces unstated prohibitions.
+   Record the outcome on a **FirstLightResult** (probes run, gate that caught each, owner
+   verdict); the run is breaker-bounded like any other. Close with a **first-week dry-run**
+   (materialize the standing week without publishing) so the owner sees the rhythm before
+   go-live; the kit flips draft → active on owner sign-off.
 
 ## Output
 
-A complete, schema-valid Brand Kit (YAML + asset files), a brand one-pager, and one first-light
-test post (including the deliberate near-violation) presented for owner approval. No agent code
-or engine document was modified.
+A complete, schema-valid Brand Kit (YAML + asset files), a brand one-pager, one first-light
+test post with **both probe artifacts** (safe output + blocked near-miss, declared + undeclared)
+recorded on a FirstLightResult, and a first-week dry-run — presented for owner approval. No
+agent code or engine document was modified.
 
 ## When to use / When NOT
 

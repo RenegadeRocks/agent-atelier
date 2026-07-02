@@ -50,13 +50,16 @@ max_posts_per_week: 6
 
 claims_allowed: ["'reduces stress' with citation", "population-level study figures with hedge + named source"]
 claims_forbidden: ["'cures depression'", "'replaces therapy/medication'", "100% outcome claims", "invented citations"]
+claims_forbidden_confirmed: true              # owner-elicited + confirmed at intake (fail-closed contract, §14.2)
 comparative_claims_allowed: false
 political_content_allowed: false
 non_disclosure_rules:
   - "Sahaj Samadhi mantra and how it is received/repeated — never in words or image"
   - "Sudarshan Kriya exact rhythm/mechanism — ceiling is 'a cyclical breathing rhythm'"
+non_disclosure_rules_confirmed: true          # owner-elicited + confirmed at intake (fail-closed contract, §14.2)
 required_framing:
   - { topic: "clinical-population research (PTSD, depression)", framing: "'in clinical studies' + never implying treatment replacement" }
+required_framing_confirmed: true              # owner-elicited + confirmed at intake (fail-closed contract, §14.2)
 source_allowlist: ["peer-reviewed journals", "PubMed", "publisher pages", "Patanjali Yoga Sutras", "Sri Sri published works", "AOL canon"]
 source_denylist: ["blogs", "forums", "reddit", "secondary wellness sites"]
 citation_required_for_claims: true

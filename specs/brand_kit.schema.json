@@ -19,7 +19,6 @@
     "voice_descriptors",
     "voice_do",
     "voice_dont",
-    "reading_level",
     "logo_asset",
     "wordmark_text",
     "palette_hex",
@@ -82,8 +81,8 @@
     "timezone": { "type": "string", "description": "IANA tz, e.g. 'Asia/Kolkata'. Optional (defaults from environment)." },
     "mission": { "type": "string", "minLength": 1, "description": "1-2 sentences anchoring agent judgment. Token [[MISSION]]." },
     "brand_type": {
-      "description": "Content-strategy archetype; selects the active Creative Engine hook/shape pack (§9.1). Two packs ship; extend the enum when a new pack is authored. Token [[BRAND_TYPE]].",
-      "enum": ["educational", "product_commerce"]
+      "description": "Content-strategy archetype (§7.8 BrandTemplate catalog). Each archetype maps to exactly ONE of the two shipped §9.1 hook/shape packs (educational_editorial | product_commerce) — archetype breadth != pack count. Token [[BRAND_TYPE]].",
+      "enum": ["educational", "product_commerce", "nonprofit_ngo", "saas_b2b", "hospitality_local", "clinic_health", "coaching_creator", "ecommerce_dtc", "school_education", "custom"]
     },
 
     "audience_persona": { "type": "string", "minLength": 1, "description": "The one concrete reader in the writer's head. Token [[AUDIENCE_PERSONA]]." },
@@ -92,6 +91,27 @@
       "description": "Concrete audience pains. Token [[AUDIENCE_PAINS]]."
     },
     "scroll_test_persona": { "type": "string", "minLength": 1, "description": "Who must stop scrolling; used by Gate 0. Token [[SCROLL_TEST_PERSONA]]." },
+
+    "intent_statement": {
+      "type": "string",
+      "description": "North-star capture (§7.1/§7.2): '[brand] helps [audience] [outcome] so they feel [feeling]; the next step is [CTA]'. The single explicit 'on-brand' referent — read by §9.1/§9.2/§15.1; editing it stales the golden set (§15.3). Optional at validation (Appendix A omits it) but the Strategist captures it at intake."
+    },
+    "desired_feeling": {
+      "type": "string",
+      "description": "The one feeling a stranger should have in 1s (§7.2); seeds voice_descriptors + the §9.2 'feel in one second'; a §15.1 'dead' indicator references it."
+    },
+    "primary_cta": {
+      "type": "string",
+      "description": "The one action; used EXACTLY, never invented (contact rule, §7.2)."
+    },
+    "cta_destination": {
+      "enum": ["dm", "whatsapp", "link", "visit", "call"],
+      "description": "Where the primary CTA points (§7.2)."
+    },
+    "off_brand_notes": {
+      "type": "array", "items": { "type": "string" },
+      "description": "Taste-level 'not us' notes — DISTINCT from the fail-closed safety fields; never gates publish (§7.2)."
+    },
 
     "voice_descriptors": {
       "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 },
@@ -155,8 +175,8 @@
       ]
     },
     "image_quality_tier": {
-      "description": "FLOOR/default quality tier; a CD 'premium' tag may UPGRADE a piece, never downgrade (§9.2). Token [[IMAGE_QUALITY_TIER]].",
-      "enum": ["low", "medium", "high"]
+      "description": "FLOOR/default quality tier; a CD 'premium' tag may UPGRADE a piece to high, never downgrade below the floor (§9.2). The PRD defines two tiers (medium default | high). Token [[IMAGE_QUALITY_TIER]].",
+      "enum": ["medium", "high"]
     },
 
     "cta_style": {
@@ -190,11 +210,13 @@
         "properties": {
           "track": {
             "type": "string",
-            "pattern": "^(evergreen|optional|offering:[a-z0-9._-]+)$",
-            "description": "'evergreen' | 'optional' | 'offering:<id>' (id must match an offerings[].id)."
+            "pattern": "^(evergreen|optional|quiet|offering:[a-z0-9._-]+)$",
+            "description": "'evergreen' | 'optional' | 'quiet' (first-class no-post day, §7.2) | 'offering:<id>' (id must match an offerings[].id)."
           },
           "language": { "type": "string", "minLength": 1, "description": "Optional per-slot language pin (§7.6)." },
           "flag": { "enum": ["research_grounded"], "description": "Only valid when research_post_min_per_week > 0." },
+          "format": { "type": "string", "minLength": 1, "description": "Optional §7.1.1 slot format; a format lacking an auto-publish adapter is materialized manual_publish_only (§12.3)." },
+          "channel": { "type": "string", "minLength": 1, "description": "Optional per-slot channel override; must be one of channels[]." },
           "notes": { "type": "string" }
         }
       }
@@ -217,6 +239,63 @@
           "dates": { "type": "string", "minLength": 1 }
         }
       }
+    },
+    "max_queue_depth": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "default": null,
+      "description": "Backpressure cap (§9.5). null -> default 2 x posts_per_week_target. The §9.5 cadence validator additionally enforces integer >= posts_per_week_target (a cross-field rule this schema cannot express)."
+    },
+    "owner_absence_pause_days": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 7,
+      "description": "§9.5 — pause standing-week materialisation after N days with no Owner Action (any actor=human AuditEntry) AND a deep queue. Resumes automatically on any owner action."
+    },
+    "campaign_overrides_backpressure": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, a dated campaign slot + the research minimum still materialise through a §9.5 backpressure pause."
+    },
+    "quiet_days": {
+      "type": "array",
+      "items": { "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+      "default": [],
+      "description": "Recurring no-post weekday tokens; first-class (track: quiet), distinct from weekend:optional (§7.2). A quiet/blackout day carries no track (§9.5 validator)."
+    },
+    "blackout_dates": {
+      "type": "array",
+      "default": [],
+      "description": "Brand-closed windows (holidays, closures); win over everything at materialization (§9.5).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "dates"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "dates": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "evergreen_rotation": {
+      "type": "string",
+      "default": "no_repeat_within: 3",
+      "description": "Cadence INTENT for pillar variety; the §9.4 deterministic ledger-linter ENFORCES it."
+    },
+    "posting_goal": {
+      "enum": ["awareness", "community", "conversion", "launch"],
+      "default": "awareness",
+      "description": "Biases the §7.1.1 cadence proposal."
+    },
+    "weekly_capacity": {
+      "type": "string",
+      "default": "sustainable",
+      "description": "Owner's sustainable volume; the cadence proposal stays at/below this (§7.1.1)."
+    },
+    "cadence_source": {
+      "enum": ["owner_stated", "proposed_archetype", "edited"],
+      "default": "proposed_archetype",
+      "description": "Provenance of standing_week (§7.1.1)."
     },
 
     "claims_allowed": {
@@ -306,6 +385,58 @@
       "enum": ["human", "auto", "auto_after_trust"]
     },
     "auto_publish_enabled": { "type": "boolean", "description": "MASTER kill-switch (§12.3). Auto-publish requires this true AND approval_mode auto/auto_after_trust AND gates pass AND an adapter exists." },
+    "approver_allowlist": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "default": [],
+      "description": "Google accounts/emails allowed to approve for this brand (§12.5). [] -> owner-only. A non-allowlisted operator is refused FAIL-CLOSED."
+    },
+    "delegation": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "Optional §12.5 scoped, expiring approval authority (mirrors the §17 Delegation entity).",
+      "additionalProperties": false,
+      "required": ["delegate_operator_id", "scope", "expires_at"],
+      "properties": {
+        "delegate_operator_id": { "type": "string", "minLength": 1 },
+        "scope": { "enum": ["approve", "request_changes_only", "publish"] },
+        "expires_at": { "type": "string", "minLength": 1, "description": "ISO-8601" }
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "description": "Seeds the §14.4.1 notification model + the §16.2 notify contract. All optional; safe defaults (§7.2). channel 'none' = Sheets ALERTS row + Studio Floor only.",
+      "additionalProperties": false,
+      "properties": {
+        "channel": { "enum": ["none", "email", "chat"], "default": "none" },
+        "recipients": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "All notified; FIRST acknowledgement resolves for everyone (§14.4.1)." },
+        "severity_floor": { "enum": ["critical", "action", "digest"], "default": "action", "description": "Lowest tier pushed out-of-band; the scheduled digest always sends on its own schedule regardless." },
+        "quiet_hours": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tz": { "type": "string", "description": "Defaults to the brand timezone." },
+            "start": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+            "end": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" }
+          },
+          "description": "CRITICAL always breaks through (§14.4.1/§16.2)."
+        },
+        "digest": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "day": { "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "default": "fri" },
+            "hour": { "type": "string", "pattern": "^\\d{2}:\\d{2}$", "default": "16:00" }
+          },
+          "description": "The §8.2 digest schedule."
+        },
+        "batch_max_wait_minutes": { "type": "integer", "minimum": 0, "default": 120 },
+        "batch_max_items": { "type": "integer", "minimum": 1, "default": 6 },
+        "reminder_after_hours": { "type": "integer", "minimum": 1, "default": 24, "description": "An unacked ACTION re-notifies once, then folds into the digest." },
+        "critical_reminder_minutes": { "type": "integer", "minimum": 1, "default": 60 },
+        "max_sends_per_hour": { "type": "integer", "minimum": 1, "default": 12, "description": "Rate cap (Denial-of-Wallet, §16.2); excess non-CRITICAL coalesces; CRITICAL exempt." }
+      }
+    },
     "system_of_record": {
       "description": "Where the queue/ledger/audit live. Token: system_of_record.",
       "enum": ["google_sheets", "builtin_db"]

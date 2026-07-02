@@ -288,6 +288,17 @@ never emitted into the prompt.
    `[[...]]` substitution.
 5. **Secret split.** Secrets resolve only into the auth layer; never into model-visible text.
 6. **Serialization discipline.** Emit per the registry/use-site directive; never dump raw YAML.
+7. **Version pinning (edit-safety, §7.2.1).** A piece resolves tokens against the
+   **`brand_kit_version` captured when it entered the pipeline at PLAN** (recorded on
+   `Draft`/`QueueItem`/`Run`/`LedgerRow`, §17) — never against whatever the kit is at each
+   later stage — so a mid-pipeline edit cannot produce a self-inconsistent artifact.
+   **The three fail-closed safety fields are the deliberate exception:** `claims_forbidden` /
+   `non_disclosure_rules` / `required_framing` (and the Policy Server) always resolve to the
+   **LATEST** value, so a tightening can never be out-run by a piece already in flight.
+8. **Mid-pipeline resolution failure is fail-closed too (§7.2.1).** An unresolvable
+   **required** token mid-pipeline does **not** silently substitute an empty string — the
+   piece is set `exception` and routed to the owner (treated like an unconfirmed safety
+   field). An unknown/absent `brand_kit_version` on replay also fails closed.
 
 ```gherkin
 Scenario: Unresolved required variable blocks the run

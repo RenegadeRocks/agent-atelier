@@ -270,7 +270,10 @@
       "load_files": [
         "build-view/core.md",
         "build-view/sections/07-the-brand-kit-product-agnostic-configuration.md",
-        "build-view/sections/app-a-worked-example-the-art-of-living-ludhiana-brand.md"
+        "build-view/sections/app-a-worked-example-the-art-of-living-ludhiana-brand.md",
+        "specs/brand_kit.schema.json",
+        "specs/brand_kit.template.yaml",
+        "specs/resolver.md"
       ],
       "park": "§12.4, §14, §15 — later phases"
     },
@@ -315,7 +318,8 @@
         "build-view/sections/15-evaluation-quality.md",
         "build-view/sections/18-tech-stack-build-plan-for-antigravity.md",
         "build-view/sections/10-the-content-production-pipeline-state-machine.md",
-        "specs/policies.yaml"
+        "specs/policies.yaml",
+        "specs/golden_set.md"
       ],
       "park": "§12.4 and the publish-time referee (P4-B)"
     },
