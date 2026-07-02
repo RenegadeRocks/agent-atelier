@@ -17,6 +17,14 @@ already always-loaded by the tool.
 - `build-view/sections/08-the-agent-roster-generic-parameterized.md`  — §8
 - `build-view/sections/09-the-canon-engine-documents-the-harness-s-shared.md`  — §9
 - `build-view/sections/10-the-content-production-pipeline-state-machine.md`  — §10
+- `specs/agents/managing-editor.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/agents/evergreen-content.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/agents/research-verification.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/agents/creative-director.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/agents/visual-production.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/agents/publishing-operations.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/canon/`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/skills/`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
 - `specs/contracts/P1-A.md`  — the ten-field BUNNY contract for this unit
 
 Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside

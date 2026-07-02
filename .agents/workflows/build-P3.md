@@ -18,6 +18,12 @@ already always-loaded by the tool.
 - `build-view/sections/09-the-canon-engine-documents-the-harness-s-shared.md`  — §9
 - `build-view/sections/13-orchestration-scheduling.md`  — §13
 - `build-view/sections/08-the-agent-roster-generic-parameterized.md`  — §8
+- `specs/agents/offering-content.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/skills/ledger-lint/SKILL.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/skills/weekly-digest/SKILL.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/skills/ledger-audit/SKILL.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/canon/cadence_plan.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/canon/content_ledger.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
 - `specs/contracts/P3.md`  — the ten-field BUNNY contract for this unit
 
 Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside

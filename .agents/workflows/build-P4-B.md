@@ -16,6 +16,7 @@ already always-loaded by the tool.
 - `build-view/core.md`  — the always-load core (load every time)
 - `build-view/sections/14-governance-safety-security.md`  — §14
 - `build-view/sections/15-evaluation-quality.md`  — §15
+- `specs/redteam.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
 - `specs/contracts/P4-B.md`  — the ten-field BUNNY contract for this unit
 
 Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside

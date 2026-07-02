@@ -16,6 +16,9 @@ already always-loaded by the tool.
 - `build-view/core.md`  — the always-load core (load every time)
 - `build-view/sections/07-the-brand-kit-product-agnostic-configuration.md`  — §7
 - `build-view/sections/app-a-worked-example-the-art-of-living-ludhiana-brand.md`  — Appendix A
+- `specs/agents/brand-strategist.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/skills/intake-interview/SKILL.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/brand_kit.template.yaml`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
 - `specs/contracts/P2-B.md`  — the ten-field BUNNY contract for this unit
 
 Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside

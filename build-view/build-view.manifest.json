@@ -244,7 +244,15 @@
         "build-view/core.md",
         "build-view/sections/08-the-agent-roster-generic-parameterized.md",
         "build-view/sections/09-the-canon-engine-documents-the-harness-s-shared.md",
-        "build-view/sections/10-the-content-production-pipeline-state-machine.md"
+        "build-view/sections/10-the-content-production-pipeline-state-machine.md",
+        "specs/agents/managing-editor.md",
+        "specs/agents/evergreen-content.md",
+        "specs/agents/research-verification.md",
+        "specs/agents/creative-director.md",
+        "specs/agents/visual-production.md",
+        "specs/agents/publishing-operations.md",
+        "specs/canon/",
+        "specs/skills/"
       ],
       "park": "§7 (Brand Kit), §12.4, §14 — later phases"
     },
@@ -290,7 +298,10 @@
       "load_files": [
         "build-view/core.md",
         "build-view/sections/07-the-brand-kit-product-agnostic-configuration.md",
-        "build-view/sections/app-a-worked-example-the-art-of-living-ludhiana-brand.md"
+        "build-view/sections/app-a-worked-example-the-art-of-living-ludhiana-brand.md",
+        "specs/agents/brand-strategist.md",
+        "specs/skills/intake-interview/SKILL.md",
+        "specs/brand_kit.template.yaml"
       ],
       "park": "§12.4, §15.4 — later phases"
     },
@@ -305,7 +316,13 @@
         "build-view/sections/07-the-brand-kit-product-agnostic-configuration.md",
         "build-view/sections/09-the-canon-engine-documents-the-harness-s-shared.md",
         "build-view/sections/13-orchestration-scheduling.md",
-        "build-view/sections/08-the-agent-roster-generic-parameterized.md"
+        "build-view/sections/08-the-agent-roster-generic-parameterized.md",
+        "specs/agents/offering-content.md",
+        "specs/skills/ledger-lint/SKILL.md",
+        "specs/skills/weekly-digest/SKILL.md",
+        "specs/skills/ledger-audit/SKILL.md",
+        "specs/canon/cadence_plan.md",
+        "specs/canon/content_ledger.md"
       ],
       "park": "§12.4, §14.2 — later phases"
     },
@@ -336,7 +353,8 @@
       "load_files": [
         "build-view/core.md",
         "build-view/sections/14-governance-safety-security.md",
-        "build-view/sections/15-evaluation-quality.md"
+        "build-view/sections/15-evaluation-quality.md",
+        "specs/redteam.md"
       ],
       "park": "the UI (P5)"
     },
