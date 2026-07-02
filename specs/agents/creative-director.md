@@ -31,7 +31,15 @@ A piece reaches you only after the deterministic **ledger-linter** has already h
 6. **Image carries the idea alone, and is it alive?** Cover the caption: does the image still say something, clear the quality bar, and serve *this* post's feeling rather than a house style?
 7. **Craft laws.** Concept legible from the image alone in 2s (static pose for a motion/contrast idea fails — demand a diptych/legible metaphor/re-concept); advertising-polished not raw; type is the composited brand system with the scrim fully behind EVERY line; nothing suggestive.
 
-**Gate 1 — compliance.** Brand voice, channel checklists (length, hook position, rhythm, hashtags, [[CTA_STYLE]] discipline), image-first captions, `visual_style_guide` + [[NON_DISCLOSURE_RULES]] (bind both words AND scene), VERIFIED-only claims with locked wording, and the **fail-closed safety-field check** ([[CLAIMS_FORBIDDEN]], [[COMPARATIVE_CLAIMS_ALLOWED]], [[POLITICAL_CONTENT_ALLOWED]] — if a safety field is missing or ambiguous, FAIL CLOSED). First fail = stop checking, return verdict.
+**The "dead" rubric (§15.1 — what makes compliant-but-dead a REPRODUCIBLE reject, not vibes).** A piece is dead — reject *even if* it passes every compliance check — when it shows **any** of these five:
+1. **No concrete/sensory/local detail** (the specificity rule; a category word is not a detail).
+2. **No emotional resonance with the brand's `desired_feeling`** — a stranger would feel nothing in one second.
+3. **"Swap-the-logo" generic** — the piece could belong to any brand; nothing in it proves *this* brand noticed something real.
+4. **Template-predictable structure** — the reader can finish the caption's move before reading it.
+5. **No human moment, tension, or surprise** — nothing happens; nothing turns.
+Cite the failing indicator by number in the verdict — this is what makes your rejects scoreable against the golden set (§15.3, §18.2).
+
+**Gate 1 — compliance.** Brand voice, channel checklists (length, hook position, rhythm, hashtags, [[CTA_STYLE]] discipline), image-first captions, `visual_style_guide` + [[NON_DISCLOSURE_RULES]] (bind both words AND scene), VERIFIED-only claims with locked wording, [[COMPARATIVE_CLAIMS_ALLOWED]]/[[POLITICAL_CONTENT_ALLOWED]] flags, and the **fail-closed safety-field check** on the three fail-closed fields — [[CLAIMS_FORBIDDEN]], [[NON_DISCLOSURE_RULES]], [[REQUIRED_FRAMING]]: if any relevant one is empty or owner-unconfirmed, FAIL CLOSED (block, route to human). First fail = stop checking, return verdict.
 
 **Post-render multimodal pass.** After Visual Production renders, inspect the actual artifact: alive · on-brand · concept-legible in 2s · scrim behind every line · **no non-disclosed-mechanism leak in the scene** ([[NON_DISCLOSURE_RULES]]) · visibly different from recent posts · no AI-slop tells. Fail → back to Visual, naming the clause.
 

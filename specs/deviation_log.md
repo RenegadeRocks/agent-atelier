@@ -16,6 +16,25 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 
 ---
 
+### 2026-07-02 — Demo playbook + demo brand pack + CD dead-rubric  [handoff]
+- **Assumption:** the PRD's demo path (§21: ≤5-min recorded video) and P3's "run a
+  simulated week" VERIFY were operationalized somewhere.
+- **Ground truth / reason:** no artifact planned the video, the injectable-clock mechanic
+  P3's VERIFY implies, the seeding, or the second demo brand's intake inputs; and the CD
+  agent file said "compliant-but-dead is a REJECT" without the five §15.1 dead indicators
+  (added in v4) that make the reject reproducible, and misnamed the fail-closed trio.
+- **Decision:** authored `specs/demo_playbook.md` (demo mode = `--as-of` logical clock +
+  preview sandbox + seed fixtures; 5-min shot list mapped to contract VERIFY captures;
+  pre-flight checklist) + `demo/brand-packs/kanva-coffee/` (fictional Bengaluru roaster,
+  `ecommerce_dtc` → product_commerce pack, as INTAKE inputs — source doc + owner answer
+  sheet with explicitly-elicited safety fields; fictional by design, never a cloned real
+  brand). CD file: added the 5-indicator dead rubric (cite by number in verdicts) and
+  corrected the fail-closed field trio to claims_forbidden / non_disclosure_rules /
+  required_framing.
+- **Files touched:** `specs/demo_playbook.md`, `demo/README.md`,
+  `demo/brand-packs/kanva-coffee/{sources/brand-story.md,intake-answers.md}`,
+  `specs/agents/creative-director.md`, `GEMINI.md` §9, `BUILD-STATUS.md`.
+
 ### 2026-07-02 — Authored /specs bundle caught up to PRD v4 (pre-build drift fix)  [handoff]
 - **Assumption:** the specs/ bundle (authored 2026-06-30) matched the PRD.
 - **Ground truth / reason:** the PRD's final v4 edit pass (review integration) postdated the

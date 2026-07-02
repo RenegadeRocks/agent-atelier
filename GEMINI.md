@@ -297,6 +297,8 @@ agent-atelier/                     # = git repo root; open THIS folder in Antigr
     agent_cards/                   # [authored] creative-director.json — illustrative A2A card (§13.3)
     schemas/                       # [authored] MCP tool output (§16.1) · notify payload (§16.2) ·
                                    #   conscious-deviation-entry (§18.4.4) JSON schemas
+    demo_playbook.md               # [authored] §21 demo: demo-mode mechanics (--as-of clock, preview
+                                   #   sandbox, seeding), the 5-min video shot list, capture-as-you-build
     contracts/P0.md … P6.md        # [derived] the 11 BUNNY prompt-contracts, carved from §19.1
     deviation_log.md               # [live] conscious-deviation log (assumption → ground truth → decision)
   brands/
@@ -304,6 +306,9 @@ agent-atelier/                     # = git repo root; open THIS folder in Antigr
       brand_kit.yaml               # [authored] the only thing that changes between products
       offerings/                   # [authored] filled Offering Briefs
       assets/{people,products}/    # [authored] pre-approved image pool
+  demo/                            # [authored] §21 demo assets (see specs/demo_playbook.md):
+    brand-packs/kanva-coffee/      #   the 2nd demo brand (fictional coffee roaster) as INTAKE inputs
+    seed/                          #   [live, P3+] fixtures: ledger history, planted violators
 ```
 
 > **Layout note (conscious deviation from §18.3 / P0).** Antigravity governance lives in

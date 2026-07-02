@@ -41,6 +41,14 @@ ADK/Antigravity project layout (conform + log any deviation), commit. Then autho
 > `.gitignore` excludes (`build/`, `dist/`, `node_modules/`) — source under those would be
 > silently untracked and lost on `git pull`. Use a package dir like `app/`.
 
+## Demo discipline (start at P1-B — do not leave the video for the deadline)
+
+`specs/demo_playbook.md` is the plan for the §21 ≤5-min video. Two build-time obligations:
+(1) the orchestrator tick + linter take an **injectable logical `now`** (`--as-of`) — it is
+required by P3's "run a simulated week" VERIFY and is what makes the demo fast; (2) every
+contract's VERIFY capture from P1-B onward is **screen-recorded** — each gate's evidence is
+a video segment (the shot list maps them). Demo brand inputs: `demo/brand-packs/`.
+
 ## Scope-cut order (only if the July-6 deadline bites; §19.2)
 
 Cut from the tail: **P6** → **P5-B** (Studio Floor console — demo-polish) → **P4-B**
