@@ -13,13 +13,13 @@ done + authorized, clear it and tick the contract in `BUILD-STATUS.md`.
 ## Current
 
 - **Contract:** P1-A (Done)
-- **Sub-tasks done:** Created tests, created spec instruction files, implemented ADK core agents, wired pipeline handoffs, verified trace.
-- **Sub-tasks remaining:** None for P1-A
-- **Current file state / where the code is:** `app/agents/` and `specs/agents/` populated, pipeline.py working, test_p1_a.py green.
-- **▶ NEXT ACTION (the one thing to do on resume):** Owner commit and then run `.agents/workflows/build-P1-B.md`.
-- **Open questions / waiting on owner:** Need authorization to proceed to P1-B.
-- **Last commit:** (Pending owner prompt to commit)
-- **Machine last worked on:** (Unknown/Current)
+- **Sub-tasks done:** Created tests, implemented ADK core agents, wired pipeline handoffs, pinned models securely in `config.py` with runtime validation, and configured CI to auto-skip live tests via `conftest.py`.
+- **Sub-tasks remaining:** None for P1-A.
+- **Current file state / where the code is:** `app/agents/` and `specs/agents/` populated. Pipeline is wired. `app/tests/test_p1_a.py` is green and CI is configured correctly.
+- **▶ NEXT ACTION (the one thing to do on resume):** Run `.agents/workflows/build-P1-B.md`.
+- **Open questions / waiting on owner:** None. Authorized to move to P1-B.
+- **Last commit:** Fix CI: skip live tests without API key, defer model validation to runtime.
+- **Machine last worked on:** Office/Home (Leaving)
 
 ---
 
