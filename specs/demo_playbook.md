@@ -81,10 +81,13 @@ kit sits alongside as fallback if the live interview segment fights the clock.
 
 ## 5. Pre-flight checklist (owner, before recording)
 
-- [ ] Test Instagram Business/Creator account created + API access verified (start this
-      EARLY — external approval latency is the one thing no agent can compress).
-- [ ] GCP project: Sheets/Drive APIs on, service account shared to the demo sheet, Gemini
-      + image-model keys in the vault. `python3 tools/build_view_split.py --verify` green.
+- [ ] **REQUIRED, do first:** GCP project — Sheets/Drive APIs on, service account shared
+      to the demo sheet, Gemini + image-model keys in the vault (P1-B needs all of this).
+      `python3 tools/build_view_split.py --verify` green.
+- [ ] **OPTIONAL (auto-publish finale only):** a test Instagram Business/Creator account +
+      content-publishing API access. The manual Post Kit + mark-as-posted path needs NO
+      API account and is fully submission-worthy on its own — P5-A's ON-FAIL names manual
+      handoff as the unaffected default. Skip this under deadline pressure.
 - [ ] `demo/seed/` loaded; images pre-generated; one planted violator + one planted
       ungrounded claim in place.
 - [ ] AOL kit + demo-brand kit both validate; both feeds seeded for the side-by-side.
