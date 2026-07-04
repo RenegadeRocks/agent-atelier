@@ -4,7 +4,7 @@
 
 This is the canonical rule set for **how every image is made**. The Visual Production Agent produces against it; the CreativeDirector (CD) reviews every visual against it. If a visual fails any **hard rule**, it is rejected on sight.
 
-This guide is **subordinate to [`visual_engine`](./visual_engine.md)**. `visual_engine` governs the visual *strategy and feeling* ([[VISUAL_STRATEGY]], [[VISUAL_REGISTER]]) — the higher-order decision of what a piece should make a viewer feel and how variety is achieved across the feed ([[VISUAL_VARIETY]]). This guide governs the *mechanical craft* of executing that decision into a shippable asset. Where the two appear to conflict, `visual_engine` wins on strategy; this guide still governs execution mechanics (overlay, branding, OCR gate, aspect ratio, hosting).
+This guide is **subordinate to [`visual_engine`](./visual_engine.md)**. `visual_engine` governs the visual *strategy and feeling* ([[VISUAL_STRATEGY]], [[VISUAL_REGISTER]]) — the higher-order decision of what a piece should make a viewer feel and how variety is achieved across the feed ([[VISUAL_VARIETY]]). This guide governs the *mechanical craft* of executing that decision into a shippable asset. Where the two appear to conflict, `visual_engine` wins on strategy; this guide still governs execution mechanics (overlay, branding, OCR gate, aspect ratio, hosting). **Scoping (live-engine reconciliation):** the person-photo sections (demographics, gesture formulas, person-shot skeleton and checklist) apply **ONLY when a person is the subject** — drop them entirely for typographic / research-card / detail / place / metaphor / illustrated / abstract treatments.
 
 Pair this with:
 
@@ -52,7 +52,7 @@ The image is what stops the scroll. If the hook lives only in the caption, the p
 
 - **Length:** 4–10 words. If the caption hook is longer, distil — don't crop mid-sentence.
 - **Wording:** must mirror, not contradict, the caption hook. Same promise, same register ([[VOICE_DESCRIPTORS]]). The overlay restates the caption's promise; it does not invent a louder one.
-- **Position:** top third **or** vertically centered. Never bottom — the bottom is reserved for branding (§4) and the feed UI crops it.
+- **Position — RECONCILED (live-engine board direction, 2026-06-30): the type block sits at the BOTTOM.** The compositor places kicker → accent rule → headline → subhead → CTA → brandmark as one bottom-anchored stack on the feathered scrim (see `tools/reference/paperclip_caption.py`); the photograph keeps its **lower ~40% clean** for it, with the subject in the upper/central area — **never reserve the top third**. Where any older top-third guidance in this guide conflicts, the bottom-stack rule wins (`visual_engine` §11).
 - **Typography:**
   - High contrast against the area it sits on. If the background is busy, add a subtle scrim (soft-edged 10–25% black gradient) — not a hard box.
   - Use the brand headline face: [[HEADLINE_FONT]]. Weighted enough to read at a ~150px thumbnail. Avoid thin display weights.
@@ -60,7 +60,7 @@ The image is what stops the scroll. If the hook lives only in the caption, the p
   - One typeface, one weight per overlay. No mixing. Labels/eyebrows use [[LABEL_FONT]].
 - **Language match:** overlay language matches the caption language for that piece, drawn from [[LANGUAGES]]. Render in the script native to that language. **Never transliterate.**
 - **Thumbnail test (required before submit):** view the rendered, composited image at ~150×150 px. If you cannot read the hook in two seconds, it fails.
-- **Composition discipline:** the photograph must be composed *with overlay space in mind*. Generate with headroom in the top third (or a clean center) so the overlay does not collide with the subject's face, hands, or focal gesture.
+- **Composition discipline:** the photograph must be composed *with overlay space in mind*. Generate with the **lower ~40% clean** (subject upper/central) so the bottom type stack never collides with the subject's face, hands, or focal gesture.
 
 ### Forbidden in overlays
 

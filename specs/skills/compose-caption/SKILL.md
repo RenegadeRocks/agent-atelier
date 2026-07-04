@@ -9,6 +9,13 @@ The Visual Production Agent's typography step, driving the Caption-Composer serv
 (`caption_compose`, PRD §11.2). The image model renders NO text; we composite all type
 ourselves for brand-exactness + determinism + an OCR-verifiable invariant.
 
+> **Reference implementation:** `tools/reference/paperclip_caption.py` — the PROVEN
+> production compositor from the live Paperclip engine (feathered full-strength scrim,
+> auto-shrinking headline max 3 lines, never-clip kicker auto-fit, wrapping subhead, CTA
+> action line, luminance themes, bottom-anchored brandmark). **Adapt it (fonts/brand values
+> from config — see `tools/reference/README.md`); do not reinvent its geometry** — the
+> constants encode reviewed production taste and real CD root-cause fixes.
+
 Type/theme facts resolve from the Brand Kit: headline `[[HEADLINE_FONT]]`, label/kicker
 `[[LABEL_FONT]]`, logo `[[LOGO_ASSET]]`, wordmark `[[WORDMARK_TEXT]]`, accent-rule gradient
 `[[PALETTE_HEX]]`, dark-photo scrim `[[ACCENT_DARK_BG]]`, light-photo scrim

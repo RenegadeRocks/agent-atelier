@@ -20,6 +20,9 @@ already always-loaded by the tool.
 - `build-view/sections/16-integrations-interfaces-mcp-first.md`  — §16
 - `specs/schemas/mcp_tool_outputs.schema.json`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
 - `specs/schemas/notify_payload.schema.json`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/skills/compose-caption/SKILL.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `specs/canon/visual_engine.md`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
+- `tools/reference/paperclip_caption.py`  — authored artifact (PRE-SEEDED: reconcile against the loaded §§ and extend it — do not author a blind duplicate)
 - `specs/contracts/P1-B.md`  — the ten-field BUNNY contract for this unit
 
 Where the READ-SCOPE names a **subsection** (e.g. §12.2), read only that subsection inside

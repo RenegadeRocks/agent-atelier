@@ -269,7 +269,10 @@
         "build-view/sections/12-review-approval-publishing-system-of-record.md",
         "build-view/sections/16-integrations-interfaces-mcp-first.md",
         "specs/schemas/mcp_tool_outputs.schema.json",
-        "specs/schemas/notify_payload.schema.json"
+        "specs/schemas/notify_payload.schema.json",
+        "specs/skills/compose-caption/SKILL.md",
+        "specs/canon/visual_engine.md",
+        "tools/reference/paperclip_caption.py"
       ],
       "park": "§7, §12.4, §14 — later phases"
     },
