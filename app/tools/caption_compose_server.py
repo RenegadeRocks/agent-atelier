@@ -75,7 +75,6 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
 
     from app.agents import config
     from app.agents.config import ACCENT_COLOR, WORDMARK_TEXT
-    import os
     
     # 2. Add Typography and Layout (Paperclip Compositor Integration)
     margin = int(width * 0.075)
@@ -141,12 +140,24 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     kick_h = 0
     scrim_top = max(0, top_of_text - kick_h - accent_gap - int(height * 0.10))
 
+    # Auto-detect Theme (Light vs Dark) based on lower band luminance
+    box = (0, int(height * 0.6), width, height)
+    region = img.crop(box).convert("L")
+    mean_luminance = sum(region.getdata()) / (region.width * region.height)
+    is_light = mean_luminance > 140
+    theme = "light" if is_light else "dark"
+
+    # Theme Variables
+    cap_alpha = 242 if is_light else 224
+    scrim_col = (250, 246, 239, 255) if is_light else (8, 7, 11, 255)
+    shadow = None if is_light else (0, 0, 0, 150)
+    text_col = (38, 30, 22, 255) if is_light else (255, 252, 247, 255)
+    accent_col = "#B8800E" if is_light else ACCENT_COLOR
+
     # 3. Add Feathered Scrim (Replaces rudimentary gradient)
     grad = Image.new("L", (1, height), 0)
     feather = max(1, int(height * 0.10))
     full_at = scrim_top + feather
-    cap_alpha = 224 # dark theme scrim
-    col = (8, 7, 11, 255) # dark theme color
     
     for yy in range(height):
         if yy < scrim_top: v = 0
@@ -155,7 +166,7 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
         grad.putpixel((0, yy), v)
         
     grad = grad.resize((width, height))
-    sc = Image.new("RGBA", (width, height), col)
+    sc = Image.new("RGBA", (width, height), scrim_col)
     sc.putalpha(grad)
     layer = Image.alpha_composite(layer, sc)
     d = ImageDraw.Draw(layer)
@@ -166,18 +177,17 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     ry = top_of_text - accent_gap
     rule_w = int(width * 0.085)
     rule_h = max(3, int(width * 0.006))
-    d.rectangle([x_left, ry, x_left + rule_w, ry + rule_h], fill=ACCENT_COLOR)
+    d.rectangle([x_left, ry, x_left + rule_w, ry + rule_h], fill=accent_col)
 
     # Headline
     y_text = top_of_text
-    shadow = (0, 0, 0, 150)
-    text_col = (255, 252, 247, 255)
     
     max_text_width = 0
     for ln in lines:
         line_w = d.textlength(ln, font=font)
         max_text_width = max(max_text_width, line_w)
-        d.text((x_left + 2, y_text + 3), ln, font=font, fill=shadow)
+        if shadow:
+            d.text((x_left + 2, y_text + 3), ln, font=font, fill=shadow)
         d.text((x_left, y_text), ln, font=font, fill=text_col)
         y_text += lh
         
@@ -190,7 +200,7 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
         wf = load_font("sans", wf_size)
         ws = spaced(WORDMARK_TEXT, 1)
         wy = height - int(height * 0.045)
-        d.text((x_left, wy), ws, font=wf, fill=ACCENT_COLOR)
+        d.text((x_left, wy), ws, font=wf, fill=accent_col)
 
     img = Image.alpha_composite(img.convert("RGBA"), layer).convert("RGB")
     
@@ -204,6 +214,7 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
         "asset_url": out_path,
         "ocr_text_free": ocr_text_free,
         "scrim_applied": True,
+        "theme": theme,
         "width": width,
         "height": height,
         "short_edge_px": min(width, height),

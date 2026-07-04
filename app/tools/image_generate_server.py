@@ -21,8 +21,8 @@ def image_generate_handle_call_tool(name: str, arguments: dict) -> list[TextCont
     if not prompt:
         raise ValueError("Missing 'prompt' argument.")
         
-    # Inject constraint to enforce text-free E2E generation and channel aspect ratio
-    prompt = f"{prompt}\n\n[SYSTEM CONSTRAINT]: Generate at {CHANNEL_ASPECT_RATIO} aspect ratio. --no text, words, letters, signatures, watermarks. Blank screens/blank signs are fine; no readable glyphs anywhere."
+    # Inject constraints to enforce text-free E2E generation, channel aspect ratio, and composition boundaries
+    prompt = f"{prompt}\n\n[SYSTEM CONSTRAINT]: Generate at {CHANNEL_ASPECT_RATIO} aspect ratio. Compose with the subject in the upper and central area of the frame; keep the lower ~40% of the frame clean, simple background with no important elements — space is reserved there for typography. --no text, words, letters, signatures, watermarks. Blank screens/blank signs are fine; no readable glyphs anywhere."
     
     client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
     

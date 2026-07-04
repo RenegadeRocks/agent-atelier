@@ -173,6 +173,32 @@ def test_caption_compose_layout():
     assert bounds["bottom"] <= output["height"]
 
 
+def test_caption_compose_theme_selection():
+    """Verify that light and dark lower bands trigger the correct typographic theme."""
+    import json
+    from PIL import Image
+    from app.tools.caption_compose_server import caption_compose_handle_call_tool
+
+    def run_theme_test(color, expected_theme):
+        # Create a synthetic image
+        img_path = f"app/tests/evidence/test_theme_{expected_theme}.jpg"
+        Image.new("RGB", (1080, 1350), color).save(img_path)
+
+        args = {
+            "image_url": img_path,
+            "caption": "Testing theme selection"
+        }
+        response = caption_compose_handle_call_tool("caption_compose", args)
+        output = json.loads(response[0].text)
+        assert output["theme"] == expected_theme, f"Expected {expected_theme} theme for {color} image, got {output.get('theme')}"
+
+    # Synthetic Bright Image
+    run_theme_test((250, 250, 250), "light")
+
+    # Synthetic Dark Image
+    run_theme_test((20, 20, 20), "dark")
+
+
 @pytest.mark.live
 def test_p1_b_pipeline_flow():
     """
