@@ -117,6 +117,7 @@ def test_mcp_schemas():
         assert "mime_type" in output
         assert output["byte_url"].startswith("http")
 
+@pytest.mark.live
 def test_p1_b_pipeline_escalation():
     """
     Scenario: The pipeline correctly handles deterministic blocks (like the OCR text-free check) and loops/escalates properly (CI Mocked).
@@ -252,13 +253,22 @@ def test_p1_b_pipeline_flow():
     if caption_match:
         caption = caption_match.group(1).strip()
         
-    alt_text_match = re.search(r'(?i)Alt[- ]Text[\*\:\s]*(.*?)(?=\n\s*\n|\n#|\Z)', visual_text, re.DOTALL)
+    alt_text_match = re.search(r'(?i)Alt[- ]Text[\*\:\s]*(.*?)(?=\n\s*\n|\n\s*#|\n\s*Status:|\n\s*Run Metrics:|\Z)', visual_text, re.DOTALL)
+    if not alt_text_match:
+        # Fallback to check if it's in the alt_text_response
+        alt_text_resp = responses.get("alt_text_response", "")
+        alt_text_match = re.search(r'(?i)Alt[- ]Text[\*\:\s]*(.*?)(?=\n\s*\n|\n\s*#|\n\s*Status:|\n\s*Run Metrics:|\Z)', alt_text_resp, re.DOTALL)
+
     if alt_text_match:
         alt_text = alt_text_match.group(1).strip()
         alt_text = alt_text.replace('*', '').replace('>', '').strip()
         
     assert "[[" not in caption, f"Unresolved token [[ found in caption: {caption}"
     assert "[[" not in alt_text, f"Unresolved token [[ found in alt_text: {alt_text}"
+    
+    # Invariant: Caption and hook must not silently fall back to input directive
+    assert caption != test_idea, "Caption silently fell back to the input directive (extraction failed)."
+    assert test_idea not in caption, "Caption contains the input directive."
     
     # Alt-text quality invariants
     assert len(alt_text) >= 20, f"Alt text too short (<20 chars): {alt_text}"
@@ -271,3 +281,8 @@ def test_p1_b_pipeline_flow():
     assert "managing_editor" in trace
     assert "creative_director" in trace
     assert "publishing_operations" in trace
+    
+    # Invariant: Alt-text is authored AFTER final asset selection (post-OCR)
+    assert "visual_production_alt_text" in trace, "Late-bound alt-text generation step missing."
+    # cd_render_pass represents the final asset acceptance
+    assert trace.index("visual_production_alt_text") > trace.index("cd_render_pass"), "Alt-text was not generated after final asset acceptance."

@@ -99,17 +99,51 @@ async def run_pipeline_async(idea: str) -> dict:
     print(f"[{me.name}] Response:\n{resp}\n")
     
     review_loop_count = 0
+    draft_loop_count = 0
     approved_by_cd = False
+    draft_prompt_suffix = ""
+    
+    # Store extracted fields safely
+    caption = ""
+    idea_sentence = ""
+    hook = ""
+    visual_brief = ""
     
     while review_loop_count <= 2 and not approved_by_cd:
         # [IDEATE+DRAFT]
         evergreen = get_evergreen()
         prompt = f"Draft content based on this plan:\n{responses.get('plan', '')}"
+        if draft_prompt_suffix:
+            prompt += f"\n\nERROR FROM PREVIOUS ATTEMPT: {draft_prompt_suffix}"
+            draft_prompt_suffix = ""
+            
         print(f"[{evergreen.name}] Prompt: {prompt}")
         resp = await run_agent(evergreen, prompt)
         responses["draft"] = resp
         trace.append("evergreen_content")
         print(f"[{evergreen.name}] Response:\n{resp}\n")
+        
+        # Strict Extraction - fail loudly if fields are missing
+        import re
+        caption_match = re.search(r'\*\*Caption:\*\*\s*(.*?)(?=\n\*\*|\Z)', resp, re.DOTALL)
+        idea_sentence_match = re.search(r'\*\*Idea Sentence:\*\*\s*(.*?)(?=\n\*\*|\Z)', resp, re.DOTALL)
+        words_match = re.search(r'\*\*WORDS:\*\*\s*(.*?)(?=\n\*|\n\*\*|\Z)', resp, re.DOTALL)
+        visual_brief_match = re.search(r'\*\*Visual Brief.*?\*\*(.*?)(?=\n\*\*|\Z)', resp, re.DOTALL)
+        
+        if not caption_match or not idea_sentence_match or not words_match or not visual_brief_match:
+            draft_prompt_suffix = "You failed to provide all required fields (**Caption:**, **Idea Sentence:**, **WORDS:**, **Visual Brief:**). You must provide them exactly as formatted."
+            draft_loop_count += 1
+            if draft_loop_count > 2:
+                print("[pipeline] Escalate due to draft formatting limit.")
+                trace.append("escalate_me")
+                return {"status": "Escalated", "trace": trace, "responses": responses}
+            print(f"[pipeline] Draft extraction failed. Bouncing to evergreen. Loop count: {draft_loop_count}/2")
+            continue
+            
+        caption = caption_match.group(1).strip()
+        idea_sentence = idea_sentence_match.group(1).strip()
+        hook = words_match.group(1).strip()
+        visual_brief = visual_brief_match.group(1).strip()
         
         # [RESEARCH STUB]
         research = get_research()
@@ -150,32 +184,9 @@ async def run_pipeline_async(idea: str) -> dict:
     
     while visual_loop_count <= 2 and not visual_approved:
         # [VISUALIZE]
-        draft_text = responses.get('draft', '')
-        # Simple extraction using regex
-        import re
-        
-        caption_match = re.search(r'\*\*Caption:\*\*\s*(.*?)(?=\n\*\*|\Z)', draft_text, re.DOTALL)
-        caption = caption_match.group(1).strip() if caption_match else idea
-        
-        idea_sentence_match = re.search(r'\*\*Idea Sentence:\*\*\s*(.*?)(?=\n\*\*|\Z)', draft_text, re.DOTALL)
-        idea_sentence = idea_sentence_match.group(1).strip() if idea_sentence_match else idea
-        
-        # Extract hook / on-image words from WORDS: field
-        words_match = re.search(r'\*\*WORDS:\*\*\s*(.*?)(?=\n\*|\n\*\*|\Z)', draft_text, re.DOTALL)
-        if words_match:
-            hook = words_match.group(1).strip()
-        else:
-            # Fallback to caption's first line
-            hook = caption.split('\n')[0].split('.')[0] + '.'
-            
-        # visual brief prompt
-        visual_brief_match = re.search(r'\*\*Visual Brief.*?\*\*(.*?)(?=\n\*\*|\Z)', draft_text, re.DOTALL)
-        visual_brief = visual_brief_match.group(1).strip() if visual_brief_match else hook
-        
-        # [VISUALIZE]
         visual = get_visual()
         # Prompt visual agent
-        prompt = f"Create a visual brief and placeholder for this draft:\n{draft_text}"
+        prompt = f"Create a visual brief and placeholder for this draft:\n{responses.get('draft', '')}"
         if visual_prompt_suffix:
             prompt += f"\n\nERROR FROM PREVIOUS ATTEMPT: {visual_prompt_suffix}"
             
@@ -185,19 +196,7 @@ async def run_pipeline_async(idea: str) -> dict:
         trace.append("visual_production")
         print(f"[{visual.name}] Response:\n{resp}\n")
         
-        # Extract alt text from visual agent response. Handle '> **Alt Text:**', '### Alt-Text:', etc.
-        import re
-        alt_text_match = re.search(r'(?i)Alt[- ]Text[\*\:\s]*(.*?)(?=\n\s*\n|\n#|\Z)', resp, re.DOTALL)
-        alt_text = alt_text_match.group(1).strip() if alt_text_match else ""
-        
-        # Clean up any residual formatting characters
-        alt_text = alt_text.replace('*', '').replace('>', '').strip()
-        
-        if not alt_text or "Status" in alt_text or "Task" in alt_text or len(alt_text) < 20 or len(alt_text) > 400:
-            visual_prompt_suffix = "You failed to provide a valid '**Alt Text:**' field (or it contained status chatter/was not 20-300 chars). You MUST provide ONLY the image description under the '**Alt Text:**' heading."
-            visual_loop_count += 1
-            print(f"[pipeline] Alt Text extraction failed. Loop count: {visual_loop_count}/3")
-            continue
+        # Removed early alt-text extraction here. Alt-text is now late-bound.
         
         # Mock MCP integrations for Visualize step
         img_res = image_generate_handle_call_tool("image_generate", {"prompt": visual_brief})
@@ -230,6 +229,19 @@ async def run_pipeline_async(idea: str) -> dict:
         print("[pipeline] Escalate due to visual loop limit.")
         trace.append("escalate_visual")
         return {"status": "Escalated", "trace": trace, "responses": responses}
+
+    # [LATE-BOUND ALT TEXT]
+    visual = get_visual()
+    alt_prompt = f"The final visual asset has been selected and generated based on this brief:\n{visual_brief}\n\nPlease write a brief, 1-2 sentence maximum final '**Alt Text:**' describing this image (strictly 20-350 characters, no status chatter). Do NOT exceed 2 sentences."
+    print(f"[{visual.name}] Alt-Text Prompt: {alt_prompt}")
+    alt_resp = await run_agent(visual, alt_prompt)
+    responses["alt_text_response"] = alt_resp
+    trace.append("visual_production_alt_text")
+    
+    import re
+    alt_text_match = re.search(r'(?i)Alt[- ]Text[\*\:\s]*(.*?)(?=\n\s*\n|\n\s*#|\n\s*Status:|\n\s*Run Metrics:|\Z)', alt_resp, re.DOTALL)
+    alt_text = alt_text_match.group(1).strip() if alt_text_match else ""
+    alt_text = alt_text.replace('*', '').replace('>', '').strip()
 
     # [QUEUE]
     ops = get_ops()
