@@ -8,7 +8,7 @@ from google import genai
 from google.genai import types
 
 load_dotenv()
-from app.agents.config import IMAGE_MODEL_ID
+from app.agents.config import IMAGE_MODEL_ID, CHANNEL_ASPECT_RATIO
 
 server = FastMCP(name="image_generate")
 
@@ -21,6 +21,9 @@ def image_generate_handle_call_tool(name: str, arguments: dict) -> list[TextCont
     if not prompt:
         raise ValueError("Missing 'prompt' argument.")
         
+    # Inject constraint to enforce text-free E2E generation and channel aspect ratio
+    prompt = f"{prompt}\n\n[SYSTEM CONSTRAINT]: Generate at {CHANNEL_ASPECT_RATIO} aspect ratio. --no text, words, letters, signatures, watermarks. Blank screens/blank signs are fine; no readable glyphs anywhere."
+    
     client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
     
     print(f"[MCP image_generate] Real generating image with model {IMAGE_MODEL_ID}...")

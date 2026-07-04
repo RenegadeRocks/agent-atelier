@@ -162,6 +162,10 @@ def test_caption_compose_layout():
     assert "text_bounds" in output, "Bounding box missing from output"
     bounds = output["text_bounds"]
     
+    # Assert dimensions are strictly enforced
+    assert output["width"] == 1080
+    assert output["height"] == 1350
+    
     # Assert text lies fully inside the image bounds
     assert bounds["left"] >= 0
     assert bounds["right"] <= output["width"]
@@ -176,7 +180,7 @@ def test_p1_b_pipeline_flow():
     Scenario: A final piece successfully lands in the REAL Google Sheets queue and Drive via Real API MCPs.
     """
     # Real organic ideation prompt for the hard-coded brand
-    test_idea = "Generate a brand new evergreen piece for our rotation based on the brand kit's mission and audience. CRITICAL: The visual concept must be a physical object or nature scene (e.g. an apple, a desk, a tool). Absolutely NO screens, phones, books, UI elements, or signs, to guarantee 0% text in the generated image."
+    test_idea = "Generate a brand new evergreen piece for our rotation based on the brand kit's mission and audience."
     
     result = run_pipeline(test_idea)
     

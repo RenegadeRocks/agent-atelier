@@ -13,6 +13,11 @@ FLASH_MODEL = "gemini-flash-latest"
 # Visual Production - Real Image Model (Discovered via models.list(), gemini-3-pro-image gave 404 for generate_images)
 IMAGE_MODEL_ID = "gemini-3-pro-image"
 
+# Channel Targets
+CHANNEL_ASPECT_RATIO = "4:5"
+CHANNEL_TARGET_WIDTH = 1080
+CHANNEL_TARGET_HEIGHT = 1350
+
 # System of Record Identifiers (Configured externally)
 SHEET_ID = "1OZIBoTSzuBVGRCb-ZxLIh-OKKD1XCCrRfLaP5s7CmVQ"
 DRIVE_FOLDER_ID = "1TIXJCpo6rb0MBIx4liYITIZJdYsGimZf"

@@ -21,6 +21,11 @@ done + authorized, clear it and tick the contract in `BUILD-STATUS.md`.
 - **Last commit:** State machine pipeline + MCP tool simulation + P1-B Tests.
 - **Machine last worked on:** Office/Home (Leaving)
 
+## DEVIATION LOG
+- **[Date: 2026-07-04] Reverted physical object subject ban**: A product-content rule ("must be physical object, no screens/signs") was incorrectly injected into the test pipeline prompt to dodge the OCR loop. This was a deviation from the visual engine mandate (treatment should be driven by the message). It has been reverted. The pipeline now correctly relies on the text-free constraint appended to the image generation prompt and the OCR loop to enforce text-free images.
+- **[Date: 2026-07-04] Font Fidelity**: Using `arialbd.ttf` (or system default) as an open-source stand-in for brand fonts during caption composition.
+- **[Date: 2026-07-04] Image Target Backend**: Using Google Cloud Storage backend for the Drive tool due to service-account storage quota limits on the consumer Drive account.
+
 ---
 
 ### Template (copy the shape above)

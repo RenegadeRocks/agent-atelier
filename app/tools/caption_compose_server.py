@@ -50,24 +50,40 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     # Load image with Pillow
     img = Image.open(image_path)
     
-    # 1. Enforce >=1080px short edge
+    # 1. Enforce Channel Aspect Ratio & Dimensions
+    from app.agents.config import CHANNEL_TARGET_WIDTH, CHANNEL_TARGET_HEIGHT
+    
     width, height = img.size
-    short_edge = min(width, height)
-    if short_edge < 1080:
-        scale = 1080 / short_edge
-        new_width = int(width * scale)
-        new_height = int(height * scale)
-        img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-        width, height = img.size
+    target_ratio = CHANNEL_TARGET_WIDTH / CHANNEL_TARGET_HEIGHT
+    img_ratio = width / height
+    
+    if abs(img_ratio - target_ratio) > 0.01:
+        if img_ratio > target_ratio:
+            # Too wide, crop width
+            new_width = int(height * target_ratio)
+            left = (width - new_width) // 2
+            img = img.crop((left, 0, left + new_width, height))
+        else:
+            # Too tall, crop height
+            new_height = int(width / target_ratio)
+            top = (height - new_height) // 2
+            img = img.crop((0, top, width, top + new_height))
+            
+    # Resize exactly to target
+    img = img.resize((CHANNEL_TARGET_WIDTH, CHANNEL_TARGET_HEIGHT), Image.Resampling.LANCZOS)
+    width, height = img.size
 
     # 2. Add Typography and Layout
     draw = ImageDraw.Draw(img)
+    # Enforce minimum font size (~4.5% of height)
+    min_font_size = max(int(height * 0.045), 60)
+    font_size = min_font_size + 10 # start a bit larger
+    
     try:
-        # Load default font with size (supported in pinned Pillow)
-        font_size = 40
-        font = ImageFont.load_default(size=font_size)
+        # Bold stand-in weight
+        font = ImageFont.truetype("arialbd.ttf", size=font_size)
     except:
-        font = ImageFont.load_default()
+        font = ImageFont.load_default(size=font_size)
 
     margin = int(width * 0.08) # 8% padding
     safe_width = width - (2 * margin)
@@ -100,10 +116,13 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     line_spacing = int(line_height * 0.3)
     text_block_height = (len(wrapped_lines) * line_height) + ((len(wrapped_lines) - 1) * line_spacing)
     
-    # If text is too tall, we scale font (simplified fallback logic)
+    # If text is too tall, scale font down to floor
     if text_block_height > (height * 0.4):
-        font_size = 30
-        font = ImageFont.load_default(size=font_size)
+        font_size = min_font_size
+        try:
+            font = ImageFont.truetype("arialbd.ttf", size=font_size)
+        except:
+            font = ImageFont.load_default(size=font_size)
         wrapped_lines = wrap_text(caption, font, safe_width)
         line_height = font.getbbox("A")[3] - font.getbbox("A")[1]
         line_spacing = int(line_height * 0.3)
@@ -115,7 +134,7 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     
     scrim_height = text_block_height + (margin * 2) # Scrim covers text + bottom margin + top margin
     for i in range(scrim_height):
-        alpha = int(255 * (i / scrim_height) * 0.8) # max 80% opacity at the bottom
+        alpha = int(255 * (i / scrim_height) * 0.85) # Very high contrast (85% opacity) at bottom
         y = height - scrim_height + i
         scrim_draw.line([(0, y), (width, y)], fill=(0, 0, 0, alpha))
         
@@ -129,7 +148,11 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     for line in wrapped_lines:
         line_w = font.getbbox(line)[2] - font.getbbox(line)[0]
         max_text_width = max(max_text_width, line_w)
-        draw.text((margin, y_text), line, font=font, fill=(255, 255, 255, 255))
+        # Try to use stroke if the font is default to simulate boldness
+        try:
+            draw.text((margin, y_text), line, font=font, fill=(255, 255, 255, 255), stroke_width=1, stroke_fill=(255, 255, 255, 255))
+        except:
+            draw.text((margin, y_text), line, font=font, fill=(255, 255, 255, 255))
         y_text += line_height + line_spacing
     
     img = img.convert('RGB')
