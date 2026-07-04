@@ -25,7 +25,7 @@ done + authorized, clear it and tick the contract in `BUILD-STATUS.md`.
 - **[Date: 2026-07-04] Reverted physical object subject ban**: A product-content rule ("must be physical object, no screens/signs") was incorrectly injected into the test pipeline prompt to dodge the OCR loop. This was a deviation from the visual engine mandate (treatment should be driven by the message). It has been reverted. The pipeline now correctly relies on the text-free constraint appended to the image generation prompt and the OCR loop to enforce text-free images.
 - **[Date: 2026-07-04] Font Fidelity**: Using `arialbd.ttf` (or system default) as an open-source stand-in for brand fonts during caption composition.
 - **[Date: 2026-07-04] Image Target Backend**: Using Google Cloud Storage backend for the Drive tool due to service-account storage quota limits on the consumer Drive account.
-
+- **[Date: 2026-07-04] Token Resolution Stub**: Added a hard-coded `TEST_BRAND_MAP` and substitution function applied at prompt assembly so agents don't emit `[[TOKENS]]`. The P1 contracts state brand facts are hard-coded until P2-A. The true dynamic Brand Kit resolver will replace this temporary stub at P2-A.
 ---
 
 ### Template (copy the shape above)

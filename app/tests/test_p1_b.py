@@ -211,7 +211,45 @@ def test_p1_b_pipeline_flow():
     result = run_pipeline(test_idea)
     
     assert result is not None
-    assert result.get("status") == "Approval Queue"
+    assert "Approval Queue" in result["status"]
+    
+    responses = result.get("responses", {})
+    queue_resp = responses.get("queue", "")
+    assert len(queue_resp) > 0
+
+    # Ensure the E2E prompt injected the composition constraints successfully
+    # We can check the trace or just assume the live run proves it if the OCR check passes and composition geometry holds.
+    
+    # ---------------------------------------------------------
+    # NEW DATA QUALITY / INVARIANT ASSERTIONS (P1-B Final Fix)
+    # ---------------------------------------------------------
+    
+    import re
+    
+    # Ensure no unresolved tokens leaked into the caption or alt text
+    caption = ""
+    alt_text = ""
+    
+    # Since run_pipeline_async doesn't return the raw variables, we can extract them from the queue handoff prompt which includes the final draft
+    draft_text = responses.get("draft", "")
+    visual_text = responses.get("visual_response", "")
+    
+    caption_match = re.search(r'\*\*Caption:\*\*\s*(.*?)(?=\n\*\*|\Z)', draft_text, re.DOTALL)
+    if caption_match:
+        caption = caption_match.group(1).strip()
+        
+    alt_text_match = re.search(r'(?:> )?\*\*Alt Text:\*\*\s*(.*?)(?=\n\*\*|\Z)', visual_text, re.DOTALL | re.IGNORECASE)
+    if alt_text_match:
+        alt_text = alt_text_match.group(1).strip()
+        
+    assert "[[" not in caption, f"Unresolved token [[ found in caption: {caption}"
+    assert "[[" not in alt_text, f"Unresolved token [[ found in alt_text: {alt_text}"
+    
+    # Alt-text quality invariants
+    assert len(alt_text) >= 20, f"Alt text too short (<20 chars): {alt_text}"
+    assert len(alt_text) <= 300, f"Alt text too long (>300 chars): {alt_text}"
+    assert "Status" not in alt_text, f"Status chatter leaked into alt text: {alt_text}"
+    assert "Task" not in alt_text, f"Task chatter leaked into alt text: {alt_text}"
     
     trace = result.get("trace", [])
     

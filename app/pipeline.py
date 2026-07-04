@@ -21,7 +21,55 @@ import uuid
 
 load_dotenv()
 
+TEST_BRAND_MAP = {
+    "[[BRAND_NAME]]": "Agent Atelier",
+    "[[BRAND_SHORT_NAME]]": "Atelier",
+    "[[EVERGREEN_PILLARS]]": "Operational Efficiency, AI Automation, Future of Work",
+    "[[EVERGREEN_PILLARS_1]]": "Operational Efficiency",
+    "[[CHANNELS]]": "Instagram, LinkedIn",
+    "[[VOICE_DESCRIPTORS]]": "Sharp, pragmatic, mildly contrarian",
+    "[[AUDIENCE_PERSONA]]": "Agency owners and cafe managers",
+    "[[AUDIENCE_PAINS]]": "Margin compression and operational chaos",
+    "[[MISSION]]": "Agent Atelier builds autonomous teams to reclaim human time.",
+    "[[LOCAL_DETAIL_BANK]]": "the fourth cold cup of coffee, the 4:05 PM sink dump",
+    "[[SCROLL_TEST_PERSONA]]": "a stressed manager scrolling during a brief break",
+    "[[LANGUAGES]]": "English",
+    "[[STANDING_WEEK]]": "Monday-Friday",
+    "[[CONTACT_WHATSAPP]]": "wa.me/agentatelier",
+    "[[CONTACT_INSTAGRAM]]": "@agentatelier",
+    "[[CTA_STYLE]]": "Soft hook, link in bio",
+    "[[OFFERINGS]]": "Full-service AI Ops",
+    "[[OFFERING_ID]]": "OPS-01",
+    "[[CLAIM_REVERIFY_MONTHS]]": "6",
+    "[[REQUIRE_SECOND_SOURCE_FOR_QUANTITATIVE]]": "True",
+    "[[IMAGE_PROVIDER]]": "Gemini native",
+    "[[IMAGE_QUALITY_TIER]]": "High",
+    "[[CLAIMS_ALLOWED]]": "General observations",
+    "[[CLAIMS_FORBIDDEN]]": "Guaranteed ROI",
+    "[[NON_DISCLOSURE_RULES]]": "No client names without consent",
+    "[[REQUIRED_FRAMING]]": "Actionable optimism",
+    "[[COMPARATIVE_CLAIMS_ALLOWED]]": "False",
+    "[[POLITICAL_CONTENT_ALLOWED]]": "False",
+    "[[CTA_FORBIDDEN_PHRASES]]": "Buy now, act fast",
+    "[[SOURCE_ALLOWLIST]]": "Primary research, reputable journals",
+    "[[SOURCE_DENYLIST]]": "Wikipedia, unverified blogs",
+    "[[POSTS_PER_WEEK_TARGET]]": "3",
+    "[[MAX_POSTS_PER_WEEK]]": "5",
+    "[[RESEARCH_POST_MIN_PER_WEEK]]": "1",
+}
+
+def resolve_tokens(text: str) -> str:
+    if not text: return text
+    for k in sorted(TEST_BRAND_MAP.keys(), key=len, reverse=True):
+        text = text.replace(k, TEST_BRAND_MAP[k])
+    import re
+    text = re.sub(r'\[\[(.*?)\]\]', r'\1', text)
+    return text
+
 async def run_agent(agent, prompt: str) -> str:
+    agent.instruction = resolve_tokens(agent.instruction) + "\n\nCRITICAL: Square-bracket tokens like [[TOKEN]] must NEVER appear in your output."
+    prompt = resolve_tokens(prompt)
+    
     runner = runners.InMemoryRunner(agent=agent)
     events = await runner.run_debug(prompt, quiet=True)
     output_text = ""
@@ -98,6 +146,7 @@ async def run_pipeline_async(idea: str) -> dict:
 
     visual_loop_count = 0
     visual_approved = False
+    visual_prompt_suffix = ""
     
     while visual_loop_count <= 2 and not visual_approved:
         # [VISUALIZE]
@@ -127,6 +176,9 @@ async def run_pipeline_async(idea: str) -> dict:
         visual = get_visual()
         # Prompt visual agent
         prompt = f"Create a visual brief and placeholder for this draft:\n{draft_text}"
+        if visual_prompt_suffix:
+            prompt += f"\n\nERROR FROM PREVIOUS ATTEMPT: {visual_prompt_suffix}"
+            
         print(f"[{visual.name}] Prompt: {prompt}")
         resp = await run_agent(visual, prompt)
         responses["visual_response"] = resp
@@ -134,8 +186,17 @@ async def run_pipeline_async(idea: str) -> dict:
         print(f"[{visual.name}] Response:\n{resp}\n")
         
         # Extract alt text from visual agent response
-        alt_text_match = re.search(r'(?:> )?\*\*Alt Text:\*\*\s*(.*?)(?=\n\*\*|\Z)', resp, re.DOTALL | re.IGNORECASE)
-        alt_text = alt_text_match.group(1).strip() if alt_text_match else "Generated visual asset."
+        alt_text_match = re.search(r'(?i)(?:### |> |\*\*|^|\n)\s*Alt[- ]Text:?\*?\s*(.*?)(?=\n\s*\n|\n#|\n\*\*|\Z)', resp, re.DOTALL)
+        alt_text = alt_text_match.group(1).strip() if alt_text_match else ""
+        
+        # Clean up any residual asterisks in case of loose match
+        alt_text = alt_text.replace('*', '').strip()
+        
+        if not alt_text or "Status" in alt_text or "Task" in alt_text or len(alt_text) < 20 or len(alt_text) > 300:
+            visual_prompt_suffix = "You failed to provide a valid '**Alt Text:**' field (or it contained status chatter/was not 20-300 chars). You MUST provide ONLY the image description under the '**Alt Text:**' heading."
+            visual_loop_count += 1
+            print(f"[pipeline] Alt Text extraction failed. Loop count: {visual_loop_count}/3")
+            continue
         
         # Mock MCP integrations for Visualize step
         img_res = image_generate_handle_call_tool("image_generate", {"prompt": visual_brief})
@@ -148,6 +209,7 @@ async def run_pipeline_async(idea: str) -> dict:
         comp_out = json.loads(comp_res[0].text)
         
         if not comp_out["ocr_text_free"]:
+            visual_prompt_suffix = "The generated image contained legible text. You must adjust your Visual Brief to explicitly request no text, words, or typography."
             visual_loop_count += 1
             print(f"[pipeline] OCR check failed (baked_glyph). Loop count: {visual_loop_count}/3")
             continue # Try again
