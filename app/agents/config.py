@@ -5,10 +5,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Pinned models (do not auto-switch per PRD §14.3 and §18.2)
-# RE-CHECK: if a stable gemini-3.1-pro (non-preview) is released before the demo recording, update this pin.
+# Security & Determinism (build-protocol §18.2): Pin exact models
+# Using gemini-3.1-pro-preview based on models.list() discovery
 REASONING_MODEL = "gemini-3.1-pro-preview"
 FLASH_MODEL = "gemini-flash-latest"
+
+# Visual Production - Real Image Model (Discovered via models.list(), gemini-3-pro-image gave 404 for generate_images)
+IMAGE_MODEL_ID = "imagen-4.0-generate-001"
+
+# System of Record Identifiers (Configured externally)
+SHEET_ID = "1OZIBoTSzuBVGRCb-ZxLIh-OKKD1XCCrRfLaP5s7CmVQ"
+DRIVE_FOLDER_ID = "1TIXJCpo6rb0MBIx4liYITIZJdYsGimZf"
+
+USE_GCS_FOR_VISUALS = True
+GCS_BUCKET_NAME = "agent-atelier-assets-satbir"
+
+# Thresholds
+LINT_MATCH_THRESHOLD = 90
 
 def validate_models_on_startup():
     try:

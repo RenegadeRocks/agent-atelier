@@ -3,7 +3,7 @@
 The live build checklist. **Update it at every contract hand-off** (build-protocol §1.7).
 Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-and-proceed.
 
-> **▶ NEXT CONTRACT: P1-B** — run `.agents/workflows/build-P1-B.md`.
+> **▶ NEXT CONTRACT: P2-A** — run `.agents/workflows/build-P2-A.md`.
 
 ## Contracts (P0 → P6)
 
@@ -11,7 +11,7 @@ Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-a
 |---|----------|-------|--------|--------------|
 | 1 | P0   | 0 | ✅ verified + committed + authorized | CI green on stubs; structure approved |
 | 2 | P1-A | 1 | ✅ verified + committed + authorized | one idea flows through all six agents, in role |
-| 3 | P1-B | 1 | ⬜ | one on-brand piece passes both gates + the linter → lands in the Sheets queue |
+| 3 | P1-B | 1 | ✅ verified + committed + authorized | one on-brand piece passes both gates + the linter → lands in the Sheets queue |
 | 4 | P2-A | 2 | ⬜ | P1 brand runs entirely from `brand_kit.yaml`; a 2nd toy brand via kit only; missing-var blocks |
 | 5 | P2-B | 2 | ⬜ | new brand onboarded by interview, zero code changes, produces a piece |
 | 6 | P3   | 3 | ⬜ | a full week auto-plans/drafts/reviews/queues; rotation-violating draft rejected pre-CD; §9.5 backpressure pause |
