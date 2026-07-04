@@ -20,6 +20,7 @@ def test_p1_a_pipeline_flow():
     # We will expand this as we build the ADK agents to verify their outputs.
     assert "managing_editor" in result.get("trace", [])
     assert "evergreen_content" in result.get("trace", [])
+    assert "research_verification" in result.get("trace", [])
     assert "ledger_lint_stub" in result.get("trace", [])
     assert "creative_director" in result.get("trace", [])
     assert "visual_production" in result.get("trace", [])

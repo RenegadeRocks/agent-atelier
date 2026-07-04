@@ -50,6 +50,15 @@ async def run_pipeline_async(idea: str) -> dict:
     trace.append("evergreen_content")
     print(f"[{evergreen.name}] Response:\n{resp}\n")
     
+    # 2.25 RESEARCH
+    research = get_research()
+    prompt = f"Verify claims for this draft:\n{responses.get('draft', '')}"
+    print(f"[{research.name}] Prompt: {prompt}")
+    resp = await run_agent(research, prompt)
+    responses["research"] = resp
+    trace.append("research_verification")
+    print(f"[{research.name}] Response:\n{resp}\n")
+    
     # 2.5 LINT STUB
     trace.append("ledger_lint_stub")
     print(f"[ledger_lint_stub] Linter passed.\n")

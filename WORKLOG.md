@@ -13,7 +13,7 @@ done + authorized, clear it and tick the contract in `BUILD-STATUS.md`.
 ## Current
 
 - **Contract:** P1-A (Done)
-- **Sub-tasks done:** Created tests, implemented ADK core agents, wired pipeline handoffs, pinned models securely in `config.py` with runtime validation, and configured CI to auto-skip live tests via `conftest.py`.
+- **Sub-tasks done:** Created tests, implemented ADK core agents, wired pipeline handoffs, pinned models securely in `config.py` with runtime validation, and configured CI to auto-skip live tests via `conftest.py`. Added missing `research_verification` agent to pipeline. Captured trace to `app/tests/evidence/p1a_pipeline_run.txt`.
 - **Sub-tasks remaining:** None for P1-A.
 - **Current file state / where the code is:** `app/agents/` and `specs/agents/` populated. Pipeline is wired. `app/tests/test_p1_a.py` is green and CI is configured correctly.
 - **▶ NEXT ACTION (the one thing to do on resume):** Run `.agents/workflows/build-P1-B.md`.
