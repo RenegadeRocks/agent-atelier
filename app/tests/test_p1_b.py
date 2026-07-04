@@ -156,8 +156,14 @@ def test_caption_compose_layout():
     
     # We must use the REAL server implementation for this deterministic test, not the mock
     import app.tools.caption_compose_server as ccs
-    res = ccs.caption_compose_handle_call_tool("caption_compose", {"image_url": test_img_path, "caption": long_text})
-    output = json.loads(res[0].text)
+    
+    original_ocr_checker = ccs.ocr_checker
+    try:
+        ccs.ocr_checker = lambda path: True
+        res = ccs.caption_compose_handle_call_tool("caption_compose", {"image_url": test_img_path, "caption": long_text})
+        output = json.loads(res[0].text)
+    finally:
+        ccs.ocr_checker = original_ocr_checker
     
     assert "text_bounds" in output, "Bounding box missing from output"
     bounds = output["text_bounds"]
@@ -188,7 +194,15 @@ def test_caption_compose_theme_selection():
             "image_url": img_path,
             "caption": "Testing theme selection"
         }
-        response = caption_compose_handle_call_tool("caption_compose", args)
+        
+        import app.tools.caption_compose_server as ccs
+        original_ocr_checker = ccs.ocr_checker
+        try:
+            ccs.ocr_checker = lambda path: True
+            response = ccs.caption_compose_handle_call_tool("caption_compose", args)
+        finally:
+            ccs.ocr_checker = original_ocr_checker
+            
         output = json.loads(response[0].text)
         assert output["theme"] == expected_theme, f"Expected {expected_theme} theme for {color} image, got {output.get('theme')}"
 

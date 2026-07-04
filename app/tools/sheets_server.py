@@ -9,7 +9,12 @@ load_dotenv()
 from app.agents.config import SHEET_ID
 
 server = FastMCP(name="sheets")
+server.tool_name = "sheets"
 
+from pathlib import Path
+schema_path = Path(__file__).parent.parent.parent / "specs" / "schemas" / "mcp_tool_outputs.schema.json"
+with open(schema_path) as f:
+    server.declared_output_schema = json.load(f)["properties"]["tools"]["properties"]["sheets"]
 @server.tool()
 def sheets_handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
     if name != "sheets":

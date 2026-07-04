@@ -11,6 +11,37 @@ load_dotenv()
 from app.agents.config import REASONING_MODEL
 
 server = FastMCP(name="caption_compose")
+server.tool_name = "caption_compose"
+
+# Attach declared output schema for P0 compatibility
+from pathlib import Path
+schema_path = Path(__file__).parent.parent.parent / "specs" / "schemas" / "mcp_tool_outputs.schema.json"
+with open(schema_path) as f:
+    server.declared_output_schema = json.load(f)["properties"]["tools"]["properties"]["caption_compose"]
+def default_ocr_checker(image_path: str) -> bool:
+    client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
+    with open(image_path, "rb") as f:
+        img_bytes = f.read()
+
+    print("[MCP caption_compose] Running OCR text-free check via Gemini Vision...")
+    response = client.models.generate_content(
+        model=REASONING_MODEL,
+        contents=[
+            "Extract any text you see in this image. Do not describe the image. If there are words, output them exactly. If the image is completely free of letters, words, and text, output exactly the string 'NO_TEXT'.",
+            types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg")
+        ]
+    )
+    
+    ocr_result = response.text.strip()
+    ocr_text_free = ("NO_TEXT" in ocr_result) or (len(ocr_result) == 0)
+    
+    if not ocr_text_free:
+        print(f"[MCP caption_compose] OCR Flagged Text: {ocr_result}")
+        
+    return ocr_text_free
+
+# Module-level variable to allow dependency injection during tests
+ocr_checker = default_ocr_checker
 
 @server.tool()
 def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
@@ -25,27 +56,8 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
         
     print(f"[MCP caption_compose] Processing {image_path}...")
 
-    # OCR Check via Gemini Vision
-    client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
-    
-    with open(image_path, "rb") as f:
-        img_bytes = f.read()
-
-    print("[MCP caption_compose] Running OCR text-free check via Gemini Vision...")
-    response = client.models.generate_content(
-        model=REASONING_MODEL,
-        contents=[
-            "Extract any text you see in this image. Do not describe the image. If there are words, output them exactly. If the image is completely free of letters, words, and text, output exactly the string 'NO_TEXT'.",
-            types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg")
-        ]
-    )
-    
-    ocr_result = response.text.strip()
-    # Since LLMs can be wordy, check if it strictly said NO_TEXT or if it's empty
-    ocr_text_free = ("NO_TEXT" in ocr_result) or (len(ocr_result) == 0)
-    
-    if not ocr_text_free:
-        print(f"[MCP caption_compose] OCR Flagged Text: {ocr_result}")
+    # OCR Check via injected dependency
+    ocr_text_free = ocr_checker(image_path)
 
     # Load image with Pillow
     img = Image.open(image_path)

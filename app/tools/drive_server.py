@@ -11,7 +11,13 @@ from google.cloud import storage
 
 from app.agents import config
 
-server = FastMCP("drive_mcp_server")
+server = FastMCP(name="drive")
+server.tool_name = "drive"
+
+from pathlib import Path
+schema_path = Path(__file__).parent.parent.parent / "specs" / "schemas" / "mcp_tool_outputs.schema.json"
+with open(schema_path) as f:
+    server.declared_output_schema = json.load(f)["properties"]["tools"]["properties"]["drive"]
 
 def get_credentials():
     creds_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
