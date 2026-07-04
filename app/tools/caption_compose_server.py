@@ -73,89 +73,112 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     img = img.resize((CHANNEL_TARGET_WIDTH, CHANNEL_TARGET_HEIGHT), Image.Resampling.LANCZOS)
     width, height = img.size
 
-    # 2. Add Typography and Layout
-    draw = ImageDraw.Draw(img)
-    # Enforce minimum font size (~4.5% of height)
-    min_font_size = max(int(height * 0.045), 60)
-    font_size = min_font_size + 10 # start a bit larger
+    from app.agents.config import ACCENT_COLOR, WORDMARK_TEXT
     
-    try:
-        # Bold stand-in weight
-        font = ImageFont.truetype("arialbd.ttf", size=font_size)
-    except:
-        font = ImageFont.load_default(size=font_size)
+    # 2. Add Typography and Layout (Paperclip Compositor Integration)
+    margin = int(width * 0.075)
+    max_w = width - 2 * margin
+    size = int(width * 0.072)
 
-    margin = int(width * 0.08) # 8% padding
-    safe_width = width - (2 * margin)
-    
-    # Helper to wrap text
-    def wrap_text(text, font, max_width):
-        lines = []
-        for paragraph in text.split('\n'):
-            words = paragraph.split(' ')
-            current_line = []
-            for word in words:
-                test_line = ' '.join(current_line + [word]) if current_line else word
-                bbox = font.getbbox(test_line)
-                w = bbox[2] - bbox[0]
-                if w <= max_width:
-                    current_line.append(word)
-                else:
-                    if current_line:
-                        lines.append(' '.join(current_line))
-                    current_line = [word]
-            if current_line:
-                lines.append(' '.join(current_line))
+    def load_font(font_path, font_size):
+        try:
+            return ImageFont.truetype(font_path, font_size)
+        except Exception as e:
+            print(f"Font load error ({font_path}): {e}")
+            raise RuntimeError(f"BANNED: Failed to load {font_path}. ImageFont.load_default() is prohibited.")
+
+    headline_font_path = "C:\\Windows\\Fonts\\georgiab.ttf"
+    sans_font_path = "C:\\Windows\\Fonts\\arial.ttf"
+
+    def wrap(draw, text, font, max_w):
+        words, lines, cur = text.split(), [], ""
+        for w in words:
+            t = (cur + " " + w).strip()
+            if draw.textlength(t, font=font) <= max_w: cur = t
+            else:
+                if cur: lines.append(cur)
+                cur = w
+        if cur: lines.append(cur)
         return lines
 
-    # Wrap the text
-    wrapped_lines = wrap_text(caption, font, safe_width)
+    layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    font = load_font(headline_font_path, size)
     
-    # Calculate text block height
-    line_height = font.getbbox("A")[3] - font.getbbox("A")[1]
-    line_spacing = int(line_height * 0.3)
-    text_block_height = (len(wrapped_lines) * line_height) + ((len(wrapped_lines) - 1) * line_spacing)
+    # Normalize the caption to replace actual newlines with spaces for natural wrapping
+    normalized_caption = " ".join(caption.split())
+    lines = wrap(d, normalized_caption, font, max_w)
     
-    # If text is too tall, scale font down to floor
-    if text_block_height > (height * 0.4):
-        font_size = min_font_size
-        try:
-            font = ImageFont.truetype("arialbd.ttf", size=font_size)
-        except:
-            font = ImageFont.load_default(size=font_size)
-        wrapped_lines = wrap_text(caption, font, safe_width)
-        line_height = font.getbbox("A")[3] - font.getbbox("A")[1]
-        line_spacing = int(line_height * 0.3)
-        text_block_height = (len(wrapped_lines) * line_height) + ((len(wrapped_lines) - 1) * line_spacing)
+    # Auto-shrink headline if too many lines
+    while len(lines) > 3 and size > 30:
+        size -= 4
+        font = load_font(headline_font_path, size)
+        lines = wrap(d, normalized_caption, font, max_w)
 
-    # 3. Add Scrim dynamically sized to cover text block + padding
-    scrim = Image.new('RGBA', img.size, (0, 0, 0, 0))
-    scrim_draw = ImageDraw.Draw(scrim)
+    asc, desc = font.getmetrics()
+    lh = int((asc + desc) * 1.06)
+    block_h = lh * len(lines)
+
+    # Wordmark padding
+    wm_h = int(width * 0.05) if WORDMARK_TEXT else 0
+    bottom_pad = int(height * 0.055) + wm_h
+    top_of_text = height - bottom_pad - block_h
+    accent_gap = int(width * 0.022)
+    kick_h = 0
+    scrim_top = max(0, top_of_text - kick_h - accent_gap - int(height * 0.10))
+
+    # 3. Add Feathered Scrim (Replaces rudimentary gradient)
+    grad = Image.new("L", (1, height), 0)
+    feather = max(1, int(height * 0.10))
+    full_at = scrim_top + feather
+    cap_alpha = 224 # dark theme scrim
+    col = (8, 7, 11, 255) # dark theme color
     
-    scrim_height = text_block_height + (margin * 2) # Scrim covers text + bottom margin + top margin
-    for i in range(scrim_height):
-        alpha = int(255 * (i / scrim_height) * 0.85) # Very high contrast (85% opacity) at bottom
-        y = height - scrim_height + i
-        scrim_draw.line([(0, y), (width, y)], fill=(0, 0, 0, alpha))
+    for yy in range(height):
+        if yy < scrim_top: v = 0
+        elif yy < full_at: v = int(((yy - scrim_top) / feather) * cap_alpha)
+        else: v = cap_alpha
+        grad.putpixel((0, yy), v)
         
-    img = img.convert('RGBA')
-    img = Image.alpha_composite(img, scrim)
+    grad = grad.resize((width, height))
+    sc = Image.new("RGBA", (width, height), col)
+    sc.putalpha(grad)
+    layer = Image.alpha_composite(layer, sc)
+    d = ImageDraw.Draw(layer)
+
+    x_left = margin
     
-    # Draw text
-    draw = ImageDraw.Draw(img)
-    y_text = height - margin - text_block_height
+    # Accent rule
+    ry = top_of_text - accent_gap
+    rule_w = int(width * 0.085)
+    rule_h = max(3, int(width * 0.006))
+    d.rectangle([x_left, ry, x_left + rule_w, ry + rule_h], fill=ACCENT_COLOR)
+
+    # Headline
+    y_text = top_of_text
+    shadow = (0, 0, 0, 150)
+    text_col = (255, 252, 247, 255)
+    
     max_text_width = 0
-    for line in wrapped_lines:
-        line_w = font.getbbox(line)[2] - font.getbbox(line)[0]
+    for ln in lines:
+        line_w = d.textlength(ln, font=font)
         max_text_width = max(max_text_width, line_w)
-        # Try to use stroke if the font is default to simulate boldness
-        try:
-            draw.text((margin, y_text), line, font=font, fill=(255, 255, 255, 255), stroke_width=1, stroke_fill=(255, 255, 255, 255))
-        except:
-            draw.text((margin, y_text), line, font=font, fill=(255, 255, 255, 255))
-        y_text += line_height + line_spacing
-    
-    img = img.convert('RGB')
+        d.text((x_left + 2, y_text + 3), ln, font=font, fill=shadow)
+        d.text((x_left, y_text), ln, font=font, fill=text_col)
+        y_text += lh
+        
+    # Wordmark pinned to bottom
+    if WORDMARK_TEXT:
+        def spaced(s, n=1):
+            return (" " * n).join(list(s.upper()))
+            
+        wf_size = int(width * 0.0225)
+        wf = load_font(sans_font_path, wf_size)
+        ws = spaced(WORDMARK_TEXT, 1)
+        wy = height - int(height * 0.045)
+        d.text((x_left, wy), ws, font=wf, fill=ACCENT_COLOR)
+
+    img = Image.alpha_composite(img.convert("RGBA"), layer).convert("RGB")
     
     out_path = image_path.replace("gen_", "composited_")
     if out_path == image_path:
@@ -171,8 +194,8 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
         "height": height,
         "short_edge_px": min(width, height),
         "text_bounds": {
-            "top": height - margin - text_block_height,
-            "bottom": height - margin,
+            "top": top_of_text,
+            "bottom": height - bottom_pad,
             "left": margin,
             "right": margin + max_text_width
         }
