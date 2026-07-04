@@ -28,24 +28,24 @@ def mock_sheets_handle_call_tool(name: str, arguments: dict):
 
 def mock_caption_compose_handle_call_tool(name: str, arguments: dict):
     img_url = arguments.get("image_url", "")
-    ocr_text_free = "baked_glyph" not in img_url
+    caption = arguments.get("caption", "").lower()
+    ocr_text_free = "bake" not in caption and "bake" not in img_url
     output = {
         "asset_url": f"composited_{img_url}",
         "ocr_text_free": ocr_text_free,
         "scrim_applied": True,
         "width": 1080,
         "height": 1920,
-        "short_edge_px": 1080
+        "short_edge_px": 1080,
+        "text_bounds": {"top": 0, "bottom": 100, "left": 0, "right": 500}
     }
     return [TextContent(type="text", text=json.dumps(output))]
 
 def mock_image_generate_handle_call_tool(name: str, arguments: dict):
-    prompt = arguments.get("prompt", "")
     pred_id = str(uuid.uuid4())[:8]
-    if "bake text" in prompt.lower():
-        asset_url = f"baked_glyph_{pred_id}.jpg"
-    else:
-        asset_url = f"clean_image_{pred_id}.jpg"
+    # For the escalation test, we want to force a visual loop escalation.
+    # We can just always return baked_glyph so that the OCR mock always fails it.
+    asset_url = f"baked_glyph_{pred_id}.jpg"
     
     output = {
         "asset_url": asset_url,
@@ -139,13 +139,44 @@ def test_p1_b_pipeline_escalation():
         assert "visual_production" in trace
         assert "escalate_visual" in trace
 
+def test_caption_compose_layout():
+    """
+    Scenario: The caption_compose tool correctly wraps long lines, dynamically sizes the scrim, and scales the font so text stays within bounds.
+    """
+    # Create a blank white image to test with
+    evidence_dir = os.path.join(os.path.dirname(__file__), "evidence")
+    os.makedirs(evidence_dir, exist_ok=True)
+    test_img_path = os.path.join(evidence_dir, "test_bounds.jpg")
+    
+    from PIL import Image
+    img = Image.new('RGB', (1080, 1080), color='white')
+    img.save(test_img_path)
+    
+    long_text = "This is a deliberately very long hook line meant to run off the canvas if text wrapping and font scaling are not implemented properly. It should be wrapped to multiple lines, and the bounding box of the resulting text block should lie fully inside the image dimensions (with a safe padding margin)."
+    
+    # We must use the REAL server implementation for this deterministic test, not the mock
+    import app.tools.caption_compose_server as ccs
+    res = ccs.caption_compose_handle_call_tool("caption_compose", {"image_url": test_img_path, "caption": long_text})
+    output = json.loads(res[0].text)
+    
+    assert "text_bounds" in output, "Bounding box missing from output"
+    bounds = output["text_bounds"]
+    
+    # Assert text lies fully inside the image bounds
+    assert bounds["left"] >= 0
+    assert bounds["right"] <= output["width"]
+    assert bounds["top"] >= 0
+    assert bounds["bottom"] <= output["height"]
+
+
 @pytest.mark.live
 def test_p1_b_pipeline_flow():
     """
     Scenario: LIVE E2E test. The pipeline state machine progresses correctly from PLAN through QUEUE.
     Scenario: A final piece successfully lands in the REAL Google Sheets queue and Drive via Real API MCPs.
     """
-    test_idea = "A simple red apple on a clean wooden table. Absolutely no text, no branding, no logos."
+    # Real organic ideation prompt for the hard-coded brand
+    test_idea = "Generate a brand new evergreen piece for our rotation based on the brand kit's mission and audience. CRITICAL: The visual concept must be a physical object or nature scene (e.g. an apple, a desk, a tool). Absolutely NO screens, phones, books, UI elements, or signs, to guarantee 0% text in the generated image."
     
     result = run_pipeline(test_idea)
     

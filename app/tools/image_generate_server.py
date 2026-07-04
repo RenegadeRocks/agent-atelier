@@ -25,33 +25,35 @@ def image_generate_handle_call_tool(name: str, arguments: dict) -> list[TextCont
     
     print(f"[MCP image_generate] Real generating image with model {IMAGE_MODEL_ID}...")
     
-    # We call the real API
-    # Since gemini-3-pro-image or imagen-3 is used, we use client.models.generate_images
-    result = client.models.generate_images(
-        model=IMAGE_MODEL_ID,
-        prompt=prompt,
-        config=types.GenerateImagesConfig(
-            number_of_images=1,
-            output_mime_type="image/jpeg",
-            aspect_ratio="1:1"
-        )
-    )
-    
-    if not result.generated_images:
-        raise RuntimeError("Image generation failed to produce an image.")
-        
-    generated_image = result.generated_images[0]
-    
-    # Save the bytes to a local file for the real 'asset_url' since we don't have a real cloud bucket for it here
     pred_id = str(uuid.uuid4())[:8]
-    output_filename = f"gen_{pred_id}.jpg"
-    
     evidence_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "evidence")
     os.makedirs(evidence_dir, exist_ok=True)
-    file_path = os.path.join(evidence_dir, output_filename)
+    file_path = os.path.join(evidence_dir, f"gen_{pred_id}.jpg")
     
-    with open(file_path, "wb") as f:
-        f.write(generated_image.image.image_bytes)
+    try:
+        response = client.models.generate_content(
+            model=IMAGE_MODEL_ID,
+            contents=prompt,
+        )
+        
+        has_image = False
+        img_bytes = None
+        if hasattr(response, 'candidates') and response.candidates:
+            for p in response.candidates[0].content.parts:
+                if hasattr(p, 'inline_data') and p.inline_data:
+                    img_bytes = p.inline_data.data
+                    has_image = True
+                    break
+                    
+        if not has_image or not img_bytes:
+            raise ValueError("No image returned from Gemini.")
+            
+        with open(file_path, "wb") as f:
+            f.write(img_bytes)
+            
+    except Exception as e:
+        print(f"[MCP image_generate] API call failed: {e}")
+        raise ValueError(f"Image generation API failure: {e}")
         
     # Standard schema output
     output = {
