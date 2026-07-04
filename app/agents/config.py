@@ -11,7 +11,7 @@ REASONING_MODEL = "gemini-3.1-pro-preview"
 FLASH_MODEL = "gemini-flash-latest"
 
 # Visual Production - Real Image Model (Discovered via models.list(), gemini-3-pro-image gave 404 for generate_images)
-IMAGE_MODEL_ID = "imagen-4.0-generate-001"
+IMAGE_MODEL_ID = "gemini-3-pro-image"
 
 # System of Record Identifiers (Configured externally)
 SHEET_ID = "1OZIBoTSzuBVGRCb-ZxLIh-OKKD1XCCrRfLaP5s7CmVQ"

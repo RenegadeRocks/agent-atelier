@@ -60,38 +60,77 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
         img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
         width, height = img.size
 
-    # 2. Add Scrim (linear gradient at the bottom)
-    # Create an RGBA image for drawing the gradient
+    # 2. Add Typography and Layout
+    draw = ImageDraw.Draw(img)
+    try:
+        # Load default font with size (supported in pinned Pillow)
+        font_size = 40
+        font = ImageFont.load_default(size=font_size)
+    except:
+        font = ImageFont.load_default()
+
+    margin = int(width * 0.08) # 8% padding
+    safe_width = width - (2 * margin)
+    
+    # Helper to wrap text
+    def wrap_text(text, font, max_width):
+        lines = []
+        for paragraph in text.split('\n'):
+            words = paragraph.split(' ')
+            current_line = []
+            for word in words:
+                test_line = ' '.join(current_line + [word]) if current_line else word
+                bbox = font.getbbox(test_line)
+                w = bbox[2] - bbox[0]
+                if w <= max_width:
+                    current_line.append(word)
+                else:
+                    if current_line:
+                        lines.append(' '.join(current_line))
+                    current_line = [word]
+            if current_line:
+                lines.append(' '.join(current_line))
+        return lines
+
+    # Wrap the text
+    wrapped_lines = wrap_text(caption, font, safe_width)
+    
+    # Calculate text block height
+    line_height = font.getbbox("A")[3] - font.getbbox("A")[1]
+    line_spacing = int(line_height * 0.3)
+    text_block_height = (len(wrapped_lines) * line_height) + ((len(wrapped_lines) - 1) * line_spacing)
+    
+    # If text is too tall, we scale font (simplified fallback logic)
+    if text_block_height > (height * 0.4):
+        font_size = 30
+        font = ImageFont.load_default(size=font_size)
+        wrapped_lines = wrap_text(caption, font, safe_width)
+        line_height = font.getbbox("A")[3] - font.getbbox("A")[1]
+        line_spacing = int(line_height * 0.3)
+        text_block_height = (len(wrapped_lines) * line_height) + ((len(wrapped_lines) - 1) * line_spacing)
+
+    # 3. Add Scrim dynamically sized to cover text block + padding
     scrim = Image.new('RGBA', img.size, (0, 0, 0, 0))
     scrim_draw = ImageDraw.Draw(scrim)
-    # Apply a gradient over the bottom 25% of the image
-    scrim_height = int(height * 0.25)
+    
+    scrim_height = text_block_height + (margin * 2) # Scrim covers text + bottom margin + top margin
     for i in range(scrim_height):
-        alpha = int(255 * (i / scrim_height) * 0.8) # max 80% opacity
+        alpha = int(255 * (i / scrim_height) * 0.8) # max 80% opacity at the bottom
         y = height - scrim_height + i
         scrim_draw.line([(0, y), (width, y)], fill=(0, 0, 0, alpha))
         
     img = img.convert('RGBA')
     img = Image.alpha_composite(img, scrim)
     
-    # 3. Add Typography
+    # Draw text
     draw = ImageDraw.Draw(img)
-    try:
-        # We don't have brand fonts, using default as an open-source stand-in (logged as deviation)
-        font = ImageFont.load_default(size=40)
-    except:
-        font = ImageFont.load_default()
-
-    # Simple text wrap would go here, but for now we draw the caption at the bottom
-    margin = 40
-    # Use textbbox to get size
-    bbox = draw.textbbox((0, 0), caption, font=font)
-    text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
-    
-    x = margin
-    y = height - text_h - margin
-    draw.text((x, y), caption, font=font, fill=(255, 255, 255, 255))
+    y_text = height - margin - text_block_height
+    max_text_width = 0
+    for line in wrapped_lines:
+        line_w = font.getbbox(line)[2] - font.getbbox(line)[0]
+        max_text_width = max(max_text_width, line_w)
+        draw.text((margin, y_text), line, font=font, fill=(255, 255, 255, 255))
+        y_text += line_height + line_spacing
     
     img = img.convert('RGB')
     
@@ -107,7 +146,13 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
         "scrim_applied": True,
         "width": width,
         "height": height,
-        "short_edge_px": min(width, height)
+        "short_edge_px": min(width, height),
+        "text_bounds": {
+            "top": height - margin - text_block_height,
+            "bottom": height - margin,
+            "left": margin,
+            "right": margin + max_text_width
+        }
     }
 
     return [TextContent(type="text", text=json.dumps(output))]

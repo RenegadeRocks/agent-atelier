@@ -101,21 +101,50 @@ async def run_pipeline_async(idea: str) -> dict:
     
     while visual_loop_count <= 2 and not visual_approved:
         # [VISUALIZE]
+        draft_text = responses.get('draft', '')
+        # Simple extraction using regex
+        import re
+        
+        caption_match = re.search(r'\*\*Caption:\*\*\s*(.*?)(?=\n\*\*|\Z)', draft_text, re.DOTALL)
+        caption = caption_match.group(1).strip() if caption_match else idea
+        
+        idea_sentence_match = re.search(r'\*\*Idea Sentence:\*\*\s*(.*?)(?=\n\*\*|\Z)', draft_text, re.DOTALL)
+        idea_sentence = idea_sentence_match.group(1).strip() if idea_sentence_match else idea
+        
+        # Extract hook / on-image words from WORDS: field
+        words_match = re.search(r'\*\*WORDS:\*\*\s*(.*?)(?=\n\*|\n\*\*|\Z)', draft_text, re.DOTALL)
+        if words_match:
+            hook = words_match.group(1).strip()
+        else:
+            # Fallback to caption's first line
+            hook = caption.split('\n')[0].split('.')[0] + '.'
+            
+        # visual brief prompt
+        visual_brief_match = re.search(r'\*\*Visual Brief.*?\*\*(.*?)(?=\n\*\*|\Z)', draft_text, re.DOTALL)
+        visual_brief = visual_brief_match.group(1).strip() if visual_brief_match else hook
+        
+        # [VISUALIZE]
         visual = get_visual()
-        prompt = f"Create a visual brief and placeholder for this draft:\n{responses.get('draft', '')}\nNOTE: Pass '{idea}' to prompt"
+        # Prompt visual agent
+        prompt = f"Create a visual brief and placeholder for this draft:\n{draft_text}"
         print(f"[{visual.name}] Prompt: {prompt}")
         resp = await run_agent(visual, prompt)
+        responses["visual_response"] = resp
         trace.append("visual_production")
         print(f"[{visual.name}] Response:\n{resp}\n")
         
+        # Extract alt text from visual agent response
+        alt_text_match = re.search(r'(?:> )?\*\*Alt Text:\*\*\s*(.*?)(?=\n\*\*|\Z)', resp, re.DOTALL | re.IGNORECASE)
+        alt_text = alt_text_match.group(1).strip() if alt_text_match else "Generated visual asset."
+        
         # Mock MCP integrations for Visualize step
-        img_res = image_generate_handle_call_tool("image_generate", {"prompt": idea})
+        img_res = image_generate_handle_call_tool("image_generate", {"prompt": visual_brief})
         img_out = json.loads(img_res[0].text)
         asset_url = img_out["asset_url"]
         trace.append(f"image_generate:{asset_url}")
         
-        caption = idea
-        comp_res = caption_compose_handle_call_tool("caption_compose", {"image_url": asset_url, "caption": caption})
+        # Caption compose using the HOOK (on-image words), NOT the generation prompt
+        comp_res = caption_compose_handle_call_tool("caption_compose", {"image_url": asset_url, "caption": hook})
         comp_out = json.loads(comp_res[0].text)
         
         if not comp_out["ocr_text_free"]:
@@ -155,8 +184,9 @@ async def run_pipeline_async(idea: str) -> dict:
         "values": {
             "status": "Approval Queue",
             "asset_url": responses.get("visual_asset"),
-            "caption": idea,
-            "alt_text": "A simple red apple on a clean wooden table. Absolutely no text, no branding, no logos."
+            "caption": caption,
+            "alt_text": alt_text,
+            "idea": idea_sentence
         }
     })
     
