@@ -73,22 +73,36 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     img = img.resize((CHANNEL_TARGET_WIDTH, CHANNEL_TARGET_HEIGHT), Image.Resampling.LANCZOS)
     width, height = img.size
 
+    from app.agents import config
     from app.agents.config import ACCENT_COLOR, WORDMARK_TEXT
+    import os
     
     # 2. Add Typography and Layout (Paperclip Compositor Integration)
     margin = int(width * 0.075)
     max_w = width - 2 * margin
     size = int(width * 0.072)
 
-    def load_font(font_path, font_size):
-        try:
-            return ImageFont.truetype(font_path, font_size)
-        except Exception as e:
-            print(f"Font load error ({font_path}): {e}")
-            raise RuntimeError(f"BANNED: Failed to load {font_path}. ImageFont.load_default() is prohibited.")
-
-    headline_font_path = "C:\\Windows\\Fonts\\georgiab.ttf"
-    sans_font_path = "C:\\Windows\\Fonts\\arial.ttf"
+    def load_font(font_type, font_size):
+        paths = {
+            "headline": [
+                getattr(config, "HEADLINE_FONT_PATH", None),
+                "C:\\Windows\\Fonts\\georgiab.ttf",
+                "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
+            ],
+            "sans": [
+                getattr(config, "SANS_FONT_PATH", None),
+                "C:\\Windows\\Fonts\\arial.ttf",
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+            ]
+        }
+        for path in paths[font_type]:
+            if path and os.path.exists(path):
+                try:
+                    return ImageFont.truetype(path, font_size)
+                except Exception as e:
+                    print(f"Font load error ({path}): {e}")
+                    
+        raise RuntimeError(f"BANNED: Failed to resolve {font_type} font across all fallbacks. ImageFont.load_default() is prohibited.")
 
     def wrap(draw, text, font, max_w):
         words, lines, cur = text.split(), [], ""
@@ -103,7 +117,7 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
 
     layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
-    font = load_font(headline_font_path, size)
+    font = load_font("headline", size)
     
     # Normalize the caption to replace actual newlines with spaces for natural wrapping
     normalized_caption = " ".join(caption.split())
@@ -112,7 +126,7 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     # Auto-shrink headline if too many lines
     while len(lines) > 3 and size > 30:
         size -= 4
-        font = load_font(headline_font_path, size)
+        font = load_font("headline", size)
         lines = wrap(d, normalized_caption, font, max_w)
 
     asc, desc = font.getmetrics()
@@ -173,7 +187,7 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
             return (" " * n).join(list(s.upper()))
             
         wf_size = int(width * 0.0225)
-        wf = load_font(sans_font_path, wf_size)
+        wf = load_font("sans", wf_size)
         ws = spaced(WORDMARK_TEXT, 1)
         wy = height - int(height * 0.045)
         d.text((x_left, wy), ws, font=wf, fill=ACCENT_COLOR)
