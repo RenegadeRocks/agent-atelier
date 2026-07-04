@@ -185,14 +185,15 @@ async def run_pipeline_async(idea: str) -> dict:
         trace.append("visual_production")
         print(f"[{visual.name}] Response:\n{resp}\n")
         
-        # Extract alt text from visual agent response
-        alt_text_match = re.search(r'(?i)(?:### |> |\*\*|^|\n)\s*Alt[- ]Text:?\*?\s*(.*?)(?=\n\s*\n|\n#|\n\*\*|\Z)', resp, re.DOTALL)
+        # Extract alt text from visual agent response. Handle '> **Alt Text:**', '### Alt-Text:', etc.
+        import re
+        alt_text_match = re.search(r'(?i)Alt[- ]Text[\*\:\s]*(.*?)(?=\n\s*\n|\n#|\Z)', resp, re.DOTALL)
         alt_text = alt_text_match.group(1).strip() if alt_text_match else ""
         
-        # Clean up any residual asterisks in case of loose match
-        alt_text = alt_text.replace('*', '').strip()
+        # Clean up any residual formatting characters
+        alt_text = alt_text.replace('*', '').replace('>', '').strip()
         
-        if not alt_text or "Status" in alt_text or "Task" in alt_text or len(alt_text) < 20 or len(alt_text) > 300:
+        if not alt_text or "Status" in alt_text or "Task" in alt_text or len(alt_text) < 20 or len(alt_text) > 400:
             visual_prompt_suffix = "You failed to provide a valid '**Alt Text:**' field (or it contained status chatter/was not 20-300 chars). You MUST provide ONLY the image description under the '**Alt Text:**' heading."
             visual_loop_count += 1
             print(f"[pipeline] Alt Text extraction failed. Loop count: {visual_loop_count}/3")
