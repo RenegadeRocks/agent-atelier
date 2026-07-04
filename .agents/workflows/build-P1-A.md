@@ -54,6 +54,12 @@ hard boundaries** — do not build a later phase's work "while you're here."
      (§14.3 / §18.4.4 — honest refusal over silent fallback).
 - Author the contract's ACCEPTANCE/VERIFY behaviour as a **failing** Gherkin suite first
   (red), then implement to green. Add it to the growing regression suite.
+- **Tests must assert the spec's invariants on OUTPUTS, not merely that steps executed.**
+  Derive at least one assertion per INVARIANT in the contract: field mappings (distinct
+  fields land in their own destinations — never one payload impersonating several),
+  bounds/formats (rendered text inside the frame, ratios, sizes), and state rules. A test
+  that only checks "a row/file/call exists" does not cover the invariant that governs its
+  CONTENT.
 - Build component-by-component to SCOPE/ACTION; show diffs; verify model IDs / deps
   against live docs (GEMINI.md §4).
 - **VERIFY with captured evidence** (report-is-not-the-repo): run the piece / fire the negative test / capture the run.
