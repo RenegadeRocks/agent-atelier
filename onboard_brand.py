@@ -44,11 +44,9 @@ async def main():
             print("[System] Ingestion successful. Passing to Strategist...\n")
 
     agent = get_agent()
-    # Resolve the agent instructions (with a blank brand kit for onboarding)
-    blank_kit = {}
-    vault = get_vault()
-    agent.instruction = resolve(agent.instruction, blank_kit, os.environ, vault, ResolveScope(MODEL))
-
+    # The Strategist runs PRE-kit, so we do NOT fail-closed resolve its instructions.
+    # The [[TOKENS]] remain literal text so the LLM knows which fields to elicit.
+    
     runner = runners.InMemoryRunner(agent=agent)
     
     print("=========================================================")

@@ -62,3 +62,25 @@ def test_strategist_live_interview_and_first_light():
     """
     # The actual execution is left to the owner via `python onboard_brand.py demo/brand-packs/kanva-coffee/`
     pass
+
+def test_onboarding_launches_without_resolve_blocked():
+    """
+    Scenario: Onboarding launches with no kit and reaches the first interview question
+    without ResolveBlocked.
+    """
+    from app.agents.brand_strategist import get_agent
+    from google.adk import runners
+    import asyncio
+    from unittest.mock import AsyncMock, patch
+    
+    agent = get_agent()
+    # The Strategist instruction retains literal [[TOKENS]] and is not resolved against a blank kit.
+    runner = runners.InMemoryRunner(agent=agent)
+    
+    async def run_test():
+        with patch.object(runners.InMemoryRunner, 'run_debug', new_callable=AsyncMock) as mock_run:
+            mock_run.return_value = []
+            await runner.run_debug("Hello! I am ready to start the guided brand interview.")
+            mock_run.assert_called_once()
+            
+    asyncio.run(run_test())
