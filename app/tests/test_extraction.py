@@ -11,7 +11,7 @@ I have followed all instructions and crafted a compelling narrative for the bran
 {
     "idea_sentence": "This is a great idea.",
     "caption": "This is a captivating caption with a specific detail: the 4:05 PM sink dump.",
-    "words": "STOP THE SINK DUMP",
+    "hook_text": "STOP THE SINK DUMP",
     "visual_brief": "MESSAGE: The daily toll of operational chaos on a founder's time."
 }
 ```"""
@@ -22,7 +22,7 @@ I have followed all instructions and crafted a compelling narrative for the bran
     draft_data = json.loads(blocks[-1])
     assert draft_data["idea_sentence"] == "This is a great idea."
     assert draft_data["caption"] == "This is a captivating caption with a specific detail: the 4:05 PM sink dump."
-    assert draft_data["words"] == "STOP THE SINK DUMP"
+    assert draft_data["hook_text"] == "STOP THE SINK DUMP"
     assert draft_data["visual_brief"] == "MESSAGE: The daily toll of operational chaos on a founder's time."
 
 def test_json_extraction_alt_text():

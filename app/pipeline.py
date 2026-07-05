@@ -112,7 +112,7 @@ async def run_pipeline_async(idea: str) -> dict:
     while review_loop_count <= 2 and not approved_by_cd:
         # [IDEATE+DRAFT]
         evergreen = get_evergreen()
-        prompt = f"Draft content based on this plan:\n{responses.get('plan', '')}\n\nYou MUST end your reply with exactly one fenced ```json block containing these exactly named keys: 'idea_sentence', 'caption', 'words', 'visual_brief'."
+        prompt = f"Draft content based on this plan:\n{responses.get('plan', '')}\n\nYou MUST end your reply with exactly one fenced ```json block containing these exactly named keys: 'idea_sentence', 'caption', 'hook_text', 'visual_brief'.\n'hook_text': the exact short phrase (2-10 words) to be printed on the image - e.g. 'Burnout isn't a badge of honor.' Never a number, never a count."
         if draft_prompt_suffix:
             prompt += f"\n\nERROR FROM PREVIOUS ATTEMPT: {draft_prompt_suffix}"
             draft_prompt_suffix = ""
@@ -152,11 +152,11 @@ async def run_pipeline_async(idea: str) -> dict:
             
         caption = str(draft_data.get("caption", "")).strip()
         idea_sentence = str(draft_data.get("idea_sentence", "")).strip()
-        hook = str(draft_data.get("words", "")).strip()
+        hook = str(draft_data.get("hook_text", "")).strip()
         visual_brief = str(draft_data.get("visual_brief", "")).strip()
         
         if not caption or not idea_sentence or not hook or not visual_brief:
-            draft_prompt_suffix = "Your JSON block was missing one or more required keys: 'idea_sentence', 'caption', 'words', 'visual_brief'."
+            draft_prompt_suffix = "Your JSON block was missing one or more required keys: 'idea_sentence', 'caption', 'hook_text', 'visual_brief'."
             draft_loop_count += 1
             if draft_loop_count > 2:
                 print("[pipeline] Escalate due to draft formatting limit.")
@@ -252,7 +252,7 @@ async def run_pipeline_async(idea: str) -> dict:
 
     # [LATE-BOUND ALT TEXT]
     visual = get_visual()
-    alt_prompt = f"The final visual asset has been selected and generated based on this brief:\n{visual_brief}\n\nPlease write a brief, 1-2 sentence maximum final description of this image (strictly 20-350 characters, no status chatter). Do NOT exceed 2 sentences.\n\nYou MUST end your reply with exactly one fenced ```json block containing a single key 'alt_text'."
+    alt_prompt = f"The final visual asset has been composited based on this brief:\n{visual_brief}\n\nThe final composited image file is at: {responses.get('visual_asset', '')}\n\nPlease write a brief, 1-2 sentence maximum final description of this image (strictly 20-350 characters, no status chatter). Do NOT exceed 2 sentences.\n\nYou MUST end your reply with exactly one fenced ```json block containing a single key 'alt_text'."
     print(f"[{visual.name}] Alt-Text Prompt: {alt_prompt}")
     alt_resp = await run_agent(visual, alt_prompt)
     responses["alt_text_response"] = alt_resp
