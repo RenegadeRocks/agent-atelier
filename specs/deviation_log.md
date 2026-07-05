@@ -16,6 +16,11 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 
 ---
 
+### 2026-07-05 — Field scraping leak cleanup  [P1-B]
+- **Assumption:** Regex field scraping over agent prose correctly isolated drafted fields like `WORDS`.
+- **Ground truth / reason:** The E2E test runs leaked numeric fragments (e.g., "66", "74", "114") into the live production sheet for the `WORDS` field.
+- **Decision:** Refactored the pipeline to strictly use fenced ```json block extraction, eliminating field-scraping leakage. Rows 11–17 in the live `Approval Queue` sheet contain this residue and must be manually deleted for demo cleanup.
+- **Files touched:** `app/pipeline.py`, `app/tests/test_p1_b.py`, `app/tests/test_extraction.py`
 
 ### 2026-07-04 — Live-Paperclip craft port: caption.py reference + bottom-stack reconciliation  [handoff]
 - **Assumption:** the 2026-06-30 distillation captured the live engine's full craft layer.
