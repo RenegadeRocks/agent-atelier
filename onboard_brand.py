@@ -26,22 +26,34 @@ async def main():
 
     validate_models_on_startup()
     
-    # Pre-load source ingestion material if provided
+def preload_ingested_context(source_dir: str) -> str:
     ingested_context = ""
-    if args.source_dir and os.path.isdir(args.source_dir):
-        print(f"\n[System] Found source directory: {args.source_dir}. Ingesting local files...")
-        from app.tools.source_ingest import ingest_source
-        
-        # Look for markdown or text files
-        for f in os.listdir(args.source_dir):
-            if f.endswith(".md") or f.endswith(".txt"):
-                file_path = os.path.join(args.source_dir, f)
-                res = ingest_source(file_path)
-                if res["status"] == "success":
-                    ingested_context += f"\n--- INGESTED SOURCE: {f} ---\n{res['text']}\n"
-        
-        if ingested_context:
-            print("[System] Ingestion successful. Passing to Strategist...\n")
+    if source_dir and os.path.isdir(source_dir):
+        sources_path = os.path.join(source_dir, "sources")
+        if os.path.isdir(sources_path):
+            print(f"\n[System] Found source directory: {sources_path}. Ingesting local files...")
+            from app.tools.source_ingest import ingest_source
+            
+            # Look for markdown or text files
+            for f in os.listdir(sources_path):
+                if f.endswith(".md") or f.endswith(".txt"):
+                    file_path = os.path.join(sources_path, f)
+                    res = ingest_source(file_path)
+                    if res["status"] == "success":
+                        ingested_context += f"\n--- INGESTED SOURCE: {f} ---\n{res['text']}\n"
+            
+            if ingested_context:
+                print("[System] Ingestion successful. Passing to Strategist...\n")
+    return ingested_context
+
+async def main():
+    parser = argparse.ArgumentParser(description="Brand Onboarding CLI")
+    parser.add_argument("source_dir", nargs='?', default=None, help="Directory containing source materials (e.g. demo/brand-packs/kanva-coffee/)")
+    args = parser.parse_args()
+
+    validate_models_on_startup()
+    
+    ingested_context = preload_ingested_context(args.source_dir)
 
     agent = get_agent()
     # The Strategist runs PRE-kit, so we do NOT fail-closed resolve its instructions.

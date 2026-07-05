@@ -171,3 +171,9 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 - **Ground truth / reason:** Owner explicitly constrained the v1 scope of source_ingest to local files only (markdown/text from a given directory). Building generic web fetchers, social media API integrations, and PDF parsers is out-of-scope for today's contract.
 - **Decision:** source_ingest gracefully declines URL, social, and PDF ingestion inputs with a logged message and falls back to manual interview, only ingesting local text/markdown files (e.g. from the demo source material).
 - **Files touched:** `app/tools/source_ingest.py`, `app/skills/intake_interview.py`
+
+### 2026-07-05 — Ingestion defect reading intake answers [P2-B]
+- **Assumption:** The `onboard_brand.py` script would safely read all markdown files in the provided brand directory.
+- **Ground truth / reason:** The script ingested `intake-answers.md` alongside legitimate sources, leading to the Strategist pre-filling safety and intent fields directly from the answer sheet instead of eliciting them naturally.
+- **Decision:** Modified `onboard_brand.py` to only read from the `sources/` subdirectory of the provided brand pack. Added a deterministic test to ensure files outside `sources/` are ignored.
+- **Files touched:** `onboard_brand.py`, `app/tests/test_p2_b.py`

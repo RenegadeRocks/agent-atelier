@@ -84,3 +84,28 @@ def test_onboarding_launches_without_resolve_blocked():
             mock_run.assert_called_once()
             
     asyncio.run(run_test())
+
+def test_ingestion_scope_only_reads_sources_dir(tmp_path):
+    """
+    Scenario: Ingestion never reads files outside sources/.
+    """
+    from onboard_brand import preload_ingested_context
+    
+    brand_dir = tmp_path / "test-brand"
+    brand_dir.mkdir()
+    
+    # Root level markdown (should NOT be ingested)
+    root_md = brand_dir / "intake-answers.md"
+    root_md.write_text("C-Scheme Locale")
+    
+    # Sources dir markdown (should be ingested)
+    sources_dir = brand_dir / "sources"
+    sources_dir.mkdir()
+    source_md = sources_dir / "brand-story.md"
+    source_md.write_text("Best chuski in Jaipur")
+    
+    context = preload_ingested_context(str(brand_dir))
+    
+    assert "Best chuski in Jaipur" in context
+    assert "C-Scheme Locale" not in context
+
