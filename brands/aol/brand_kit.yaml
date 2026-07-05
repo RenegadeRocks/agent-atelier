@@ -17,7 +17,7 @@ voice_do: ["lead with value", "name the Ludhiana day specifically", "one small t
 voice_dont: ["fear hooks", "listicle slop", "fake urgency", "medical claims", "politics", "paraphrasing Sri Sri without citation"]
 
 logo_asset: "assets/aol_logo.png"
-wordmark_text: "Ludhiana"
+wordmark_text: "ART OF LIVING LUDHIANA"
 palette_hex: ["#F07020", "#F09020", "#F0B020", "#F0D020"]
 accent_dark_bg: "#F2C12E"
 accent_light_bg: "#B8800E"

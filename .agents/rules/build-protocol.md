@@ -133,4 +133,4 @@ Full procedure: **`.agents/workflows/change-request.md`**.
 
 ## 7. COMPLETION REPORTS
 
-Before any completion report: `git push`. Every report ends with the commit SHA and both GitHub Actions run URLs. A completion claim without pushed, linkable evidence is invalid.
+Before any completion report: `git push`. Every report ends with the commit SHA and both GitHub Actions run URLs. You MUST verify the conclusion of both runs via `gh run list` and state their conclusion (e.g. "completed success") in the report. A completion claim without pushed, linkable evidence of GREEN/successful runs is a false report and invalid.

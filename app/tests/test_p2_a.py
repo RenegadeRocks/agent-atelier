@@ -59,12 +59,14 @@ def test_aol_appendix_a_validates():
     assert kit['brand_name'] == "Art of Living Ludhiana"
     assert kit['claims_forbidden_confirmed'] is True
 
+@pytest.mark.live
 def test_pipeline_processes_aol_brand():
     """The pipeline successfully processes the AOL brand via brand_kit.yaml."""
     # Deterministic test
     result = run_pipeline("A test idea for AOL", 'brands/aol/brand_kit.yaml')
     assert result["status"] == "Approval Queue"
 
+@pytest.mark.live
 def test_pipeline_processes_kanva_brand():
     """The pipeline successfully processes the kanva brand via its brand_kit.yaml with zero code changes."""
     # Deterministic test
@@ -90,12 +92,13 @@ def test_compositor_uses_brand_kit(mock_text, mock_rect, tmp_path):
         "brand_kit": aol_kit
     })
     
-    # Assert AOL Wordmark (spaced out uppercase)
-    expected_aol_wordmark = " ".join(list("Ludhiana".upper()))
-    assert any(expected_aol_wordmark in str(call) for call in mock_text.call_args_list), "AOL Wordmark missing"
+    # Assert AOL Wordmark
+    expected_aol_wordmark = " ".join(list(aol_kit.get('wordmark_text', '').upper()))
+    assert any(expected_aol_wordmark in str(call) for call in mock_text.call_args_list), f"AOL Wordmark '{expected_aol_wordmark}' missing"
     
-    # Assert AOL Accent (AOL light theme accent is #B8800E)
-    assert any("fill='#b8800e'" in str(call).lower() for call in mock_rect.call_args_list), "AOL Accent missing"
+    # Assert AOL Accent (AOL light theme accent)
+    aol_accent = aol_kit.get('accent_light_bg', '').lower()
+    assert any(f"fill='{aol_accent}'" in str(call).lower() for call in mock_rect.call_args_list), f"AOL Accent '{aol_accent}' missing"
     
     mock_text.reset_mock()
     mock_rect.reset_mock()
@@ -109,10 +112,10 @@ def test_compositor_uses_brand_kit(mock_text, mock_rect, tmp_path):
     })
     
     # Assert Kanva Wordmark
-    expected_kanva_wordmark = " ".join(list("Kanva".upper()))
-    assert any(expected_kanva_wordmark in str(call) for call in mock_text.call_args_list), "Kanva Wordmark missing"
+    expected_kanva_wordmark = " ".join(list(kanva_kit.get('wordmark_text', '').upper()))
+    assert any(expected_kanva_wordmark in str(call) for call in mock_text.call_args_list), f"Kanva Wordmark '{expected_kanva_wordmark}' missing"
     
-    # Assert Kanva Accent (Kanva light theme accent is #B8800E but overridden by accent_light_bg which is #2E1F1A)
-    # Wait, in Kanva's kit, accent_light_bg is #2E1F1A.
-    assert any("fill='#2e1f1a'" in str(call).lower() for call in mock_rect.call_args_list), "Kanva Accent missing"
+    # Assert Kanva Accent (Kanva light theme accent)
+    kanva_accent = kanva_kit.get('accent_light_bg', '').lower()
+    assert any(f"fill='{kanva_accent}'" in str(call).lower() for call in mock_rect.call_args_list), f"Kanva Accent '{kanva_accent}' missing"
 

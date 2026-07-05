@@ -74,7 +74,7 @@ product_pool: "assets/products/"
 image_provider: "gemini_image_pro"
 image_quality_tier: "medium"
 logo_asset: "assets/logo.png"
-wordmark_text: "Kanva"
+wordmark_text: "KANVA COFFEE WORKS"
 
 channels: ["instagram"]
 posts_per_week_target: 4
