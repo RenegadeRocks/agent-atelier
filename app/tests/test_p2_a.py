@@ -120,3 +120,62 @@ def test_compositor_uses_brand_kit(mock_text, mock_rect, mock_ocr, tmp_path):
     kanva_accent = kanva_kit.get('accent_light_bg', '').lower()
     assert any(f"fill='{kanva_accent}'" in str(call).lower() for call in mock_rect.call_args_list), f"Kanva Accent '{kanva_accent}' missing"
 
+from unittest.mock import MagicMock
+@patch("app.pipeline.caption_compose_handle_call_tool")
+@patch("app.pipeline.drive_handle_call_tool")
+@patch("app.pipeline.sheets_handle_call_tool")
+@patch("app.pipeline.run_agent")
+def test_pipeline_ocr_retry_logic(mock_run_agent, mock_sheets, mock_drive, mock_compose):
+    """Deterministic test: stub OCR to fail twice then pass → assert ONE queue row, ONE stable piece_id, and zero GCS/queue calls for rejected attempts."""
+    import json
+    from app.pipeline import run_pipeline
+    
+    # Mock run_agent to bypass all LLM calls deterministically
+    def mock_run_agent_side_effect(agent, prompt, brand_kit):
+        if agent.name == "managing_editor":
+            return "Plan OK"
+        elif agent.name == "evergreen_content":
+            return '```json\n{"idea_sentence": "Idea", "caption": "Caption", "hook_text": "Hook", "visual_brief": "Brief"}\n```'
+        elif agent.name == "research_verification":
+            return "Research OK"
+        elif agent.name == "creative_director":
+            return "APPROVED"
+        elif agent.name == "visual_production":
+            if "write a brief, 1-2 sentence maximum" in prompt:
+                return '```json\n{"alt_text": "Alt Text"}\n```'
+            return "Visual Brief OK"
+        elif agent.name == "publishing_operations":
+            return "Publishing OK"
+        return "OK"
+        
+    mock_run_agent.side_effect = mock_run_agent_side_effect
+    
+    # Mock image generate to just return a dummy asset url
+    with patch("app.pipeline.image_generate_handle_call_tool") as mock_img_gen:
+        mock_img_gen.return_value = [MagicMock(text=json.dumps({"asset_url": "dummy.jpg"}))]
+        
+        # Mock caption compose to fail twice then pass
+        mock_compose.side_effect = [
+            [MagicMock(text=json.dumps({"ocr_text_free": False, "asset_url": "fail1.jpg"}))],
+            [MagicMock(text=json.dumps({"ocr_text_free": False, "asset_url": "fail2.jpg"}))],
+            [MagicMock(text=json.dumps({"ocr_text_free": True, "asset_url": "pass.jpg"}))]
+        ]
+        
+        mock_drive.return_value = [MagicMock(text=json.dumps({"drive_url": "gcs://pass.jpg"}))]
+        
+        result = run_pipeline("Test OCR Logic", 'brands/aol/brand_kit.yaml')
+        
+        assert result["status"] == "Approval Queue"
+        
+        # Drive upload must ONLY be called ONCE for the passed image
+        assert mock_drive.call_count == 1
+        
+        # Sheets queue must ONLY be called ONCE
+        assert mock_sheets.call_count == 1
+        
+        # The piece_id used in sheets MUST be stable
+        sheets_args = mock_sheets.call_args[0][1]
+        assert sheets_args["action"] == "queue"
+        piece_id = sheets_args["piece_id"]
+        assert piece_id.startswith("ART-OF-LIVING-LUDHIANA-")
+

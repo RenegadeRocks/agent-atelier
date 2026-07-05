@@ -16,4 +16,13 @@ def load_brand_kit(brand_kit_path: str, schema_path: str) -> dict:
         schema = json.load(f)
         
     jsonschema.validate(instance=kit, schema=schema)
+    
+    # Enforce fail-closed validation on safety fields
+    for safety_field in ["claims_forbidden", "non_disclosure_rules", "required_framing"]:
+        confirmed_key = f"{safety_field}_confirmed"
+        if kit.get(confirmed_key) is True:
+            field_val = kit.get(safety_field)
+            if not field_val:  # Empty list, None, or empty string
+                raise ValueError(f"Confirmed-empty is only legal with an explicit owner sign-off marker. Field '{safety_field}' is empty but '{confirmed_key}' is True.")
+
     return kit

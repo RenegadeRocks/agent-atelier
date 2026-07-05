@@ -39,10 +39,8 @@ non_disclosure_rules:
 non_disclosure_rules_confirmed: true
 
 required_framing:
-  - topic: "caffeine effects (energy, focus, sleep)"
-    framing: "'effects vary person to person' — and never frame coffee as a health product"
-  - topic: "sourcing claims ('direct trade', 'single estate')"
-    framing: "only with the named estate/family on the same asset"
+  - { topic: "caffeine effects (energy, focus, sleep)", framing: "'effects vary person to person' — and never frame coffee as a health product" }
+  - { topic: "sourcing claims ('direct trade', 'single estate')", framing: "only with the named estate/family on the same asset" }
 required_framing_confirmed: true
 
 comparative_claims_allowed: false

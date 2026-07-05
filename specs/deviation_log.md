@@ -153,3 +153,9 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 - **Ground truth / reason:** the build environment lacks NodeJS (`node --version` not found), so `npx @modelcontextprotocol/inspector` cannot run.
 - **Decision:** Inspector evidence deferred to the P1-B validator pass / a Node-equipped session; the four inspector commands are documented in the walkthrough for the owner to run.
 - **Files touched:** `specs/deviation_log.md`.
+
+### 2026-07-05 — P2-A Residue and Deferred Work [P2-A]
+- **Assumption:** The pipeline cleanly discards rejected pieces and fully implements visual prompts.
+- **Ground truth / reason:** Minor residue exists, and some visual prompting rules are deferred.
+- **Decision:** rows 32–35 residue; kit desired_feeling must reach the image prompt — deferred to P4-A; golden-set REJECT #1: Kanva roastery image — tattered, stained log reads as a hygiene risk for an F&B brand (owner verdict).
+- **Files touched:** N/A

@@ -58,6 +58,9 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
 
     # OCR Check via injected dependency
     ocr_text_free = ocr_checker(image_path)
+    
+    if not ocr_text_free:
+        return [TextContent(type="text", text=json.dumps({"ocr_text_free": False}))]
 
     # Load image with Pillow
     img = Image.open(image_path)
