@@ -128,3 +128,9 @@ Full procedure: **`.agents/workflows/change-request.md`**.
 1. Read **`BUILD-STATUS.md`** — it names the next contract.
 2. Open **`.agents/workflows/build-<next>.md`** and follow it.
 3. If you are picking up a half-done contract, use **`.agents/workflows/resume.md`** first.
+
+---
+
+## 7. COMPLETION REPORTS
+
+Before any completion report: `git push`. Every report ends with the commit SHA and both GitHub Actions run URLs. A completion claim without pushed, linkable evidence is invalid.

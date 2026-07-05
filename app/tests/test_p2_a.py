@@ -71,3 +71,48 @@ def test_pipeline_processes_kanva_brand():
     result = run_pipeline("A test idea for Kanva", 'brands/kanva-coffee/brand_kit.yaml')
     assert result["status"] == "Approval Queue"
 
+from unittest.mock import patch
+from app.tools.caption_compose_server import caption_compose_handle_call_tool
+
+@patch("PIL.ImageDraw.ImageDraw.rectangle")
+@patch("PIL.ImageDraw.ImageDraw.text")
+def test_compositor_uses_brand_kit(mock_text, mock_rect, tmp_path):
+    # Create a dummy image
+    from PIL import Image
+    dummy_img = tmp_path / "gen_dummy.jpg"
+    Image.new("RGB", (1080, 1080), (255, 255, 255)).save(dummy_img, "JPEG")
+    
+    # Test AOL
+    aol_kit = load_brand_kit('brands/aol/brand_kit.yaml', 'specs/brand_kit.schema.json')
+    caption_compose_handle_call_tool("caption_compose", {
+        "image_url": str(dummy_img),
+        "caption": "Test AOL",
+        "brand_kit": aol_kit
+    })
+    
+    # Assert AOL Wordmark (spaced out uppercase)
+    expected_aol_wordmark = " ".join(list("Ludhiana".upper()))
+    assert any(expected_aol_wordmark in str(call) for call in mock_text.call_args_list), "AOL Wordmark missing"
+    
+    # Assert AOL Accent (AOL light theme accent is #B8800E)
+    assert any("fill='#b8800e'" in str(call).lower() for call in mock_rect.call_args_list), "AOL Accent missing"
+    
+    mock_text.reset_mock()
+    mock_rect.reset_mock()
+    
+    # Test Kanva
+    kanva_kit = load_brand_kit('brands/kanva-coffee/brand_kit.yaml', 'specs/brand_kit.schema.json')
+    caption_compose_handle_call_tool("caption_compose", {
+        "image_url": str(dummy_img),
+        "caption": "Test Kanva",
+        "brand_kit": kanva_kit
+    })
+    
+    # Assert Kanva Wordmark
+    expected_kanva_wordmark = " ".join(list("Kanva".upper()))
+    assert any(expected_kanva_wordmark in str(call) for call in mock_text.call_args_list), "Kanva Wordmark missing"
+    
+    # Assert Kanva Accent (Kanva light theme accent is #B8800E but overridden by accent_light_bg which is #2E1F1A)
+    # Wait, in Kanva's kit, accent_light_bg is #2E1F1A.
+    assert any("fill='#2e1f1a'" in str(call).lower() for call in mock_rect.call_args_list), "Kanva Accent missing"
+

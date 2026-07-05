@@ -52,7 +52,10 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
     
     trace = []
     responses = {}
-    piece_id = f"test_brand-{uuid.uuid4().hex[:6]}"
+    import re
+    brand_short = brand_kit.get("brand_short_name", "BRAND")
+    slug = re.sub(r'[^A-Z0-9]+', '-', brand_short.upper()).strip('-')
+    piece_id = f"{slug}-{uuid.uuid4().hex[:6].upper()}"
     
     print(f"--- STARTING PIPELINE WITH IDEA: {idea} ---\n")
     
@@ -183,16 +186,14 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         trace.append("visual_production")
         print(f"[{visual.name}] Response:\n{resp}\n")
         
-        # Removed early alt-text extraction here. Alt-text is now late-bound.
-        
         # Mock MCP integrations for Visualize step
         img_res = image_generate_handle_call_tool("image_generate", {"prompt": visual_brief})
         img_out = json.loads(img_res[0].text)
         asset_url = img_out["asset_url"]
-        trace.append(f"image_generate:{asset_url}")
+        trace.append("image_generate")
         
         # Caption compose using the HOOK (on-image words), NOT the generation prompt
-        comp_res = caption_compose_handle_call_tool("caption_compose", {"image_url": asset_url, "caption": hook})
+        comp_res = caption_compose_handle_call_tool("caption_compose", {"image_url": asset_url, "caption": hook, "brand_kit": brand_kit})
         comp_out = json.loads(comp_res[0].text)
         
         if not comp_out["ocr_text_free"]:

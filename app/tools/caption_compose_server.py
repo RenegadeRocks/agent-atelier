@@ -92,6 +92,9 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     margin = int(width * 0.075)
     max_w = width - 2 * margin
     size = int(width * 0.072)
+    
+    brand_kit = arguments.get("brand_kit", {})
+    wordmark_text = brand_kit.get("wordmark_text", getattr(config, "WORDMARK_TEXT", ""))
 
     def load_font(font_type, font_size):
         paths = {
@@ -145,7 +148,7 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     block_h = lh * len(lines)
 
     # Wordmark padding
-    wm_h = int(width * 0.05) if WORDMARK_TEXT else 0
+    wm_h = int(width * 0.05) if wordmark_text else 0
     bottom_pad = int(height * 0.055) + wm_h
     top_of_text = height - bottom_pad - block_h
     accent_gap = int(width * 0.022)
@@ -164,7 +167,13 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
     scrim_col = (250, 246, 239, 255) if is_light else (8, 7, 11, 255)
     shadow = None if is_light else (0, 0, 0, 150)
     text_col = (38, 30, 22, 255) if is_light else (255, 252, 247, 255)
-    accent_col = "#B8800E" if is_light else ACCENT_COLOR
+    
+    # Use brand kit accent colors
+    default_accent = getattr(config, "ACCENT_COLOR", "#E8D5B7")
+    if is_light:
+        accent_col = brand_kit.get("accent_light_bg", "#B8800E")
+    else:
+        accent_col = brand_kit.get("accent_dark_bg", default_accent)
 
     # 3. Add Feathered Scrim (Replaces rudimentary gradient)
     grad = Image.new("L", (1, height), 0)
@@ -204,13 +213,13 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
         y_text += lh
         
     # Wordmark pinned to bottom
-    if WORDMARK_TEXT:
+    if wordmark_text:
         def spaced(s, n=1):
             return (" " * n).join(list(s.upper()))
             
         wf_size = int(width * 0.0225)
         wf = load_font("sans", wf_size)
-        ws = spaced(WORDMARK_TEXT, 1)
+        ws = spaced(wordmark_text, 1)
         wy = height - int(height * 0.045)
         d.text((x_left, wy), ws, font=wf, fill=accent_col)
 
