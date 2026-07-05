@@ -11,8 +11,8 @@
 | 7. `piece_id` per §17 | PASS | `app/pipeline.py:56-58` mints `<slug>-<uuid>` once before the pipeline loop. Stable across retries. |
 | 8. Single queue write per run | PASS | `app/pipeline.py:199-204` continues the loop without queuing on OCR fail. `test_p2_a.py:128-182` (`test_pipeline_ocr_retry_logic`) asserts 1 drive upload and 1 stable queue write. |
 | 9. Live-test hygiene | PASS | `test_p1_a.py`, `test_p1_b.py`, `test_p2_a.py` all correctly apply `@pytest.mark.live` to E2E runs. HEAD commit `d1341f93a9436beb3a7669d10347d79db7e5a2b5`. |
-| 10. Deviation log | **FAIL** | `specs/deviation_log.md:157-161` mentions rows 32–35, `desired_feeling`, and golden-set REJECT #1, but is completely missing the Kanva kit-derivation defect. |
+| 10. Deviation log | PASS | `specs/deviation_log.md:157-168` includes entries for rows 32–35, `desired_feeling`, golden-set REJECT #1, and the Kanva kit-derivation defect. |
 
 ## Findings
 
-- **BLOCKER**: Item 10 — `specs/deviation_log.md` is missing the required conscious-deviation entry for the Kanva kit-derivation defect. All conscious deviations must be logged per PRD §18.4.4.
+- None (All checks passed)
