@@ -45,7 +45,7 @@ provider `[[IMAGE_PROVIDER]]`, quality floor `[[IMAGE_QUALITY_TIER]]`.
    the depicted scene; never depict a proprietary mechanism. `[[CLAIMS_FORBIDDEN]]` and
    `[[REQUIRED_FRAMING]]` apply to on-image words.
 5. **Generation guardrails.** Generate a **text-free** photo via `[[IMAGE_PROVIDER]]` (default
-   token `gemini_image_pro` / Nano Banana Pro — confirm name+ID at build time). Honor the
+   token `gemini_image_pro` / Nano Banana Pro — confirm name+ID at build time). One unified, single-camera scene. Never split-screen, collage, diptych, or multi-panel compositions — express contrast within a single scene. Honor the
    quality floor: `[[IMAGE_QUALITY_TIER]]` is the default; a CD "premium" tag upgrades a
    single piece to `high`, never downgrades. No silent model swaps — on provider error, stop
    and escalate. A deterministic OCR check on the raw image enforces the text-free invariant.
