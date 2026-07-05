@@ -223,7 +223,16 @@ def test_p1_b_pipeline_flow():
     # Real organic ideation prompt for the hard-coded brand
     test_idea = "Generate a brand new evergreen piece for our rotation based on the brand kit's mission and audience."
     
-    result = run_pipeline(test_idea)
+    captured_captions = []
+    import app.tools.caption_compose_server as ccs
+    real_caption_compose = ccs.caption_compose_handle_call_tool
+    
+    def spy_caption_compose(name, arguments):
+        captured_captions.append(arguments.get("caption"))
+        return real_caption_compose(name, arguments)
+        
+    with patch('app.pipeline.caption_compose_handle_call_tool', side_effect=spy_caption_compose):
+        result = run_pipeline(test_idea)
     
     assert result is not None
     assert "Approval Queue" in result["status"]
@@ -282,7 +291,8 @@ def test_p1_b_pipeline_flow():
     assert has_alpha, f"hook_text must contain at least one alphabetic character, got: '{hook}'"
     
     # Assert composited headline equals hook_text verbatim (in mock it is passed as 'caption' arg to caption_compose)
-    # The actual composited asset is URL-based. Since we test end-to-end, we just ensure it extracted properly and was passed.
+    assert len(captured_captions) > 0, "caption_compose was never called."
+    assert captured_captions[-1] == hook, f"Composited headline mismatch! Expected: '{hook}', got: '{captured_captions[-1]}'"
     
     # Alt-text quality invariants
     assert len(alt_text) >= 20, f"Alt text too short (<20 chars): {alt_text}"

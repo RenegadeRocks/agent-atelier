@@ -19,9 +19,14 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 ### 2026-07-05 — Field scraping leak cleanup  [P1-B]
 - **Assumption:** Regex field scraping over agent prose correctly isolated drafted fields like `WORDS`.
 - **Ground truth / reason:** The E2E test runs leaked numeric fragments (e.g., "66", "74", "114") into the live production sheet for the `WORDS` field.
-- **Decision:** Refactored the pipeline to strictly use fenced ```json block extraction, eliminating field-scraping leakage. Rows 11–17 in the live `Approval Queue` sheet contain this residue and must be manually deleted for demo cleanup.
+- **Decision:** Refactored the pipeline to strictly use fenced ```json block extraction, eliminating field-scraping leakage. Rows 8–19 in the live `Approval Queue` sheet contain this residue and must be manually deleted for demo cleanup.
 - **Files touched:** `app/pipeline.py`, `app/tests/test_p1_b.py`, `app/tests/test_extraction.py`
 
+### 2026-07-05 — Token-resolution stub (TEST_BRAND_MAP) [P1-B]
+- **Assumption:** The brand kit dynamic resolver would be fully implemented in P1-B to resolve brand tokens.
+- **Ground truth / reason:** The PRD specifies that true dynamic Brand Kit resolution arrives in P2-A. P1-B operates entirely on a hard-coded test brand to pass the workflow gates.
+- **Decision:** Added a hard-coded `TEST_BRAND_MAP` token-resolution-stub and substitution function applied at prompt assembly so agents don't emit `[[TOKENS]]`. The real dynamic Brand Kit resolver will replace this temporary stub at P2-A.
+- **Files touched:** `app/pipeline.py`
 ### 2026-07-04 — Live-Paperclip craft port: caption.py reference + bottom-stack reconciliation  [handoff]
 - **Assumption:** the 2026-06-30 distillation captured the live engine's full craft layer.
 - **Ground truth / reason:** the live VisualsAgent + CreativeDirector prompts were updated ~3h AFTER the distillation. Audit: the canon already carried most of it (advertising-polish vocabulary, "a stranger sees ___", lower-40% rule, type grammar) — but three gaps: (1) the PROVEN compositor `caption.py` (feathered scrim, auto-fit headline/kicker, subhead/CTA grammar, luminance themes, brandmark — real CD root-cause fixes in its comments) was never ported, so P1-B reinvented a primitive one; (2) P1-B's slice never listed compose-caption/visual_engine as artifacts, so the builder never read the grammar; (3) `visual_style_guide.md` still said overlay "top third… never bottom", missing the live reconciliation (type stack at BOTTOM; person-photo sections scoped to person-subjects only).
