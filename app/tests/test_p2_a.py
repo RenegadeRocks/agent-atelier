@@ -76,7 +76,7 @@ def test_pipeline_processes_kanva_brand():
 from unittest.mock import patch
 from app.tools.caption_compose_server import caption_compose_handle_call_tool
 
-@patch("app.tools.caption_compose_server.default_ocr_checker", return_value=True)
+@patch("app.tools.caption_compose_server.ocr_checker", return_value=True)
 @patch("PIL.ImageDraw.ImageDraw.rectangle")
 @patch("PIL.ImageDraw.ImageDraw.text")
 def test_compositor_uses_brand_kit(mock_text, mock_rect, mock_ocr, tmp_path):
