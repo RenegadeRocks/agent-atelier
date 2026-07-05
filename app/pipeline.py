@@ -18,57 +18,23 @@ from app.tools.image_generate_server import image_generate_handle_call_tool
 from app.tools.drive_server import drive_handle_call_tool
 import json
 import uuid
+from app.brand_kit import load_brand_kit
+from app.resolver import resolve, ResolveScope, MODEL, AUTH, SecretsVault
 
 load_dotenv()
 
-TEST_BRAND_MAP = {
-    "[[BRAND_NAME]]": "Agent Atelier",
-    "[[BRAND_SHORT_NAME]]": "Atelier",
-    "[[EVERGREEN_PILLARS]]": "Operational Efficiency, AI Automation, Future of Work",
-    "[[EVERGREEN_PILLARS_1]]": "Operational Efficiency",
-    "[[CHANNELS]]": "Instagram, LinkedIn",
-    "[[VOICE_DESCRIPTORS]]": "Sharp, pragmatic, mildly contrarian",
-    "[[AUDIENCE_PERSONA]]": "Agency owners and cafe managers",
-    "[[AUDIENCE_PAINS]]": "Margin compression and operational chaos",
-    "[[MISSION]]": "Agent Atelier builds autonomous teams to reclaim human time.",
-    "[[LOCAL_DETAIL_BANK]]": "the fourth cold cup of coffee, the 4:05 PM sink dump",
-    "[[SCROLL_TEST_PERSONA]]": "a stressed manager scrolling during a brief break",
-    "[[LANGUAGES]]": "English",
-    "[[STANDING_WEEK]]": "Monday-Friday",
-    "[[CONTACT_WHATSAPP]]": "wa.me/agentatelier",
-    "[[CONTACT_INSTAGRAM]]": "@agentatelier",
-    "[[CTA_STYLE]]": "Soft hook, link in bio",
-    "[[OFFERINGS]]": "Full-service AI Ops",
-    "[[OFFERING_ID]]": "OPS-01",
-    "[[CLAIM_REVERIFY_MONTHS]]": "6",
-    "[[REQUIRE_SECOND_SOURCE_FOR_QUANTITATIVE]]": "True",
-    "[[IMAGE_PROVIDER]]": "Gemini native",
-    "[[IMAGE_QUALITY_TIER]]": "High",
-    "[[CLAIMS_ALLOWED]]": "General observations",
-    "[[CLAIMS_FORBIDDEN]]": "Guaranteed ROI",
-    "[[NON_DISCLOSURE_RULES]]": "No client names without consent",
-    "[[REQUIRED_FRAMING]]": "Actionable optimism",
-    "[[COMPARATIVE_CLAIMS_ALLOWED]]": "False",
-    "[[POLITICAL_CONTENT_ALLOWED]]": "False",
-    "[[CTA_FORBIDDEN_PHRASES]]": "Buy now, act fast",
-    "[[SOURCE_ALLOWLIST]]": "Primary research, reputable journals",
-    "[[SOURCE_DENYLIST]]": "Wikipedia, unverified blogs",
-    "[[POSTS_PER_WEEK_TARGET]]": "3",
-    "[[MAX_POSTS_PER_WEEK]]": "5",
-    "[[RESEARCH_POST_MIN_PER_WEEK]]": "1",
-}
+def get_vault():
+    return SecretsVault({
+        "google_oauth_token": os.environ.get("GOOGLE_OAUTH_TOKEN", "mock_google_token"),
+        "instagram_graph_token": os.environ.get("INSTAGRAM_GRAPH_TOKEN", "mock_ig_token"),
+        "gemini_image_pro_api_key": os.environ.get("GEMINI_API_KEY", "mock_gemini_key")
+    })
 
-def resolve_tokens(text: str) -> str:
-    if not text: return text
-    for k in sorted(TEST_BRAND_MAP.keys(), key=len, reverse=True):
-        text = text.replace(k, TEST_BRAND_MAP[k])
-    import re
-    text = re.sub(r'\[\[(.*?)\]\]', r'\1', text)
-    return text
-
-async def run_agent(agent, prompt: str) -> str:
-    agent.instruction = resolve_tokens(agent.instruction) + "\n\nCRITICAL: Square-bracket tokens like [[TOKEN]] must NEVER appear in your output."
-    prompt = resolve_tokens(prompt)
+async def run_agent(agent, prompt: str, brand_kit: dict) -> str:
+    env = os.environ
+    vault = get_vault()
+    agent.instruction = resolve(agent.instruction, brand_kit, env, vault, ResolveScope(MODEL)) + "\n\nCRITICAL: Square-bracket tokens like [[TOKEN]] must NEVER appear in your output."
+    prompt = resolve(prompt, brand_kit, env, vault, ResolveScope(MODEL))
     
     runner = runners.InMemoryRunner(agent=agent)
     events = await runner.run_debug(prompt, quiet=True)
@@ -80,8 +46,9 @@ async def run_agent(agent, prompt: str) -> str:
                     output_text += p.text
     return output_text.strip()
 
-async def run_pipeline_async(idea: str) -> dict:
+async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml') -> dict:
     validate_models_on_startup()
+    brand_kit = load_brand_kit(brand_kit_path, 'specs/brand_kit.schema.json')
     
     trace = []
     responses = {}
@@ -93,7 +60,7 @@ async def run_pipeline_async(idea: str) -> dict:
     me = get_me()
     prompt = f"Plan this idea: {idea}"
     print(f"[{me.name}] Prompt: {prompt}")
-    resp = await run_agent(me, prompt)
+    resp = await run_agent(me, prompt, brand_kit)
     responses["plan"] = resp
     trace.append("managing_editor")
     print(f"[{me.name}] Response:\n{resp}\n")
@@ -118,7 +85,7 @@ async def run_pipeline_async(idea: str) -> dict:
             draft_prompt_suffix = ""
             
         print(f"[{evergreen.name}] Prompt: {prompt}")
-        resp = await run_agent(evergreen, prompt)
+        resp = await run_agent(evergreen, prompt, brand_kit)
         responses["draft"] = resp
         trace.append("evergreen_content")
         print(f"[{evergreen.name}] Response:\n{resp}\n")
@@ -169,7 +136,7 @@ async def run_pipeline_async(idea: str) -> dict:
         research = get_research()
         prompt = f"Verify claims for this draft:\n{responses.get('draft', '')}"
         print(f"[{research.name}] Prompt: {prompt}")
-        resp = await run_agent(research, prompt)
+        resp = await run_agent(research, prompt, brand_kit)
         responses["research"] = resp
         trace.append("research_verification")
         print(f"[{research.name}] Response:\n{resp}\n")
@@ -182,7 +149,7 @@ async def run_pipeline_async(idea: str) -> dict:
         cd = get_cd()
         prompt = f"Review this draft:\n{responses.get('draft', '')}"
         print(f"[{cd.name}] Prompt: {prompt}")
-        resp = await run_agent(cd, prompt)
+        resp = await run_agent(cd, prompt, brand_kit)
         trace.append("creative_director")
         print(f"[{cd.name}] Response:\n{resp}\n")
         
@@ -211,7 +178,7 @@ async def run_pipeline_async(idea: str) -> dict:
             prompt += f"\n\nERROR FROM PREVIOUS ATTEMPT: {visual_prompt_suffix}"
             
         print(f"[{visual.name}] Prompt: {prompt}")
-        resp = await run_agent(visual, prompt)
+        resp = await run_agent(visual, prompt, brand_kit)
         responses["visual_response"] = resp
         trace.append("visual_production")
         print(f"[{visual.name}] Response:\n{resp}\n")
@@ -254,7 +221,7 @@ async def run_pipeline_async(idea: str) -> dict:
     visual = get_visual()
     alt_prompt = f"The final visual asset has been composited based on this brief:\n{visual_brief}\n\nThe final composited image file is at: {responses.get('visual_asset', '')}\n\nPlease write a brief, 1-2 sentence maximum final description of this image (strictly 20-350 characters, no status chatter). Do NOT exceed 2 sentences.\n\nYou MUST end your reply with exactly one fenced ```json block containing a single key 'alt_text'."
     print(f"[{visual.name}] Alt-Text Prompt: {alt_prompt}")
-    alt_resp = await run_agent(visual, alt_prompt)
+    alt_resp = await run_agent(visual, alt_prompt, brand_kit)
     responses["alt_text_response"] = alt_resp
     trace.append("visual_production_alt_text")
     
@@ -275,7 +242,7 @@ async def run_pipeline_async(idea: str) -> dict:
     ops = get_ops()
     prompt = f"Queue this final package:\nText: {responses.get('draft', '')}\nVisual: {responses.get('visual_asset', '')}\nStatus is approved by CD."
     print(f"[{ops.name}] Prompt: {prompt}")
-    resp = await run_agent(ops, prompt)
+    resp = await run_agent(ops, prompt, brand_kit)
     responses["queue"] = resp
     trace.append("publishing_operations")
     print(f"[{ops.name}] Response:\n{resp}\n")
@@ -299,9 +266,9 @@ async def run_pipeline_async(idea: str) -> dict:
         "responses": responses
     }
 
-def run_pipeline(idea: str) -> dict:
-    return asyncio.run(run_pipeline_async(idea))
+def run_pipeline(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml') -> dict:
+    return asyncio.run(run_pipeline_async(idea, brand_kit_path))
 
 if __name__ == "__main__":
-    result = run_pipeline("A test idea for the hard-coded brand")
+    result = run_pipeline("A test idea for the aol brand", 'brands/aol/brand_kit.yaml')
 

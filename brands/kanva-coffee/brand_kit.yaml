@@ -1,0 +1,103 @@
+brand_kit_version: 2
+brand_name: "Kanva Coffee Works"
+brand_short_name: "Kanva Coffee Works"
+tagline: "Fresh, traceable Karnataka coffee"
+locale: "Jayanagar, Bengaluru, Karnataka"
+languages: ["English", "Kannada"]
+timezone: "Asia/Kolkata"
+mission: "Let curious everyday coffee drinkers in India taste what fresh, traceable Karnataka coffee actually is."
+brand_type: "ecommerce_dtc"
+
+audience_persona: "a 29-year-old Bengaluru product designer who bought a French press during the pandemic, drinks two cups a day, and suspects the ₹180 'premium' supermarket bag is a lie"
+audience_pains: ["stale supermarket beans", "coffee snobbery is intimidating", "no idea what 'single estate' actually means", "wants better mornings, not a hobby"]
+scroll_test_persona: "that designer scrolling in the elevator at 9:40am, pre-coffee"
+
+intent_statement: "Kanva helps curious everyday coffee drinkers in India taste what fresh, traceable Karnataka coffee actually is, so they feel let in on something real; the next step is trying one fresh-roasted bag."
+desired_feeling: "let in — like a friend at the roastery just handed you a cup"
+primary_cta: "DM us 'FRESH' to try this month's roast"
+cta_destination: "dm"
+posting_goal: "conversion"
+weekly_capacity: "sustainable"
+
+voice_descriptors: ["warm", "plain-spoken", "quietly nerdy", "never snobby"]
+voice_do: ["name the estate and the family", "give one usable brewing tip", "respect filter kaapi culture", "say prices and dates plainly"]
+voice_dont: ["coffee-snob gatekeeping", "'artisanal/curated' clichés", "fake urgency", "health claims", "tasting notes nobody can taste"]
+sample_lines_good: ["Roasted Tuesday. At your door by Saturday. That's the whole trick.", "Chicory isn't a sin. Stale beans are."]
+sample_lines_bad: ["Elevate your ritual with our artisanal micro-lot experience.", "☕✨ Coffee lovers ASSEMBLE! Limited stock — grab yours NOW!!"]
+reading_level: "plain, conversational"
+
+claims_forbidden:
+  - "any health-outcome claim — 'antioxidants', 'boosts metabolism', 'burns fat', 'good for your heart', 'cures/prevents anything'"
+  - "'chemical-free' / 'pesticide-free' (not certified organic — never imply it)"
+  - "100%-satisfaction or weight-loss style outcome claims"
+  - "invented awards, rankings, or 'India's best'"
+claims_forbidden_confirmed: true
+
+non_disclosure_rules:
+  - "exact roast curves (time/temperature profiles) — trade secret; ceiling is 'slow-roasted in small batches'"
+  - "farm-gate prices paid to estates — never a number in words or image; ceiling is 'above-market, agreed with the family each season'"
+non_disclosure_rules_confirmed: true
+
+required_framing:
+  - topic: "caffeine effects (energy, focus, sleep)"
+    framing: "'effects vary person to person' — and never frame coffee as a health product"
+  - topic: "sourcing claims ('direct trade', 'single estate')"
+    framing: "only with the named estate/family on the same asset"
+required_framing_confirmed: true
+
+comparative_claims_allowed: false
+political_content_allowed: false
+claims_allowed: []
+
+offerings:
+  - id: "roastery_subscription"
+    name: "The Roastery Subscription"
+    one_liner: "Monthly small-batch beans, roasted within 72 hours of dispatch; every bag names its estate, family, varietal, process, and roast date."
+    is_flagship: true
+  - id: "first_crack_workshop"
+    name: "First Crack Sundays"
+    one_liner: "A 3-hour hands-on brewing workshop at the roastery, twelve seats, last Sunday monthly — cupping, grind play, filter-kaapi-vs-pour-over, roast a tray to take home."
+    funnels_from: "roastery_subscription"
+
+evergreen_pillars: ["what freshness actually changes", "brewing at home without the hobby", "the estates and families", "filter kaapi culture, honored", "coffee myths, gently corrected", "Bengaluru mornings"]
+local_detail_bank: ["the steel tumbler and dabarah", "first-crack pop at the 9-minute mark", "monsoon steam off a pour-over", "Chikkamagaluru estate mist", "the Tuesday roast log, handwritten", "Church Street drizzle", "jacaranda season", "the roastery's burlap smell", "Sunday cupping spoons", "the 6am BMTC bus past the shutter", "jaggery-and-sweet-lime tasting notes", "the Aiyanna family's east slope"]
+
+palette_hex: ["#2E1F1A", "#C97B3D", "#E8D5B7", "#4A6B4F"]
+accent_dark_bg: "#E8D5B7"
+accent_light_bg: "#2E1F1A"
+headline_font: "a warm slab serif"
+label_font: "a clean grotesque (small caps)"
+visual_register: "warm, tactile, real hands and steam and burlap; NOT minimal-luxe, NOT stock café"
+visual_variety: "balanced"
+visual_strategy: "product_led"
+product_pool: "assets/products/"
+image_provider: "gemini_image_pro"
+image_quality_tier: "medium"
+logo_asset: "assets/logo.png"
+wordmark_text: "Kanva"
+
+channels: ["instagram"]
+posts_per_week_target: 4
+max_posts_per_week: 5
+standing_week:
+  mon: { track: "evergreen" }
+  tue: { track: "offering:roastery_subscription" }
+  thu: { track: "evergreen", flag: "research_grounded" }
+  sat: { track: "offering:first_crack_workshop" }
+  sun: { track: "quiet" }
+research_post_min_per_week: 1
+
+cta_style: "soft"
+contact_instagram: "@kanvacoffeeworks"
+contact_whatsapp: ["+91 98450 11223"]
+cta_forbidden_phrases: ["buy now", "limited stock", "selling fast", "order today", "don't miss out"]
+
+approval_mode: "human"
+auto_publish_enabled: false
+
+source_allowlist: ["coffee research institutes", "SCA (Specialty Coffee Association)"]
+source_denylist: ["blogs", "forums", "reddit", "unverified social"]
+citation_required_for_claims: true
+require_second_source_for_quantitative: false
+claim_reverify_months: 6
+system_of_record: "google_sheets"

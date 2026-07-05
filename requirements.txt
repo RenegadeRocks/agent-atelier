@@ -9,3 +9,6 @@ Pillow==12.3.0
 pytest-asyncio==1.4.0
 google-cloud-storage==2.19.0
 google-cloud-storage==2.19.0
+
+PyYAML==6.0.2
+jsonschema==4.23.0
