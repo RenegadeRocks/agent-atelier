@@ -165,3 +165,9 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 - **Ground truth / reason:** P2-A kit derivation dropped Kanva's safety constraints (claims_forbidden, non_disclosure_rules, required_framing left empty) while marking them *_confirmed: true — vouching for rules that didn't exist and bypassing fail-closed. Result: a queued caption leaked roast-curve detail ("first-crack pop at the 9-minute mark") and a comparative hook.
 - **Decision:** fields populated verbatim from intake-answers.md; brand_kit.py now fails validation on any empty safety field with *_confirmed: true. Lesson: kit derivation must be checklist-verified against the intake source; confirmed-empty requires explicit owner sign-off.
 - **Files touched:** `brands/kanva-coffee/brand_kit.yaml`, `app/brand_kit.py`
+
+### 2026-07-05 — Source Ingestion Scope Reduction [P2-B]
+- **Assumption:** The source ingestion tool would fetch URLs, parse Instagram handles, and read PDFs as part of the P2-B onboarding.
+- **Ground truth / reason:** Owner explicitly constrained the v1 scope of source_ingest to local files only (markdown/text from a given directory). Building generic web fetchers, social media API integrations, and PDF parsers is out-of-scope for today's contract.
+- **Decision:** source_ingest gracefully declines URL, social, and PDF ingestion inputs with a logged message and falls back to manual interview, only ingesting local text/markdown files (e.g. from the demo source material).
+- **Files touched:** `app/tools/source_ingest.py`, `app/skills/intake_interview.py`
