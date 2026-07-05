@@ -112,7 +112,7 @@ async def run_pipeline_async(idea: str) -> dict:
     while review_loop_count <= 2 and not approved_by_cd:
         # [IDEATE+DRAFT]
         evergreen = get_evergreen()
-        prompt = f"Draft content based on this plan:\n{responses.get('plan', '')}"
+        prompt = f"Draft content based on this plan:\n{responses.get('plan', '')}\n\nYou MUST end your reply with exactly one fenced ```json block containing these exactly named keys: 'idea_sentence', 'caption', 'words', 'visual_brief'."
         if draft_prompt_suffix:
             prompt += f"\n\nERROR FROM PREVIOUS ATTEMPT: {draft_prompt_suffix}"
             draft_prompt_suffix = ""
@@ -125,13 +125,11 @@ async def run_pipeline_async(idea: str) -> dict:
         
         # Strict Extraction - fail loudly if fields are missing
         import re
-        caption_match = re.search(r'\*\*Caption:\*\*\s*(.*?)(?=\n\*\*|\Z)', resp, re.DOTALL)
-        idea_sentence_match = re.search(r'\*\*Idea Sentence:\*\*\s*(.*?)(?=\n\*\*|\Z)', resp, re.DOTALL)
-        words_match = re.search(r'\*\*WORDS:\*\*\s*(.*?)(?=\n\*|\n\*\*|\Z)', resp, re.DOTALL)
-        visual_brief_match = re.search(r'\*\*Visual Brief.*?\*\*(.*?)(?=\n\*\*|\Z)', resp, re.DOTALL)
+        import json
+        blocks = re.findall(r'```json\s*(.*?)\s*```', resp, re.DOTALL)
         
-        if not caption_match or not idea_sentence_match or not words_match or not visual_brief_match:
-            draft_prompt_suffix = "You failed to provide all required fields (**Caption:**, **Idea Sentence:**, **WORDS:**, **Visual Brief:**). You must provide them exactly as formatted."
+        if not blocks:
+            draft_prompt_suffix = "You failed to provide a fenced ```json block. You must output exactly one JSON block at the end."
             draft_loop_count += 1
             if draft_loop_count > 2:
                 print("[pipeline] Escalate due to draft formatting limit.")
@@ -140,10 +138,32 @@ async def run_pipeline_async(idea: str) -> dict:
             print(f"[pipeline] Draft extraction failed. Bouncing to evergreen. Loop count: {draft_loop_count}/2")
             continue
             
-        caption = caption_match.group(1).strip()
-        idea_sentence = idea_sentence_match.group(1).strip()
-        hook = words_match.group(1).strip()
-        visual_brief = visual_brief_match.group(1).strip()
+        try:
+            draft_data = json.loads(blocks[-1])
+        except json.JSONDecodeError:
+            draft_prompt_suffix = "The ```json block you provided contained invalid JSON. Ensure it is perfectly formatted."
+            draft_loop_count += 1
+            if draft_loop_count > 2:
+                print("[pipeline] Escalate due to draft formatting limit.")
+                trace.append("escalate_me")
+                return {"status": "Escalated", "trace": trace, "responses": responses}
+            print(f"[pipeline] Draft JSON parse failed. Bouncing to evergreen. Loop count: {draft_loop_count}/2")
+            continue
+            
+        caption = str(draft_data.get("caption", "")).strip()
+        idea_sentence = str(draft_data.get("idea_sentence", "")).strip()
+        hook = str(draft_data.get("words", "")).strip()
+        visual_brief = str(draft_data.get("visual_brief", "")).strip()
+        
+        if not caption or not idea_sentence or not hook or not visual_brief:
+            draft_prompt_suffix = "Your JSON block was missing one or more required keys: 'idea_sentence', 'caption', 'words', 'visual_brief'."
+            draft_loop_count += 1
+            if draft_loop_count > 2:
+                print("[pipeline] Escalate due to draft formatting limit.")
+                trace.append("escalate_me")
+                return {"status": "Escalated", "trace": trace, "responses": responses}
+            print(f"[pipeline] Draft extraction failed due to missing keys. Bouncing to evergreen. Loop count: {draft_loop_count}/2")
+            continue
         
         # [RESEARCH STUB]
         research = get_research()
@@ -232,16 +252,24 @@ async def run_pipeline_async(idea: str) -> dict:
 
     # [LATE-BOUND ALT TEXT]
     visual = get_visual()
-    alt_prompt = f"The final visual asset has been selected and generated based on this brief:\n{visual_brief}\n\nPlease write a brief, 1-2 sentence maximum final '**Alt Text:**' describing this image (strictly 20-350 characters, no status chatter). Do NOT exceed 2 sentences."
+    alt_prompt = f"The final visual asset has been selected and generated based on this brief:\n{visual_brief}\n\nPlease write a brief, 1-2 sentence maximum final description of this image (strictly 20-350 characters, no status chatter). Do NOT exceed 2 sentences.\n\nYou MUST end your reply with exactly one fenced ```json block containing a single key 'alt_text'."
     print(f"[{visual.name}] Alt-Text Prompt: {alt_prompt}")
     alt_resp = await run_agent(visual, alt_prompt)
     responses["alt_text_response"] = alt_resp
     trace.append("visual_production_alt_text")
     
     import re
-    alt_text_match = re.search(r'(?i)Alt[- ]Text[\*\:\s]*(.*?)(?=\n\s*\n|\n\s*#|\n\s*Status:|\n\s*Run Metrics:|\Z)', alt_resp, re.DOTALL)
-    alt_text = alt_text_match.group(1).strip() if alt_text_match else ""
-    alt_text = alt_text.replace('*', '').replace('>', '').strip()
+    import json
+    alt_text = ""
+    blocks = re.findall(r'```json\s*(.*?)\s*```', alt_resp, re.DOTALL)
+    if blocks:
+        try:
+            alt_data = json.loads(blocks[-1])
+            alt_text = str(alt_data.get("alt_text", "")).strip()
+        except json.JSONDecodeError:
+            pass
+    if not alt_text:
+        alt_text = "Fallback alt text generated due to parsing failure."
 
     # [QUEUE]
     ops = get_ops()

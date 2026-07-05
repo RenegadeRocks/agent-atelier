@@ -245,23 +245,28 @@ def test_p1_b_pipeline_flow():
     caption = ""
     alt_text = ""
     
-    # Since run_pipeline_async doesn't return the raw variables, we can extract them from the queue handoff prompt which includes the final draft
     draft_text = responses.get("draft", "")
     visual_text = responses.get("visual_response", "")
+    alt_text_resp = responses.get("alt_text_response", "")
     
-    caption_match = re.search(r'\*\*Caption:\*\*\s*(.*?)(?=\n\*\*|\Z)', draft_text, re.DOTALL)
-    if caption_match:
-        caption = caption_match.group(1).strip()
-        
-    alt_text_match = re.search(r'(?i)Alt[- ]Text[\*\:\s]*(.*?)(?=\n\s*\n|\n\s*#|\n\s*Status:|\n\s*Run Metrics:|\Z)', visual_text, re.DOTALL)
-    if not alt_text_match:
-        # Fallback to check if it's in the alt_text_response
-        alt_text_resp = responses.get("alt_text_response", "")
-        alt_text_match = re.search(r'(?i)Alt[- ]Text[\*\:\s]*(.*?)(?=\n\s*\n|\n\s*#|\n\s*Status:|\n\s*Run Metrics:|\Z)', alt_text_resp, re.DOTALL)
-
-    if alt_text_match:
-        alt_text = alt_text_match.group(1).strip()
-        alt_text = alt_text.replace('*', '').replace('>', '').strip()
+    import json
+    
+    blocks = re.findall(r'```json\s*(.*?)\s*```', draft_text, re.DOTALL)
+    if blocks:
+        try:
+            draft_data = json.loads(blocks[-1])
+            caption = str(draft_data.get("caption", "")).strip()
+            hook = str(draft_data.get("words", "")).strip()
+        except:
+            pass
+            
+    blocks_alt = re.findall(r'```json\s*(.*?)\s*```', alt_text_resp, re.DOTALL)
+    if blocks_alt:
+        try:
+            alt_data = json.loads(blocks_alt[-1])
+            alt_text = str(alt_data.get("alt_text", "")).strip()
+        except:
+            pass
         
     assert "[[" not in caption, f"Unresolved token [[ found in caption: {caption}"
     assert "[[" not in alt_text, f"Unresolved token [[ found in alt_text: {alt_text}"
@@ -269,6 +274,12 @@ def test_p1_b_pipeline_flow():
     # Invariant: Caption and hook must not silently fall back to input directive
     assert caption != test_idea, "Caption silently fell back to the input directive (extraction failed)."
     assert test_idea not in caption, "Caption contains the input directive."
+    
+    # Invariant: WORDS checks (2-10 words, contains alphabetic chars, not purely numeric/punctuation)
+    words_list = hook.split()
+    assert 2 <= len(words_list) <= 10, f"WORDS must be 2-10 words, got {len(words_list)}: '{hook}'"
+    has_alpha = any(c.isalpha() for c in hook)
+    assert has_alpha, f"WORDS must contain at least one alphabetic character, got: '{hook}'"
     
     # Alt-text quality invariants
     assert len(alt_text) >= 20, f"Alt text too short (<20 chars): {alt_text}"
