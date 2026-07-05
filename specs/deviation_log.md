@@ -159,3 +159,9 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 - **Ground truth / reason:** Minor residue exists, and some visual prompting rules are deferred.
 - **Decision:** rows 32–35 residue; kit desired_feeling must reach the image prompt — deferred to P4-A; golden-set REJECT #1: Kanva roastery image — tattered, stained log reads as a hygiene risk for an F&B brand (owner verdict).
 - **Files touched:** N/A
+
+### 2026-07-05 — Kanva safety constraints dropped [P2-A]
+- **Assumption:** Kit derivation automatically pulls in all safety rules from the source documents.
+- **Ground truth / reason:** P2-A kit derivation dropped Kanva's safety constraints (claims_forbidden, non_disclosure_rules, required_framing left empty) while marking them *_confirmed: true — vouching for rules that didn't exist and bypassing fail-closed. Result: a queued caption leaked roast-curve detail ("first-crack pop at the 9-minute mark") and a comparative hook.
+- **Decision:** fields populated verbatim from intake-answers.md; brand_kit.py now fails validation on any empty safety field with *_confirmed: true. Lesson: kit derivation must be checklist-verified against the intake source; confirmed-empty requires explicit owner sign-off.
+- **Files touched:** `brands/kanva-coffee/brand_kit.yaml`, `app/brand_kit.py`
