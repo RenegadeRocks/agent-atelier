@@ -43,3 +43,7 @@ Cut from the tail: **P6** → **P5-B** (Studio Floor console — demo-polish) �
 (publish-time semantic referee — the one soft gate). **P4-A** (the falsifiable governance
 floor) and **P5-A** (the publish path that must ship) never drop. The gates, not the
 time-boxes, are the schedule.
+
+---
+
+**2026-07-06 — BUILD COMPLETE.** All eleven contracts sealed and independently validated (evidence: `app/tests/evidence/p*_validation.md`). Feature-complete vs the PRD per CONTRACT P6 clause 9. Remaining: submission materials (writeup + video) and owner-approved polish only.

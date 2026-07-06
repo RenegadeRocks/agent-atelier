@@ -47,3 +47,4 @@ does not travel between PCs — this file, plus the code and the spec, is what r
 - ✅ Fixed `onboard_brand.py` missing save feature: It now saves kits to disk, parses them correctly, and defaults invalid kits to `.draft.yaml`.
 - ⚠️ **Deviation Log:** Added an automatic retry loop in `onboard_brand.py` interactive shell. On parse or validation failure, it intercepts the output and injects `specs/brand_kit.template.yaml` back to the Strategist up to 2 times, forcing strict adherence to the schema.
 - ✅ **P2-B CLOSED:** Kit persistence is live, schema validation enforces fail-closed, and faithfulness checks pass.
+- 2026-07-06 (final): Eleven of eleven sealed. P6 closed with real audit (5.6% escape rate, CI [1.0%, 25.8%]) and real retro. Handoff package cut: HANDOFF.md quickstart, NEXT-SESSION-BOOTSTRAP.md (Teo validator boot), sealed-HEAD zip. NEXT ACTION: submission.
