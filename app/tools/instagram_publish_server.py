@@ -3,7 +3,7 @@ import json
 import asyncio
 from app.tools.base import create_stub_server, run_sse, ALL_OUTPUT_SCHEMAS
 
-def semantic_referee_check(caption: str, brand_kit: dict) -> dict:
+def default_semantic_referee_check(caption: str, brand_kit: dict) -> dict:
     prompt = f"""
 You are the Publish-Time Semantic Referee. Evaluate this caption for safety and compliance.
 Caption: "{caption}"
@@ -16,36 +16,21 @@ Rules:
 
 Return exactly one JSON block with keys: 'status' ("PASS" or "BLOCK") and 'reason' (string).
 """
-    try:
-        from google import genai
-        client = genai.Client()
-        # For tests, we use an in-memory client or mock, but the real pipeline uses Gemini
-        # We can simulate the referee directly or just use our standard mock wrapper if needed.
-        # However, to be safe against test stubs, let's just make a simple call if API key exists.
-        if os.environ.get("GEMINI_API_KEY", "mock_gemini_key") == "mock_gemini_key":
-            # Mock logic for tests
-            caption_lower = caption.lower()
-            if any(cta.lower() in caption_lower for cta in brand_kit.get('cta_forbidden_phrases', [])):
-                return {"status": "BLOCK", "reason": "Smuggled CTA detected"}
-            if "fail-the-referee" in caption_lower:
-                return {"status": "BLOCK", "reason": "Test failure phrase"}
-            if "referee-timeout" in caption_lower:
-                raise Exception("Simulated API timeout")
-            return {"status": "PASS", "reason": "Looks good"}
-        
-        # Real call
-        response = client.models.generate_content(
-            model='gemini-3.1-pro-preview',
-            contents=prompt,
-        )
-        import re
-        blocks = re.findall(r'```json\s*(.*?)\s*```', response.text, re.DOTALL)
-        if blocks:
-            return json.loads(blocks[-1])
-        return {"status": "PASS", "reason": "Parse fail - fallback to pass"}
-    except Exception as e:
-        # Re-raise to trigger degrade logic
-        raise e
+    from google import genai
+    client = genai.Client()
+    # Real call
+    response = client.models.generate_content(
+        model='gemini-3.1-pro-preview',
+        contents=prompt,
+    )
+    import re
+    blocks = re.findall(r'```json\s*(.*?)\s*```', response.text, re.DOTALL)
+    if blocks:
+        return json.loads(blocks[-1])
+    return {"status": "PASS", "reason": "Parse fail - fallback to pass"}
+
+# Module-level variable for dependency injection
+semantic_referee_check_impl = default_semantic_referee_check
 
 def custom_publish_handler(args: dict) -> list:
     from mcp.types import TextContent
@@ -54,7 +39,7 @@ def custom_publish_handler(args: dict) -> list:
     mode = brand_kit.get("approval_mode", "human")
     
     try:
-        referee_result = semantic_referee_check(caption, brand_kit)
+        referee_result = semantic_referee_check_impl(caption, brand_kit)
         if referee_result.get("status") == "BLOCK":
             return [TextContent(type="text", text=json.dumps({"error": f"Semantic Referee BLOCK: {referee_result.get('reason')}"}))]
     except Exception as e:

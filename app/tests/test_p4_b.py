@@ -1,7 +1,7 @@
 import pytest
 import os
 import json
-from app.tools.instagram_publish_server import semantic_referee_check, custom_publish_handler
+from app.tools.instagram_publish_server import semantic_referee_check_impl, custom_publish_handler
 from app.pipeline import run_pipeline
 
 def test_semantic_referee_blocks_smuggled_cta():
@@ -10,7 +10,10 @@ def test_semantic_referee_blocks_smuggled_cta():
         "approval_mode": "auto"
     }
     caption = "This is a great product! click link in our bio!"
-    result = custom_publish_handler({"caption": caption, "brand_kit": brand_kit})
+    from unittest.mock import patch
+    with patch("app.tools.instagram_publish_server.semantic_referee_check_impl") as mock_check:
+        mock_check.return_value = {"status": "BLOCK", "reason": "Smuggled CTA detected"}
+        result = custom_publish_handler({"caption": caption, "brand_kit": brand_kit})
     assert len(result) > 0
     resp = json.loads(result[0].text)
     assert "error" in resp
@@ -21,10 +24,12 @@ def test_semantic_referee_degrades_to_advisory_in_human_mode():
         "approval_mode": "human"
     }
     caption = "A perfectly fine caption with a referee-timeout"
-    os.environ["GEMINI_API_KEY"] = "mock_gemini_key"
     
-    # In human mode, failure (timeout) degrades to advisory (passes through)
-    result = custom_publish_handler({"caption": caption, "brand_kit": brand_kit})
+    from unittest.mock import patch
+    with patch("app.tools.instagram_publish_server.semantic_referee_check_impl") as mock_check:
+        mock_check.side_effect = Exception("Simulated API timeout")
+        # In human mode, failure (timeout) degrades to advisory (passes through)
+        result = custom_publish_handler({"caption": caption, "brand_kit": brand_kit})
     resp = json.loads(result[0].text)
     assert "error" not in resp
     assert resp.get("posted_permalink") == "stub"
@@ -34,10 +39,12 @@ def test_semantic_referee_fails_closed_in_auto_mode():
         "approval_mode": "auto"
     }
     caption = "A perfectly fine caption with a referee-timeout"
-    os.environ["GEMINI_API_KEY"] = "mock_gemini_key"
     
-    # In auto mode, failure (timeout) FAILS CLOSED
-    result = custom_publish_handler({"caption": caption, "brand_kit": brand_kit})
+    from unittest.mock import patch
+    with patch("app.tools.instagram_publish_server.semantic_referee_check_impl") as mock_check:
+        mock_check.side_effect = Exception("Simulated API timeout")
+        # In auto mode, failure (timeout) FAILS CLOSED
+        result = custom_publish_handler({"caption": caption, "brand_kit": brand_kit})
     resp = json.loads(result[0].text)
     assert "error" in resp
     assert "Failing CLOSED" in resp["error"]
