@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Atelier · Studio Floor</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="loading" data-density="comfortable">
+<noscript><p class="noscript">The Studio Floor needs JavaScript — it is a live console, not a document.</p></noscript>
+
+<header class="topbar" role="banner">
+  <div class="topbar-row">
+    <span class="wordmark">AGENT ATELIER · <strong>STUDIO FLOOR</strong></span>
+    <span id="demoBadge" class="badge badge-demo" hidden title="No exported state.json found — showing the bundled demo fixture. Run tools/export_floor_state.py to see real data.">DEMO DATA</span>
+    <label class="brand-pick">Brand
+      <select id="brandSelect" aria-label="Brand"></select>
+    </label>
+    <span class="mode-chip" title="Orchestrator: the weekly rhythm runs and pieces collect at the human gate (the async default stance). Conductor mode wires in at P5-A.">Mode: <strong>Orchestrator</strong> <span class="dim">(default)</span></span>
+    <span class="spacer"></span>
+    <span id="connChip" class="conn-chip" title="This v1 polls an exported projection (data/state.json) written by tools/export_floor_state.py — there is no live relay. What you see is the last export, re-read every 5 seconds.">◌ Snapshot</span>
+    <button id="densityBtn" class="icon-btn" type="button" aria-label="Toggle density" title="Density: comfortable / compact">◫</button>
+    <button id="themeBtn" class="icon-btn" type="button" aria-label="Toggle theme" title="Theme: dark / light">☾</button>
+  </div>
+  <div class="topbar-row topbar-sub">
+    <span class="gauge-wrap" title="Per-run token accumulator vs the run cap — the circuit breaker's gauge (§13.2), not a monthly budget.">
+      Run budget
+      <span class="gauge" role="meter" aria-label="Run budget" id="budgetGauge"><span class="gauge-fill" id="budgetFill"></span></span>
+      <span id="budgetPct" class="mono">—</span>
+    </span>
+    <span id="breakerChip" class="chip chip-ok">breaker: —</span>
+    <span id="inMotion" class="chip">— in motion</span>
+    <span id="needYou" class="chip chip-needs">▲ — need you</span>
+  </div>
+</header>
+
+<div id="offlineBanner" class="offline-banner" hidden>▲ Offline — the poll failed; showing last-known data.</div>
+<div id="rightNow" class="rightnow" hidden></div>
+<div id="followBanner" class="follow-banner" hidden></div>
+
+<main class="layout" id="layout">
+  <section class="stage" aria-label="Studio views">
+    <nav class="tabs" role="tablist" aria-label="Views">
+      <button class="tab active" role="tab" aria-selected="true" data-tab="floor" id="tab-floor">Floor</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="pipeline" id="tab-pipeline">Pipeline</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="company" id="tab-company">Company</button>
+    </nav>
+
+    <div id="viewFloor" class="view" role="tabpanel" aria-labelledby="tab-floor">
+      <div id="floorEmpty" class="empty-note" hidden>No pieces yet — the floor is quiet. Next wake: the Monday editorial calendar.</div>
+      <div class="floor" id="floor">
+        <svg id="edges" class="edges" aria-hidden="true" focusable="false"></svg>
+
+        <article class="station st-me" id="st-me" data-station="me" style="--hue: var(--a-me)">
+          <header class="st-head"><span class="st-glyph">◆</span><span class="st-name">Managing Editor</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <article class="station st-research feeder" id="st-research" data-station="research" style="--hue: var(--a-res)">
+          <header class="st-head"><span class="st-glyph">◈</span><span class="st-name">Research &amp; Verification</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <p class="st-note dim">┄ verified-claim feeder rail</p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <article class="station st-evergreen" id="st-evergreen" data-station="evergreen" style="--hue: var(--a-ever)">
+          <header class="st-head"><span class="st-glyph">▢</span><span class="st-name">Evergreen Content</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <article class="station st-offering" id="st-offering" data-station="offering" style="--hue: var(--a-off)">
+          <header class="st-head"><span class="st-glyph">▤</span><span class="st-name">Offering Content</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <article class="station st-lint gate" id="st-lint" data-station="lint">
+          <header class="st-head"><span class="st-glyph gate-glyph">⬢</span><span class="st-name">Ledger Lint</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <p class="st-note dim">deterministic gate — countable rules, pre-CD</p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <article class="station st-cd" id="st-cd" data-station="cd" style="--hue: var(--a-cd)">
+          <header class="st-head"><span class="st-glyph">✶</span><span class="st-name">Creative Director</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <p class="st-note dim">Gate 0 Scroll Test · Gate 1 Compliance</p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <article class="station st-strategist docked" id="st-strategist" data-station="strategist" style="--hue: var(--a-str)">
+          <header class="st-head"><span class="st-glyph">✦</span><span class="st-name">Brand Onboarding Strategist</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Docked</span></p>
+          <p class="st-note dim">wakes only during a §7.1 intake</p>
+        </article>
+
+        <article class="station st-visual" id="st-visual" data-station="visual" style="--hue: var(--a-vis)">
+          <header class="st-head"><span class="st-glyph">▣</span><span class="st-name">Visual Production</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <article class="station st-cdrender" id="st-cdrender" data-station="cdrender" style="--hue: var(--a-cd)">
+          <header class="st-head"><span class="st-glyph">✶</span><span class="st-name">CD Render Pass</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <p class="st-note dim">"visibly different" check, post-render</p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <article class="station st-pubops" id="st-pubops" data-station="pubops" style="--hue: var(--a-pub)">
+          <header class="st-head"><span class="st-glyph">⬡</span><span class="st-name">Publishing &amp; Ops</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <article class="station st-desk human" id="st-desk" data-station="desk">
+          <header class="st-head"><span class="st-glyph">★</span><span class="st-name">YOUR DESK — Human Gate</span></header>
+          <p class="st-state"><span class="st-ico">·</span><span class="st-label">Idle</span></p>
+          <div class="st-pieces"></div>
+        </article>
+
+        <div class="station st-record terminal" id="st-record" data-station="record">
+          <span class="dim">publish ▶ record → ledger + audit</span>
+        </div>
+      </div>
+      <p class="legend dim">Legend: ● working · ◆ orchestrating · ✶ reviewing · ⬢ deterministic gate · ↩ review loop · ▣ rendering · ◈ research · ⬡ ops · ★ you · ▲ waiting on you · ┄ feeder rail</p>
+    </div>
+
+    <div id="viewPipeline" class="view" role="tabpanel" aria-labelledby="tab-pipeline" hidden>
+      <div class="lanes" id="lanes"></div>
+    </div>
+
+    <div id="viewCompany" class="view" role="tabpanel" aria-labelledby="tab-company" hidden>
+      <div class="company" id="company"></div>
+    </div>
+
+    <section class="tray" aria-label="Needs you" id="trayWrap">
+      <h2 class="panel-title">NEEDS YOU <span id="trayCount" class="count-chip">0</span></h2>
+      <div id="tray" class="tray-items" aria-live="assertive"></div>
+    </section>
+
+    <section class="trust" aria-label="Trust ladder" id="trustPanel">
+      <h2 class="panel-title">TRUST</h2>
+      <div id="trustBody"></div>
+    </section>
+  </section>
+
+  <aside class="feedrail" aria-label="Activity feed">
+    <h2 class="panel-title">ACTIVITY</h2>
+    <div class="feed-filters" role="toolbar" aria-label="Feed filters">
+      <button class="ffilter active" data-filter="all" type="button">All</button>
+      <button class="ffilter" data-filter="reviews" type="button">Reviews</button>
+      <button class="ffilter" data-filter="handoffs" type="button">Handoffs</button>
+      <button class="ffilter" data-filter="approvals" type="button">Approvals</button>
+      <button class="ffilter" data-filter="alerts" type="button">Alerts</button>
+      <button class="ffilter" data-filter="needsme" type="button">Needs me</button>
+    </div>
+    <div id="feed" class="feed" aria-live="polite"></div>
+  </aside>
+</main>
+
+<div id="drawerBackdrop" class="drawer-backdrop" hidden></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
+  <div id="drawerBody"></div>
+</aside>
+
+<div class="skeleton" id="skeleton" aria-hidden="true"><div class="sk-line"></div><div class="sk-line"></div><div class="sk-line w60"></div></div>
+
+<script src="app.js"></script>
+</body>
+</html>
