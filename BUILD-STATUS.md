@@ -13,7 +13,7 @@ Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-a
 | 2 | P1-A | 1 | ✅ verified + committed + authorized | one idea flows through all six agents, in role |
 | 3 | P1-B | 1 | ✅ verified + committed + authorized | one on-brand piece passes both gates + the linter → lands in the Sheets queue |
 | 4 | P2-A | 2 | ✅ verified + committed + authorized | P1 brand runs entirely from `brand_kit.yaml`; a 2nd toy brand via kit only; missing-var blocks |
-| 5 | P2-B | 2 | ✅ verified + committed + authorized | new brand onboarded by interview, zero code changes, produces a piece |
+| 5 | P2-B | 2 | 🔨 in progress | new brand onboarded by interview, zero code changes, produces a piece |
 | 6 | P3   | 3 | ⬜ | a full week auto-plans/drafts/reviews/queues; rotation-violating draft rejected pre-CD; §9.5 backpressure pause |
 | 7 | P4-A | 4 | ⬜ | deterministic safety/claim scenarios pass; breaker fires; CI eval blocks a golden-set regression |
 | 8 | P4-B | 4 | ⬜ | publish-time referee catches a smuggled-CTA/tone near-miss; degrades to advisory cleanly |

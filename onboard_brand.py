@@ -46,6 +46,50 @@ def preload_ingested_context(source_dir: str) -> str:
                 print("[System] Ingestion successful. Passing to Strategist...\n")
     return ingested_context
 
+def process_kit_output(output_text: str, base_dir: str = "."):
+    import re
+    import yaml
+    import traceback
+    
+    blocks = re.findall(r'```(?:yaml)?\s*(.*?)\s*```', output_text, re.DOTALL | re.IGNORECASE)
+    for block in blocks:
+        if 'brand_kit_version' in block:
+            print("\n[System] Detected Brand Kit YAML output. Attempting to save and validate...")
+            try:
+                kit_data = yaml.safe_load(block)
+                if not isinstance(kit_data, dict):
+                    continue
+                
+                # Derive slug
+                brand_name = kit_data.get('brand_short_name') or kit_data.get('brand_name') or 'unknown-brand'
+                slug = re.sub(r'[^a-z0-9]+', '-', brand_name.lower()).strip('-')
+                
+                # Ensure directory exists
+                brand_dir = os.path.join(base_dir, "brands", slug)
+                os.makedirs(brand_dir, exist_ok=True)
+                
+                kit_path = os.path.join(brand_dir, "brand_kit.yaml")
+                with open(kit_path, 'w', encoding='utf-8') as f:
+                    f.write(block.strip())
+                
+                print(f"[System] Kit written to: {kit_path}")
+                
+                # Validate
+                from app.brand_kit import load_brand_kit
+                schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "specs", "brand_kit.schema.json")
+                try:
+                    load_brand_kit(kit_path, schema_path)
+                    print("\n[System] VALIDATION: PASS")
+                    print(f"[System] The Brand Kit at {kit_path} is now ACTIVE.")
+                except Exception as e:
+                    draft_path = os.path.join(brand_dir, "brand_kit.draft.yaml")
+                    os.rename(kit_path, draft_path)
+                    print("\n[System] VALIDATION: FAIL")
+                    print(f"[System] Reason: {str(e)}")
+                    print(f"[System] The kit has been renamed to {draft_path} and is NOT active.")
+            except Exception as e:
+                print(f"[System] Failed to parse or save YAML: {e}")
+
 async def main():
     parser = argparse.ArgumentParser(description="Brand Onboarding CLI")
     parser.add_argument("source_dir", nargs='?', default=None, help="Directory containing source materials (e.g. demo/brand-packs/kanva-coffee/)")
@@ -103,6 +147,7 @@ async def main():
                         if getattr(p, 'text', None):
                             output_text += p.text
             print(f"Strategist: {output_text.strip()}")
+            process_kit_output(output_text)
             
         except (KeyboardInterrupt, EOFError):
             print("\nExiting onboarding session...")

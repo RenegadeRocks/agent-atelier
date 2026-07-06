@@ -109,3 +109,39 @@ def test_ingestion_scope_only_reads_sources_dir(tmp_path):
     assert "Best chuski in Jaipur" in context
     assert "C-Scheme Locale" not in context
 
+def test_cli_kit_persistence_and_validation(tmp_path):
+    """
+    Scenario: At the end of the interview, the CLI writes the compiled kit to brands/<slug>/brand_kit.yaml.
+    It validates it, and the final YAML contains the first-light-amended rule.
+    """
+    import yaml
+    from onboard_brand import process_kit_output
+    
+    # Create a valid mock kit based on AOL
+    base_kit_path = "brands/aol/brand_kit.yaml"
+    with open(base_kit_path, 'r', encoding='utf-8') as f:
+        kit_data = yaml.safe_load(f)
+        
+    kit_data["brand_short_name"] = "Chuski Club Test"
+    kit_data["claims_forbidden"].append("No invented sustainability, zero-waste, or eco-friendly packaging claims")
+    kit_data["claims_forbidden_confirmed"] = True
+    
+    # Simulate LLM output
+    mock_yaml = yaml.safe_dump(kit_data)
+    mock_output = f"Here is the final kit:\n```yaml\n{mock_yaml}\n```\nAll done!"
+    
+    # Run the CLI saving logic
+    process_kit_output(mock_output, base_dir=str(tmp_path))
+    
+    # Assert file is written to correct path
+    expected_path = tmp_path / "brands" / "chuski-club-test" / "brand_kit.yaml"
+    assert expected_path.exists(), f"Kit was not saved to expected path: {expected_path}"
+    
+    # Assert validation passed (not renamed to .draft.yaml)
+    draft_path = tmp_path / "brands" / "chuski-club-test" / "brand_kit.draft.yaml"
+    assert not draft_path.exists(), "Kit failed validation and was saved as draft"
+    
+    # Assert rule exists in saved file
+    saved_kit = yaml.safe_load(expected_path.read_text(encoding='utf-8'))
+    assert "No invented sustainability, zero-waste, or eco-friendly packaging claims" in saved_kit["claims_forbidden"]
+
