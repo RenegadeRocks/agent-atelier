@@ -39,24 +39,30 @@ async def evaluate_golden_set(filepath: str, brand_kit: dict):
     negatives = 0
     caught_negatives = 0
     
+    from app.pipeline import run_agent
+    
     for entry in entries:
         kind = entry.get("kind")
         owner_expected = entry.get("owner_label", {}).get("expected_cd", "reject").upper()
         owner_decision = entry.get("owner_label", {}).get("decision", "reject").upper()
         
         artifact = entry.get("artifact", {})
-        prompt = f"Evaluate this artifact:\n{yaml.dump(artifact)}"
         
-        runner = runners.InMemoryRunner(agent=cd_agent)
-        events = await runner.run_debug(prompt, quiet=True)
+        # Prepare draft to match what the CD usually sees
+        draft_dict = {
+            "idea_sentence": artifact.get("idea_sentence", ""),
+            "caption": artifact.get("caption", ""),
+            "hook_text": artifact.get("hook", ""),
+            "visual_brief": str(artifact.get("visual_brief", "")),
+            "shape": artifact.get("shape", ""),
+            "visual_label": artifact.get("visual_label", "")
+        }
+        draft_json = f"```json\n{yaml.dump(draft_dict)}\n```"
+        prompt = f"Review this draft:\n{draft_json}"
         
-        output_text = ""
-        for e in events:
-            if getattr(e, 'author', '') != 'user' and getattr(e, 'message', None) and hasattr(e.message, 'parts'):
-                for p in e.message.parts:
-                    if getattr(p, 'text', None):
-                        output_text += p.text
-                        
+        output_text = await run_agent(cd_agent, prompt, brand_kit)
+        print(f"\n--- JUDGE TRANSCRIPT (Entry: {entry.get('id')}) ---\nPrompt:\n{prompt}\nOutput:\n{output_text}\n-----------------------------------\n")
+        
         output_upper = output_text.upper()
         
         # Parse CD verdict

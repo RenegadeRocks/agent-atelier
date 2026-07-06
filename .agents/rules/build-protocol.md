@@ -51,7 +51,7 @@ P5-A → P5-B → P6.** For the **next** contract only, run its workflow
    - Update **`WORKLOG.md`** (see §2) — even if you are continuing.
    - Log any deviation in **`specs/deviation_log.md`** (see §4).
 8. **AUTHORIZATION.** The owner signs off and releases the next contract. You do not
-   self-authorize the next phase.
+   self-authorize the next phase. Every completion report must contain the raw pasted OUTPUT of `gh run list --limit 2` — the actual table text, not links. A report whose runs cannot be matched verbatim to gh output is invalid and the contract stays open. Also, `git status --porcelain` must be EMPTY after your completion commit (a dirty tree after a completion commit is itself a failed gate).
 
 Gates are quality checkpoints, **not** stopping lines — the full P0–P6 scope is the
 target. But never open contract N+1 until N is verified, committed, and authorized.
@@ -83,6 +83,7 @@ Prefer to stop at a green test or a finished file, not mid-edit.
 Small, per-contract or per-sub-task commits. Suggested message shape:
 `P<id>: <what landed> — <gate state>`. 
 **Full Suite Rule**: Before any push, run the FULL deterministic suite — `python -m pytest app/tests -m "not live"` — the whole suite green is the bar, not the contract's own tests.
+**Clean Tree Rule**: `git status --porcelain` must be EMPTY after your completion commit (a dirty tree after a completion commit is itself a failed gate).
 Push before switching machines. Never force-push
 shared branches. Two PCs (office + home) share one remote; the repo is the single
 source of truth — chat history and tool "memories" do NOT travel, only committed files.

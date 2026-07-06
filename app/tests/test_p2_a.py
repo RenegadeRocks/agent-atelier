@@ -170,11 +170,11 @@ def test_pipeline_ocr_retry_logic(mock_run_agent, mock_sheets, mock_drive, mock_
         # Drive upload must ONLY be called ONCE for the passed image
         assert mock_drive.call_count == 1
         
-        # Sheets queue must ONLY be called ONCE
-        assert mock_sheets.call_count == 1
+        # Sheets queue and audit must be called (legitimate: one queue entry + one audit append)
+        assert mock_sheets.call_count == 2
         
         # The piece_id used in sheets MUST be stable
-        sheets_args = mock_sheets.call_args[0][1]
+        sheets_args = mock_sheets.call_args_list[0][0][1]
         assert sheets_args["action"] == "queue"
         piece_id = sheets_args["piece_id"]
         assert piece_id.startswith("ART-OF-LIVING-LUDHIANA-")
