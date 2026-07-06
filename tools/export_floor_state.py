@@ -395,7 +395,7 @@ def main():
     try:
         import yaml
         for kit_path in sorted((ROOT / "brands").glob("*/brand_kit.yaml")):
-            kit = yaml.safe_load(kit_path.read_text()) or {}
+            kit = yaml.safe_load(kit_path.read_text(encoding="utf-8")) or {}
             kits[kit.get("brand_id") or kit_path.parent.name] = kit
     except ImportError:
         print("export_floor_state: pyyaml not installed — using default trust thresholds.")

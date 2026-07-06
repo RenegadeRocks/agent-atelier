@@ -138,7 +138,7 @@ def test_trust_not_met_on_violation_or_thin_window():
 # ---------- (2) demo fixture passes the same validator ----------
 
 def test_demo_state_valid():
-    demo = json.loads((UI_DIR / "data" / "demo-state.json").read_text())
+    demo = json.loads((UI_DIR / "data" / "demo-state.json").read_text(encoding="utf-8"))
     assert efs.validate_state(demo) == []
     # the required verbatim CD note is present in the fixture
     dump = json.dumps(demo)
@@ -226,7 +226,7 @@ def test_missing_creds_queues_to_jsonl(tmp_path):
         client=None, actions_path=path, operator_id="tester",
     )
     assert status == 202 and payload["queued"] is True
-    lines = path.read_text().strip().splitlines()
+    lines = path.read_text(encoding="utf-8").strip().splitlines()
     assert len(lines) == 1
     record = json.loads(lines[0])
     assert record["piece_id"] == "chuski-club-aa1111"
@@ -255,7 +255,7 @@ def test_no_env_value_lands_in_projection(monkeypatch, tmp_path):
     assert "sekrit-sentinel-value-9f8e7d6c" not in dump
     # write_state enforces the same invariant structurally
     out = efs.write_state(state, tmp_path / "state.json")
-    assert "sekrit-sentinel-value-9f8e7d6c" not in out.read_text()
+    assert "sekrit-sentinel-value-9f8e7d6c" not in out.read_text(encoding="utf-8")
 
 
 def test_write_state_asserts_on_leak(monkeypatch, tmp_path):

@@ -19,7 +19,9 @@ const AGENTS = {
   visual_production:    { name: 'Visual Production',          glyph: '▣', hue: 'var(--a-vis)', station: 'visual',    role: 'renders images + alt text' },
   publishing_ops:       { name: 'Publishing & Ops',           glyph: '⬡', hue: 'var(--a-pub)', station: 'pubops',    role: 'ledger lint, queueing, publish, record' },
   brand_strategist:     { name: 'Brand Onboarding Strategist',glyph: '✦', hue: 'var(--a-str)', station: 'strategist',role: 'runs the one-time brand intake' },
-  human:                { name: 'you',                        glyph: '★', hue: 'var(--violet)', station: 'desk',     role: 'the ninth seat — the human gate' },
+  // human hue = warm sienna (--human): owner-taste deviation from the spec's
+  // violet (§12.4), applied everywhere; logged in the deviation log.
+  human:                { name: 'you',                        glyph: '★', hue: 'var(--human)', station: 'desk',     role: 'the ninth seat — the human gate' },
   system:               { name: 'system',                     glyph: '⚙', hue: 'var(--ink-dim)', station: null,      role: 'deterministic gates, breaker, scheduler' },
 };
 
@@ -110,11 +112,9 @@ function inMotion(p) {
 
 /* ---------- theme & density ---------- */
 function initTheme() {
-  let theme = localStorage.getItem('sf-theme');
-  if (!theme) {
-    theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
-      ? 'light' : 'dark'; // dark is the default stance
-  }
+  // ATELIER PAPER: light is the default theme; dark ("ink & candlelight")
+  // stays one toggle away. An explicit saved preference always wins.
+  const theme = localStorage.getItem('sf-theme') || 'light';
   document.documentElement.dataset.theme = theme;
   $('#themeBtn').textContent = theme === 'dark' ? '☀' : '☾';
 }
@@ -241,7 +241,7 @@ function renderHeader() {
   const pieces = brandPieces();
   const motion = pieces.filter(inMotion).length;
   const needs = pieces.filter((p) => p.needs_you).length;
-  // echo the active-station brass so the eye connects counter -> station
+  // echo the active-station working accent so the eye connects counter -> station
   const motionChip = $('#inMotion');
   motionChip.textContent = (motion > 0 ? '● ' : '') + motion + ' in motion';
   motionChip.classList.toggle('chip-motion', motion > 0);
@@ -504,9 +504,9 @@ function renderCompany() {
     `<div class="org-root">${card('managing_editor')}</div>
      <div class="org-stem"></div>
      <div class="org-row">${order.map((k) => card(k)).join('')}</div>
-     <div class="org-row"><div class="org-card" style="--hue:var(--violet)">
+     <div class="org-row"><div class="org-card" style="--hue:var(--human)">
        <div class="org-name">★ You — the Showrunner's chair</div>
-       <div class="org-role">the human gate; every action you take shows violet</div>
+       <div class="org-role">the human gate; every action you take shows your sienna mark</div>
      </div></div>`;
 }
 
@@ -652,6 +652,16 @@ function cliFallback(body) {
   const json = JSON.stringify(body).replace(/'/g, "'\\''");
   return `python3 tools/apply_floor_actions.py --enqueue '${json}'`;
 }
+function actionsDisabledReason() {
+  // Demo-mode safety: an action against demo data would write a fake
+  // piece_id into a real sheet (or just fail). Actions are live only when
+  // a real exported state.json was served over http. The CLI-fallback path
+  // stays reserved for real-data-but-server-died.
+  if (window.location.protocol === 'file:' || S.demo) {
+    return 'demo data — actions need tools/floor_serve.py with real state';
+  }
+  return null;
+}
 function whereWhy(p) {
   const revises = pieceEvents(p.piece_id)
     .filter((e) => /revise/.test(e.verb || ''))
@@ -699,6 +709,9 @@ function openDrawer(pieceId) {
   const asset = p.asset_url
     ? `<p class="drawer-sub">asset: <span class="mono">${esc(p.asset_url)}</span></p>` : '';
   const alt = p.alt_text ? `<p class="drawer-sub">alt: ${esc(p.alt_text)}</p>` : '';
+  const demoReason = actionsDisabledReason();
+  const demoDis = demoReason
+    ? ` disabled aria-disabled="true" title="${esc(demoReason)}"` : '';
   const disabledTip = 'wires in at P5-A';
   const disabled = [
     ['Unstick & resume', disabledTip],
@@ -723,10 +736,11 @@ function openDrawer(pieceId) {
         <textarea id="actionNote" rows="2"></textarea>
       </label>
       <div class="actions-row">
-        <button type="button" class="act-btn act-approve" data-action="approve">Approve ✓</button>
-        <button type="button" class="act-btn act-changes" data-action="request_changes">Request changes ↩</button>
-        <button type="button" class="act-btn act-reject" data-action="reject">Reject ✕</button>
+        <button type="button" class="act-btn act-approve" data-action="approve"${demoDis}>Approve ✓</button>
+        <button type="button" class="act-btn act-changes" data-action="request_changes"${demoDis}>Request changes ↩</button>
+        <button type="button" class="act-btn act-reject" data-action="reject"${demoDis}>Reject ✕</button>
       </div>
+      ${demoReason ? `<p class="action-disabled-note">⚠ ${esc(demoReason)}</p>` : ''}
       <div class="actions-row">${disabled}</div>
       <div id="actionResult" class="action-result" aria-live="polite"></div>
     </div>`;
@@ -740,6 +754,7 @@ function closeDrawer() {
   S.drawerPiece = null;
 }
 async function submitAction(action) {
+  if (actionsDisabledReason()) return; // defense in depth vs the disabled buttons
   const p = pieceById(S.drawerPiece);
   if (!p) return;
   const note = ($('#actionNote') && $('#actionNote').value || '').trim();
