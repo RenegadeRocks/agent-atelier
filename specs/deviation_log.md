@@ -118,6 +118,36 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 
 <!-- Add new entries below, newest first. -->
 
+### 2026-07-06 — Full deterministic suite rule added [P3]
+- **Assumption:** Testing a contract's own files locally is sufficient before pushing.
+- **Ground truth / reason:** P3 changes introduced a regression in P2-A (deadlock caused by research-min hard block). Running only P3 tests locally allowed the regression to reach CI unseen.
+- **Decision:** Added rule to `build-protocol.md` to run the FULL deterministic suite (`python -m pytest app/tests -m "not live"`) before any push.
+- **Files touched:** `.agents/rules/build-protocol.md`
+
+### 2026-07-06 — Simulated-week test uses fixture mock-runners [P3]
+- **Assumption:** Simulated week verification requires full end-to-end pipeline execution with live generation for all pieces.
+- **Ground truth / reason:** P3 limits live generation to ≤2 pieces to prevent API/token limits and preserve determinism.
+- **Decision:** Used fixture mock-runners for the simulated week tests to verify the scheduler and linter logic safely. Live generation is capped at exactly ≤2 pieces, proving the real path end-to-end without violating the limit.
+- **Files touched:** `app/tests/test_p3_simulate_week.py`
+
+### 2026-07-06 — WeekPlan rows location and sole writer [P3]
+- **Assumption:** WeekPlan/task rows might share the Approval Queue worksheet.
+- **Ground truth / reason:** Orchestrator must be the sole writer for the WeekPlan, isolated from the Approval Queue.
+- **Decision:** Defined that WeekPlan rows live in their own distinct worksheet tab to preserve orchestrator-sole-writer boundaries.
+- **Files touched:** `app/scheduler.py`
+
+### 2026-07-06 — ledger-lint implemented as a Python module [P3]
+- **Assumption:** The ledger-linter might be an agentic component.
+- **Ground truth / reason:** §9.4 dictates the linter is deterministic code, not an LLM agent, to avoid judgment loops.
+- **Decision:** Implemented `ledger-lint` as a deterministic Python module invoked directly by the pipeline pre-CD.
+- **Files touched:** `app/tools/ledger_lint.py`, `app/pipeline.py`
+
+### 2026-07-06 — research-min moved to week-plan level [P3]
+- **Assumption:** `research-min` could be enforced as a piece-level hard block in the linter alongside the other 5 rules.
+- **Ground truth / reason:** A per-piece block on an unmet weekly minimum creates a deadlock (e.g., blocking the first post of the week because the minimum isn't met yet).
+- **Decision:** Moved `research-min` enforcement from a piece-level block in `ledger-lint` to a week-plan-level guarantee in the scheduler, keeping the pipeline free from deadlocks while satisfying the requirement.
+- **Files touched:** `app/tools/ledger_lint.py`, `app/tests/test_p3_linter.py`
+
 ### 2026-07-02 — Model Fallback from gemini-3.0-pro to dynamic discovery [P1-A]
 - **Assumption:** The reasoning tier models use a hardcoded `gemini-3.0-pro` which threw a 404.
 - **Ground truth / reason:** Calling `client.models.list()` returned a list of active models. The newest pro-class model is `gemini-3.1-pro-preview`. However, auto-switching models at runtime violates §14.3 (no silent swaps) and §18.2 (CI needs reproducible models).
