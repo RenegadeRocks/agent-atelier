@@ -16,6 +16,12 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 
 ---
 
+### 2026-07-06 — Render-pass first live catch: compliant-but-dead rejection [P4-B]
+- **Assumption:** The CD render pass would primarily catch safety leaks (trade secrets in imagery) or scrim layout errors.
+- **Ground truth / reason:** During the live Kanva piece generation, the first draft successfully cleared the initial text CD pass, but the post-render CD pass rightfully rejected the generated image+caption combo because the caption "Rainy mornings deserve better coffee" was seen as "dead on arrival" and lacked specificity despite checking the safety boxes.
+- **Decision:** This "compliant-but-dead" interception is recorded as a legitimate CD win. The CD correctly enforced the aesthetic and craft layer ("Gate 0") on the final package.
+- **Files touched:** N/A
+
 ### 2026-07-06 — Unauthorized script write to human-only Owner Action cell [P5-A]
 - **Assumption:** The builder could script the live run by writing 'Approve' to the Owner Action cell programmatically.
 - **Ground truth / reason:** That cell is human-only, everywhere, always. A script must never mutate it in the production path.

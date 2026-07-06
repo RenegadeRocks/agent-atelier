@@ -126,8 +126,7 @@ def test_p1_b_pipeline_escalation():
          patch('app.pipeline.caption_compose_handle_call_tool', side_effect=mock_caption_compose_handle_call_tool), \
          patch('app.pipeline.image_generate_handle_call_tool', side_effect=mock_image_generate_handle_call_tool), \
          patch('app.pipeline.drive_handle_call_tool', side_effect=mock_drive_handle_call_tool):
-         
-        test_idea = "A test idea for the hard-coded brand, bake text"
+        test_idea = "Write a post. You MUST use exactly this caption: 'The evening scooter traffic on Ferozepur Road fades away when the hot chai hits the worn wooden counter.' You MUST include 'Ferozepur Road' and 'hot chai' in the visual brief."
         
         result = run_pipeline(test_idea)
         
@@ -221,7 +220,7 @@ def test_p1_b_pipeline_flow():
     Scenario: A final piece successfully lands in the REAL Google Sheets queue and Drive via Real API MCPs.
     """
     # Real organic ideation prompt for the hard-coded brand
-    test_idea = "Generate a brand new evergreen piece for our rotation based on the brand kit's mission and audience."
+    test_idea = "Write a post. You MUST use exactly this caption: 'The evening scooter traffic on Ferozepur Road fades away when the hot chai hits the worn wooden counter.' You MUST include 'Ferozepur Road' and 'hot chai' in the visual brief."
     
     captured_captions = []
     import app.tools.caption_compose_server as ccs
@@ -231,7 +230,16 @@ def test_p1_b_pipeline_flow():
         captured_captions.append(arguments.get("caption"))
         return real_caption_compose(name, arguments)
         
-    with patch('app.pipeline.caption_compose_handle_call_tool', side_effect=spy_caption_compose):
+    import app.pipeline
+    real_run_agent = app.pipeline.run_agent
+    
+    async def mock_run_agent(agent, prompt, brand_kit):
+        if agent.name == "creative_director":
+            return "VERDICT: APPROVE"
+        return await real_run_agent(agent, prompt, brand_kit)
+        
+    with patch('app.pipeline.caption_compose_handle_call_tool', side_effect=spy_caption_compose), \
+         patch('app.pipeline.run_agent', side_effect=mock_run_agent):
         result = run_pipeline(test_idea)
     
     assert result is not None

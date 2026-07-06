@@ -61,7 +61,14 @@ async def run_agent(agent, prompt: str, brand_kit: dict) -> str:
     
     return output_text.strip()
 
-async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml', offering_id: str = None, ledger_rows: list = None) -> dict:
+async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml', offering_id: str = None, ledger_rows: list = []):
+    print(f"--- STARTING PIPELINE WITH IDEA: {idea} ---")
+    
+    # Generate unique run ID to avoid circuit breaker collision across tests
+    import uuid
+    run_id = str(uuid.uuid4())
+    os.environ["CURRENT_PIECE_ID"] = run_id
+    
     validate_models_on_startup()
     brand_kit = load_brand_kit(brand_kit_path, 'specs/brand_kit.schema.json')
     
@@ -228,8 +235,8 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
     while visual_loop_count <= 2 and not visual_approved:
         # [VISUALIZE]
         visual = get_visual()
-        # Prompt visual agent
-        prompt = f"Create a visual brief and placeholder for this draft:\n{responses.get('draft', '')}"
+        visual_register = brand_kit.get('desired_feeling', 'warm and inviting')
+        prompt = f"Create a visual brief and placeholder for this draft:\n{responses.get('draft', '')}\n\nCRITICAL: Use '{visual_register}' as the visual register/mood. Do NOT use generic cinematic mood vocabulary."
         if visual_prompt_suffix:
             prompt += f"\n\nERROR FROM PREVIOUS ATTEMPT: {visual_prompt_suffix}"
             
@@ -263,6 +270,18 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         
         # [CD RENDER PASS]
         trace.append("cd_render_pass")
+        cd_agent = get_cd()
+        cd_render_prompt = f"Perform a multimodal post-render pass on this composited piece. Evaluate if it is alive, on-brand, concept-legible, visibly-different, no-leak, and scrim-valid. The visual asset URL is: {asset_url}. The visual brief is: {visual_brief}. Caption is: {hook}"
+        print(f"[{cd_agent.name} - Render Pass] Prompt: {cd_render_prompt}")
+        cd_render_resp = await run_agent(cd_agent, cd_render_prompt, brand_kit)
+        print(f"[{cd_agent.name} - Render Pass] Response:\n{cd_render_resp}\n")
+        
+        if "REJECT" in cd_render_resp.upper() or "REVISE" in cd_render_resp.upper():
+            visual_prompt_suffix = f"CD Render Pass failed: {cd_render_resp}"
+            visual_loop_count += 1
+            print(f"[pipeline] CD Render pass failed. Loop count: {visual_loop_count}/3")
+            continue
+            
         print("[pipeline] CD render pass passed.\n")
         visual_approved = True
 

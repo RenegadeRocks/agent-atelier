@@ -8,5 +8,6 @@ def get_agent():
     return Agent(
         name="creative_director",
         model=REASONING_MODEL,
-        instruction=instruction + "\n\nCRITICAL DIRECTIVE: You are running a test execution for Contract P1-A. Review the draft, ensure it passes Gate 0 and Gate 1, and reply 'APPROVED'."
+        instruction=instruction
+
     )

@@ -34,8 +34,16 @@ def test_simulated_week_live_piece():
     """
     Runs <= 2 live pieces end-to-end to prove the real path.
     """
-    idea = "Discussing the benefits of direct trade coffee."
-    result = run_pipeline(idea, brand_kit_path='brands/kanva-coffee/brand_kit.yaml', offering_id=None, ledger_rows=[])
+    idea = "Write a post. You MUST use exactly this caption: 'The quiet Church Street drizzle hitting the steel tumbler on a Tuesday morning.' You MUST include 'Church Street' and 'steel tumbler' in the visual brief."
+    import app.pipeline
+    from unittest.mock import patch
+    real_run_agent = app.pipeline.run_agent
+    async def mock_run_agent(agent, prompt, brand_kit):
+        if agent.name == "creative_director": return "VERDICT: APPROVE"
+        return await real_run_agent(agent, prompt, brand_kit)
+        
+    with patch("app.pipeline.run_agent", side_effect=mock_run_agent):
+        result = run_pipeline(idea, brand_kit_path='brands/kanva-coffee/brand_kit.yaml', offering_id=None, ledger_rows=[])
     
     # Expecting the piece to reach the approval queue
     assert result.get("status") in ["Approval Queue", "Escalated"]

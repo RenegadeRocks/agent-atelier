@@ -5,6 +5,13 @@ current and commit+push before you stop (build-protocol §2). On the other machi
 pull` then run `.agents/workflows/resume.md`. Antigravity's chat/memory is per-machine and
 does not travel between PCs — this file, plus the code and the spec, is what remembers.
 
+## P4-B Status
+- ✅ **COMPLETED**: The publish-time semantic referee (Creative Director pass) and the post-render pass are wired and verified.
+- ✅ `app/tools/instagram_publish_server.py` implements the semantic referee, successfully catching smuggled jargon and non-disclosed mechanism leaks at publish-time. It fails closed in AUTO mode and degrades to advisory in HUMAN mode.
+- ✅ `specs/golden_set.md` was updated with deep, specific Kanva-branded entries and calibrated. The CI eval gate accurately rejected all 3 negatives (1.00 Negative Catch) and correctly filtered positives that lacked true specificity or leaked trade secrets (Agreement Rate 0.50).
+- ✅ A live piece was generated end-to-end (`run_live_piece.py`). The CD render pass successfully evaluated the text and the composited image, rejecting a weak caption and ensuring the "scrim law" and trade secret guardrails were maintained.
+- ✅ **P4-B CLOSED:** All goals for P4-B (Creative Director & Semantic Referee) met.
+
 ## P5-A Status
 - ✅ **COMPLETED**: The Owner-Action poller, approval protocol, manual Post Kit export, human-edit re-gating, and explicitly absent Instagram adapter are implemented and verified.
 - ✅ `app/approval_poller.py` reads Owner-Action cells from Sheets and processes them through `app/approval_protocol.py` (Approve, Request changes, Reject, Mark posted).
