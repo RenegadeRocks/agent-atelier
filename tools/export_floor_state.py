@@ -373,6 +373,11 @@ def embed_demo():
 
 
 def main():
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
     if "--embed-demo" in sys.argv[1:]:
         return embed_demo()
     creds = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")

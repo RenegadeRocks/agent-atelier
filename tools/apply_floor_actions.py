@@ -70,6 +70,11 @@ def apply_actions(records, client):
 
 
 def main(argv=None):
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--actions", default=str(ACTIONS_PATH),
                         help="path to actions.jsonl")

@@ -33,3 +33,5 @@ build/
 circuit_breaker_state.json
 ui/studio-floor/data/state.json
 ui/studio-floor/data/actions.jsonl
+atelier-sor.json
+keys/

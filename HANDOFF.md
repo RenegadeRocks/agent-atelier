@@ -7,9 +7,10 @@ verdict table per contract), `specs/deviation_log.md` (the honest build record),
 
 ## Quickstart — the whole system in five commands
 
-Prereqs: Python 3.11+, `pip install -r requirements.txt`, and a `.env` you were
-handed personally (never committed): `GOOGLE_API_KEY`,
-`GOOGLE_APPLICATION_CREDENTIALS` (service-account JSON path, outside the repo).
+Prereqs: Python 3.11+, `pip install -r requirements.txt`, and TWO files you were
+handed personally (never committed, both gitignored): drop `.env` and
+`atelier-sor.json` into the repo root, and make the `.env` line read
+`GOOGLE_APPLICATION_CREDENTIALS=atelier-sor.json`. That's the whole setup.
 Deterministic parts (4, and the tests) need no keys at all.
 
 1. **Onboard a brand (guided interview, terminal by design)**

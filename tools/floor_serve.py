@@ -227,6 +227,11 @@ class FloorHandler(SimpleHTTPRequestHandler):
 
 
 def main():
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
     client = make_client()
     if client is None:
         print("floor_serve: no Sheets credentials — Floor Actions will be "
