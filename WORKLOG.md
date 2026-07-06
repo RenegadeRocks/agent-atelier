@@ -11,7 +11,7 @@ does not travel between PCs — this file, plus the code and the spec, is what r
 - ✅ `specs/golden_set.md` was updated with deep, specific Kanva-branded entries and calibrated. The CI eval gate accurately rejected all 3 negatives (1.00 Negative Catch) and correctly filtered positives that lacked true specificity or leaked trade secrets (Agreement Rate 0.50).
 - ✅ A live piece was generated end-to-end (`run_live_piece.py`). The CD render pass successfully evaluated the text and the composited image, rejecting a weak caption and ensuring the "scrim law" and trade secret guardrails were maintained.
 - ✅ **P4-B CLOSED:** All goals for P4-B (Creative Director & Semantic Referee) met.
-
+- ⚠️ **Deviation Log:** Moved to `specs/deviation_log.md` (2026-07-06 — Quota exhaustion from runaway test loop).
 ## P5-A Status
 - ✅ **COMPLETED**: The Owner-Action poller, approval protocol, manual Post Kit export, human-edit re-gating, and explicitly absent Instagram adapter are implemented and verified.
 - ✅ `app/approval_poller.py` reads Owner-Action cells from Sheets and processes them through `app/approval_protocol.py` (Approve, Request changes, Reject, Mark posted).

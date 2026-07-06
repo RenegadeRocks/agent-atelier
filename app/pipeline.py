@@ -216,7 +216,7 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         
         # [REVIEW]
         cd = get_cd()
-        prompt = f"Review this draft:\n{responses.get('draft', '')}"
+        prompt = f"Review this draft (Round {review_loop_count + 1}):\n{responses.get('draft', '')}"
         print(f"[{cd.name}] Prompt: {prompt}")
         resp = await semantic_review_judge(cd, prompt, brand_kit)
         trace.append("creative_director")

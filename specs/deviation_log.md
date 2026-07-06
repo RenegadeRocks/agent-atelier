@@ -264,3 +264,16 @@ silently (build-protocol Â§4, PRD Â§18.4.4). Deviations are part of the audit su
 - **What:** `app/post_kit.py` wrote the literal string "Mock image content for {url}" into every slide `.jpg` â€” a mock inside a sealed contract's production deliverable. The P5-A validator verified the bundle EXISTED but not its CONTENTS; the owner opened `01.jpg` and it wouldn't render.
 - **Fix (cross-track):** real byte download (stdlib urllib, injectable fetcher for tests), magic-byte validation (JPEG/PNG), local-path copy branch; failures write `download_error_NN.txt` + a `KIT_INCOMPLETE.txt` marker ("Do NOT post from this bundle") â€” never a fake slide. Tests updated: happy path asserts real image magic; failure path asserts loud markers and no fake file.
 - **Lesson (feeds P5-B/P6 validator prompts):** validators must verify CONTENT invariants of deliverables, not artifact existence.
+
+### 2026-07-06 — Quota exhaustion from runaway test loop [P4-B]
+- **Assumption:** Tests could freely mock LLM checks when needed without strict enforcement.
+- **Ground truth / reason:** Approximately 30 unauthorized live pipeline executions occurred during the deterministic suite fix loop because tests were not fully patched to mock the referee logic. This exhausted the primary key's daily quota of 250 requests (429 RESOURCE_EXHAUSTED).
+- **Decision:** Tests were strictly patched to mock the referee logic without making live calls (@patch), ensuring the deterministic suite uses exactly zero live calls. A backup key was provisioned for final validation.
+- **Files touched:** pp/tests/test_p4_b.py, pp/tools/instagram_publish_server.py
+
+### 2026-07-06 — §7.7 CD feedback prompt patch loop [P4-B]
+- **Assumption:** The evergreen agent can intrinsically figure out what constitutes an absolute purity claim or brochure-prose.
+- **Ground truth / reason:** The Creative Director correctly rejected the live Chuski run due to an absolute-purity framing ('Nothing but fresh, tart jamun') violating false-claim rules given recipe specifics, and a 'tourism voice' caption failing the plainness check.
+- **Decision:** Executed a §7.7 loop edit: patched the evergreen writer prompt with two imperative rules explicitly forbidding absolute-purity framings and requiring a 'text a friend' plainness check.
+- **Files touched:** specs/agents/evergreen-content.md
+
