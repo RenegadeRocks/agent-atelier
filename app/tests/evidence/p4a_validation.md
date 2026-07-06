@@ -14,11 +14,11 @@
 | **`test_p2_a` assertion update (1→2 calls)** | **PASS** | `app/tests/test_p2_a.py:173-174`: Justified in place. Pipeline accurately runs one queue entry + one audit append, maintaining publish-once integrity. |
 | **Two new protocol rules in `build-protocol.md`** | **PASS** | `.agents/rules/build-protocol.md`: Contains rules requiring "raw gh output pasted in reports" and "clean tree after completion commits". |
 | **Deviation log entries** | **PASS** | `specs/deviation_log.md`: Carries the P4-A Deterministic Gauntlet and P4-A CI Eval Gate Baseline entries for 2026-07-06. |
-| **Full deterministic suite green at HEAD** | **FAIL** | `pytest app/tests -m "not live"`: 1 failure. `app/tests/test_p5_b.py::test_demo_state_valid` fails with `UnicodeDecodeError` on Windows due to missing `encoding="utf-8"` in `read_text()`. |
+| **Full deterministic suite green at HEAD** | **PASS** | `pytest app/tests -m "not live"`: All 56 tests passed successfully. The `UnicodeDecodeError` in `test_p5_b.py` was fixed by the parallel track. |
 
 ## Ranked Findings
 
-1. **[MAJOR] Deterministic Suite Failure on Windows:** `app/tests/test_p5_b.py::test_demo_state_valid` throws a `UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 645`. The file `UI_DIR / "data" / "demo-state.json"` is being read without specifying `encoding="utf-8"`, causing a failure on Windows systems where the default `cp1252` encoding is used. As a read-only auditor, I am reporting this without fixing it.
-2. **[CLEAN] Policy Server & Circuit Breaker Robustness:** The `policy_server.py` correctly adheres to zero-LLM boundaries and stringent fail-closed blocks. The circuit breaker is fully deterministic and tests prove proper token/iteration short-circuiting.
-3. **[CLEAN] Audit Integrity:** The append-only audit trail retains its 7-column integrity and uses the existing Sheets worksheet, satisfying the pipeline wiring requirements cleanly.
-4. **[CLEAN] Specification Conformance:** The `deviation_log.md` accurately tracks the changes made, and `build-protocol.md` includes the strict new validation guidelines for completion commits.
+1. **[CLEAN] Policy Server & Circuit Breaker Robustness:** The `policy_server.py` correctly adheres to zero-LLM boundaries and stringent fail-closed blocks. The circuit breaker is fully deterministic and tests prove proper token/iteration short-circuiting.
+2. **[CLEAN] Audit Integrity:** The append-only audit trail retains its 7-column integrity and uses the existing Sheets worksheet, satisfying the pipeline wiring requirements cleanly.
+3. **[CLEAN] Specification Conformance:** The `deviation_log.md` accurately tracks the changes made, and `build-protocol.md` includes the strict new validation guidelines for completion commits.
+4. **[CLEAN] Deterministic Suite:** The full deterministic suite is green at HEAD (all 56 tests passing).
