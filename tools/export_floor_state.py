@@ -100,7 +100,14 @@ def _severity_for(verb):
 
 
 def _event_from_row(idx, row, kits):
-    row = list(row) + [""] * (7 - len(row))
+    row = ["" if c is None else str(c) for c in row]
+    if len(row) == 3:
+        # Legacy 3-col audit append ([piece_id, verb, message] — e.g. the
+        # publish-once guard's publish_refused row in sheets_server.py):
+        # the third column is the human-readable MESSAGE. Slot it into
+        # detail, never into the projection's stage field.
+        row = [row[0], row[1], "", row[2]]
+    row = row + [""] * (7 - len(row))
     piece_id, verb, stage, detail, actor, ts, operator_id = row[:7]
     verb_n = _norm_verb(verb)
     if not actor:
@@ -329,6 +336,11 @@ def _assert_no_env_leak(dump):
 
 
 def write_state(state, path=STATE_PATH):
+    # data/state.json is by definition the REAL export: the top-level demo
+    # flag may never travel through this writer. The console treats
+    # demo:true as demo mode (DEMO badge + Floor Actions disabled) even
+    # when served as state.json, so real exports are guaranteed flag-free.
+    state = {k: v for k, v in state.items() if k != "demo"}
     errors = validate_state(state)
     if errors:
         raise ValueError("invalid state: " + "; ".join(errors))

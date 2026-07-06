@@ -3,7 +3,9 @@
 Covers: build_state derivation (pieces/events/needs_you/trust), the demo
 fixture against the shared shape validator, the /action handler with a stub
 SheetClient (Owner-Action-only writes, never Status), projection redaction,
-and the no-external-resource guarantee of the static UI.
+the no-external-resource guarantee of the static UI, the Origin gate on
+POST /action (localhost-CSRF, socket-free), the demo-flag defense-in-depth
+(writer strips / console honors), and legacy 3-col audit-row tolerance.
 """
 
 import importlib.util
@@ -239,7 +241,8 @@ def test_status_writing_client_is_refused(tmp_path):
         def set_status(self, piece_id, status):  # pragma: no cover
             pass
 
-    with pytest.raises(AssertionError):
+    # explicit raise (not a bare assert) so the guard survives python -O
+    with pytest.raises(TypeError):
         fsrv.handle_action(
             {"piece_id": "x-abc123", "action": "approve"},
             client=BadClient(), actions_path=tmp_path / "a.jsonl",
@@ -283,3 +286,133 @@ def test_ui_is_self_contained():
         hits = CROSS_ORIGIN.findall(text)
         assert not hits, f"{name} references external resources: {hits}"
         assert "fonts.googleapis" not in text and "cdn." not in text.lower()
+
+
+# ---------- (6) Origin gate on POST /action (localhost-CSRF guard) ----------
+
+def test_origin_allowed_matrix():
+    # absent header: curl / the CLI fallback / some same-origin POSTs
+    assert fsrv.origin_allowed(None) is True
+    assert fsrv.origin_allowed("") is True
+    # file:// page
+    assert fsrv.origin_allowed("null") is True
+    # the two names this server answers to
+    assert fsrv.origin_allowed("http://127.0.0.1:8787") is True
+    assert fsrv.origin_allowed("http://localhost:8787") is True
+    # anything else is a cross-site page driving the local server
+    assert fsrv.origin_allowed("https://evil.example") is False
+    assert fsrv.origin_allowed("http://127.0.0.1:9999") is False
+    assert fsrv.origin_allowed("http://localhost") is False
+    assert fsrv.origin_allowed("https://127.0.0.1:8787") is False
+
+
+def _drive_handler(raw_request, sheet_client=None):
+    """Run FloorHandler over raw HTTP bytes with NO socket (deterministic):
+    a fake connection feeds rfile from BytesIO and captures the response
+    via sendall/makefile. Returns the raw response bytes."""
+    import io
+
+    class CaptureIO(io.BytesIO):
+        def close(self):  # keep the response readable after finish()
+            pass
+
+    out = CaptureIO()
+
+    class FakeSock:
+        def __init__(self):
+            self._in = io.BytesIO(raw_request)
+
+        def makefile(self, mode, *args, **kwargs):
+            return self._in if "r" in mode else out
+
+        def sendall(self, data):
+            out.write(data)
+
+    class FakeServer:
+        pass
+
+    server = FakeServer()
+    server.sheet_client = sheet_client
+    fsrv.FloorHandler(FakeSock(), ("127.0.0.1", 0), server)
+    return out.getvalue()
+
+
+def _post_action_raw(origin, body_dict, client):
+    body = json.dumps(body_dict).encode("utf-8")
+    origin_hdr = f"Origin: {origin}\r\n" if origin is not None else ""
+    head = (
+        "POST /action HTTP/1.1\r\n"
+        "Host: 127.0.0.1:8787\r\n"
+        f"{origin_hdr}"
+        "Content-Type: application/json\r\n"
+        f"Content-Length: {len(body)}\r\n"
+        "Connection: close\r\n\r\n"
+    )
+    return _drive_handler(head.encode("utf-8") + body, client)
+
+
+def test_cross_origin_post_is_403_and_writes_nothing():
+    stub = StubClient()
+    resp = _post_action_raw(
+        "https://evil.example",
+        {"piece_id": "x-abc123", "action": "approve", "note": "csrf"},
+        stub,
+    )
+    assert b" 403 " in resp.splitlines()[0] + b" "
+    assert b"cross-origin POST refused" in resp
+    assert stub.calls == []  # refused before any sheet interaction
+
+
+def test_loopback_origin_passes_gate_to_verb_validation():
+    stub = StubClient()
+    # allowed origin + INVALID verb: proves the request passed the Origin
+    # gate and reached handle_action's validation (and still wrote nothing)
+    resp = _post_action_raw(
+        "http://127.0.0.1:8787",
+        {"piece_id": "x-abc123", "action": "not_a_verb"},
+        stub,
+    )
+    assert b" 400 " in resp.splitlines()[0] + b" "
+    assert b"action must be one of" in resp
+    assert stub.calls == []
+
+
+# ---------- (7) demo-flag defense-in-depth ----------
+
+def test_write_state_strips_demo_flag(tmp_path):
+    # data/state.json is by definition the REAL export: even if a caller
+    # passes a fixture-shaped doc, the writer guarantees the flag never
+    # lands on disk (the console treats demo:true as demo mode).
+    state = built_state()
+    state["demo"] = True
+    out = efs.write_state(state, tmp_path / "state.json")
+    written = json.loads(out.read_text(encoding="utf-8"))
+    assert "demo" not in written
+
+
+def test_app_js_honors_demo_flag_and_fixture_declares_it():
+    js = (UI_DIR / "app.js").read_text(encoding="utf-8")
+    assert re.search(r"data\.demo\s*===\s*true", js), (
+        "app.js lost the demo-flag defense-in-depth check "
+        "(a demo doc served as state.json must still disable Floor Actions)"
+    )
+    demo = json.loads((UI_DIR / "data" / "demo-state.json").read_text(encoding="utf-8"))
+    assert demo.get("demo") is True  # the fixture declares itself demo
+
+
+# ---------- (8) legacy short audit rows (3-col publish_refused shape) ----------
+
+def test_legacy_3col_audit_row_message_lands_in_detail():
+    legacy = [["chuski-club-dd4444", "publish_refused",
+               "Publish-once guard: second publish attempt refused"]]
+    state = efs.build_state(QUEUE_ROWS, AUDIT_ROWS + legacy, KITS)
+    evt = [e for e in state["events"] if e["verb"] == "publish_refused"][-1]
+    # the message is DETAIL, never the projection's stage field
+    assert evt["detail"] == "Publish-once guard: second publish attempt refused"
+    assert evt["stage"] is None
+    assert evt["severity"] == "alert"
+    # the block pattern still maps the piece exception correctly
+    by_id = {p["piece_id"]: p for p in state["pieces"]}
+    assert by_id["chuski-club-dd4444"]["exception"] == "Publish-Failed"
+    # and the state still validates
+    assert efs.validate_state(state) == []

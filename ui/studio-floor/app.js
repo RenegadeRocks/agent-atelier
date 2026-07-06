@@ -180,6 +180,12 @@ async function poll() {
       }
     }
   }
+  // Defense-in-depth: a state document that *declares itself* demo
+  // (top-level demo:true, as the bundled fixture does) is treated as demo
+  // even if its content was copied/served as data/state.json — DEMO badge
+  // shown, Floor Actions disabled. Real exports never carry the key
+  // (write_state strips it in tools/export_floor_state.py).
+  if (data && data.demo === true) demo = true;
   S.offline = false;
   const maxSeq = data.events.length ? data.events[data.events.length - 1].seq : 0;
   const changed = !S.data || maxSeq !== S.lastSeq ||

@@ -33,6 +33,30 @@ VALID_ACTIONS = {
     "reject": "Reject",
 }
 
+# Origins that may POST /action. Loopback bind alone does not stop a
+# malicious page in the owner's browser from POSTing at localhost (the
+# classic localhost-CSRF vector, validation MINOR-5); the Origin gate does.
+# Allowed: the two names this server answers to, and "null" (a file://
+# page). An ABSENT Origin header is also allowed — curl and the
+# tools/apply_floor_actions.py CLI fallback send none.
+ALLOWED_ORIGINS = {
+    "null",
+    f"http://127.0.0.1:{PORT}",
+    f"http://localhost:{PORT}",
+}
+
+
+def origin_allowed(origin):
+    """True when this Origin header value may POST /action.
+
+    None/empty (no header: curl, CLI fallback, some same-origin POSTs) and
+    the ALLOWED_ORIGINS set pass; any other origin is a cross-site page
+    driving the local server and is refused (403).
+    """
+    if origin is None or origin == "":
+        return True
+    return origin in ALLOWED_ORIGINS
+
 # Audit row shape kept aligned with the as-built worksheet + export tool:
 # [piece_id, verb, status, detail, actor, ts, operator_id]
 
@@ -173,6 +197,13 @@ class FloorHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path != "/action":
             self._send_json(404, {"error": "unknown endpoint"})
+            return
+        origin = self.headers.get("Origin")
+        if not origin_allowed(origin):
+            self._send_json(403, {
+                "error": "cross-origin POST refused",
+                "origin": origin,
+            })
             return
         length = int(self.headers.get("Content-Length") or 0)
         if length > MAX_BODY:
