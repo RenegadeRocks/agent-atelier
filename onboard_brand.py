@@ -46,22 +46,25 @@ def preload_ingested_context(source_dir: str) -> str:
                 print("[System] Ingestion successful. Passing to Strategist...\n")
     return ingested_context
 
-def process_kit_output(output_text: str, base_dir: str = "."):
+def process_kit_output(output_text: str, base_dir: str = ".", save_draft: bool = True):
     import re
     import yaml
     import traceback
     
     blocks = re.findall(r'```(?:yaml)?\s*(.*?)\s*```', output_text, re.DOTALL | re.IGNORECASE)
+    if not blocks:
+        return {"status": "no_kit"}
+
     for block in blocks:
         if 'brand_kit_version' in block:
             print("\n[System] Detected Brand Kit YAML output. Attempting to save and validate...")
             try:
                 kit_data = yaml.safe_load(block)
                 if not isinstance(kit_data, dict):
-                    continue
+                    return {"status": "fail", "reason": "YAML is not a dictionary"}
                 
-                # Derive slug
-                brand_name = kit_data.get('brand_short_name') or kit_data.get('brand_name') or 'unknown-brand'
+                # Derive slug from canonical template field
+                brand_name = kit_data.get('identity', {}).get('short_name') or kit_data.get('brand_short_name') or kit_data.get('brand_name') or 'unnamed-brand'
                 slug = re.sub(r'[^a-z0-9]+', '-', brand_name.lower()).strip('-')
                 
                 # Ensure directory exists
@@ -81,14 +84,23 @@ def process_kit_output(output_text: str, base_dir: str = "."):
                     load_brand_kit(kit_path, schema_path)
                     print("\n[System] VALIDATION: PASS")
                     print(f"[System] The Brand Kit at {kit_path} is now ACTIVE.")
+                    return {"status": "success", "reason": ""}
                 except Exception as e:
-                    draft_path = os.path.join(brand_dir, "brand_kit.draft.yaml")
-                    os.rename(kit_path, draft_path)
+                    reason = str(e)
                     print("\n[System] VALIDATION: FAIL")
-                    print(f"[System] Reason: {str(e)}")
-                    print(f"[System] The kit has been renamed to {draft_path} and is NOT active.")
+                    print(f"[System] Reason: {reason}")
+                    if save_draft:
+                        draft_path = os.path.join(brand_dir, "brand_kit.draft.yaml")
+                        os.replace(kit_path, draft_path)
+                        print(f"[System] The kit has been renamed to {draft_path} and is NOT active.")
+                    else:
+                        os.remove(kit_path)
+                    return {"status": "fail", "reason": reason}
             except Exception as e:
-                print(f"[System] Failed to parse or save YAML: {e}")
+                reason = f"Failed to parse or save YAML: {e}"
+                print(f"[System] {reason}")
+                return {"status": "fail", "reason": reason}
+    return {"status": "no_kit"}
 
 async def main():
     parser = argparse.ArgumentParser(description="Brand Onboarding CLI")
@@ -147,7 +159,35 @@ async def main():
                         if getattr(p, 'text', None):
                             output_text += p.text
             print(f"Strategist: {output_text.strip()}")
-            process_kit_output(output_text)
+            
+            status = process_kit_output(output_text)
+            
+            # Auto-retry loop for parse/validation failures
+            retries = 0
+            while status["status"] == "fail" and retries < 2:
+                print(f"\n[System] Auto-retrying ({retries+1}/2) due to validation failure...")
+                template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "specs", "brand_kit.template.yaml")
+                with open(template_path, 'r', encoding='utf-8') as f:
+                    template_text = f.read()
+                
+                bounce_msg = (
+                    f"The emitted Brand Kit failed validation:\n{status['reason']}\n\n"
+                    f"Please fill THIS template exactly — same keys, same nesting, same enums (brand_type: ecommerce_dtc, cta_style: soft, bare hex codes, lists as lists); no invented sections:\n"
+                    f"```yaml\n{template_text}\n```\n"
+                    f"Map the interview's collected values into it."
+                )
+                
+                events = await runner.run_debug(bounce_msg, quiet=True)
+                output_text = ""
+                for e in events:
+                    if getattr(e, 'author', '') != 'user' and getattr(e, 'message', None) and hasattr(e.message, 'parts'):
+                        for p in e.message.parts:
+                            if getattr(p, 'text', None):
+                                output_text += p.text
+                print(f"Strategist (Retry): {output_text.strip()}")
+                
+                status = process_kit_output(output_text)
+                retries += 1
             
         except (KeyboardInterrupt, EOFError):
             print("\nExiting onboarding session...")

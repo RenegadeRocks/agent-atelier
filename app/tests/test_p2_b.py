@@ -145,3 +145,28 @@ def test_cli_kit_persistence_and_validation(tmp_path):
     saved_kit = yaml.safe_load(expected_path.read_text(encoding='utf-8'))
     assert "No invented sustainability, zero-waste, or eco-friendly packaging claims" in saved_kit["claims_forbidden"]
 
+def test_cli_kit_invalid_drafting(tmp_path):
+    """
+    Scenario: A kit that fails validation is saved with a .draft.yaml suffix and not active.
+    """
+    from onboard_brand import process_kit_output
+    import yaml
+    
+    mock_yaml = yaml.safe_dump({
+        "brand_kit_version": 2,
+        "identity": {"short_name": "Bad Kit Brand"}
+        # Missing required fields like product_pool, etc.
+    })
+    mock_output = f"```yaml\n{mock_yaml}\n```"
+    
+    # Run CLI saving logic (we tell it to save draft)
+    status = process_kit_output(mock_output, base_dir=str(tmp_path), save_draft=True)
+    
+    assert status["status"] == "fail"
+    
+    # Assert it was drafted
+    draft_path = tmp_path / "brands" / "bad-kit-brand" / "brand_kit.draft.yaml"
+    assert draft_path.exists(), "Invalid kit was not saved as a draft"
+    
+    active_path = tmp_path / "brands" / "bad-kit-brand" / "brand_kit.yaml"
+    assert not active_path.exists(), "Invalid kit was saved as active"
