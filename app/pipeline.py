@@ -10,6 +10,10 @@ from app.agents.research_verification import get_agent as get_research
 from app.agents.creative_director import get_agent as get_cd
 from app.agents.visual_production import get_agent as get_visual
 from app.agents.publishing_operations import get_agent as get_ops
+from app.agents.offering_content import get_agent as get_offering
+
+from app.tools.ledger_lint import ledger_lint
+from app.tools.ledger_audit import ledger_audit
 
 # We need to simulate MCP calls for the state machine logic
 from app.tools.sheets_server import sheets_handle_call_tool
@@ -46,7 +50,7 @@ async def run_agent(agent, prompt: str, brand_kit: dict) -> str:
                     output_text += p.text
     return output_text.strip()
 
-async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml') -> dict:
+async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml', offering_id: str = None, ledger_rows: list = None) -> dict:
     validate_models_on_startup()
     brand_kit = load_brand_kit(brand_kit_path, 'specs/brand_kit.schema.json')
     
@@ -81,17 +85,22 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
     
     while review_loop_count <= 2 and not approved_by_cd:
         # [IDEATE+DRAFT]
-        evergreen = get_evergreen()
-        prompt = f"Draft content based on this plan:\n{responses.get('plan', '')}\n\nYou MUST end your reply with exactly one fenced ```json block containing these exactly named keys: 'idea_sentence', 'caption', 'hook_text', 'visual_brief'.\n'hook_text': the exact short phrase (2-10 words) to be printed on the image - e.g. 'Burnout isn't a badge of honor.' Never a number, never a count."
+        if offering_id:
+            content_agent = get_offering()
+            prompt = f"Draft content for offering {offering_id} based on this plan:\n{responses.get('plan', '')}\n\nYou MUST end your reply with exactly one fenced ```json block containing these exactly named keys: 'idea_sentence', 'caption', 'hook_text', 'visual_brief', 'shape', 'visual_label', 'format'.\n'hook_text': the exact short phrase (2-10 words) to be printed on the image - e.g. 'Burnout isn't a badge of honor.' Never a number, never a count."
+        else:
+            content_agent = get_evergreen()
+            prompt = f"Draft content based on this plan:\n{responses.get('plan', '')}\n\nYou MUST end your reply with exactly one fenced ```json block containing these exactly named keys: 'idea_sentence', 'caption', 'hook_text', 'visual_brief', 'shape', 'visual_label', 'format'.\n'hook_text': the exact short phrase (2-10 words) to be printed on the image - e.g. 'Burnout isn't a badge of honor.' Never a number, never a count."
+            
         if draft_prompt_suffix:
             prompt += f"\n\nERROR FROM PREVIOUS ATTEMPT: {draft_prompt_suffix}"
             draft_prompt_suffix = ""
             
-        print(f"[{evergreen.name}] Prompt: {prompt}")
-        resp = await run_agent(evergreen, prompt, brand_kit)
+        print(f"[{content_agent.name}] Prompt: {prompt}")
+        resp = await run_agent(content_agent, prompt, brand_kit)
         responses["draft"] = resp
-        trace.append("evergreen_content")
-        print(f"[{evergreen.name}] Response:\n{resp}\n")
+        trace.append(content_agent.name.lower().replace(' ', '_'))
+        print(f"[{content_agent.name}] Response:\n{resp}\n")
         
         # Strict Extraction - fail loudly if fields are missing
         import re
@@ -124,9 +133,12 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         idea_sentence = str(draft_data.get("idea_sentence", "")).strip()
         hook = str(draft_data.get("hook_text", "")).strip()
         visual_brief = str(draft_data.get("visual_brief", "")).strip()
+        shape = str(draft_data.get("shape", "mini-story")).strip()
+        visual_label = str(draft_data.get("visual_label", "real human moment")).strip()
+        draft_format = str(draft_data.get("format", "single")).strip()
         
         if not caption or not idea_sentence or not hook or not visual_brief:
-            draft_prompt_suffix = "Your JSON block was missing one or more required keys: 'idea_sentence', 'caption', 'hook_text', 'visual_brief'."
+            draft_prompt_suffix = "Your JSON block was missing one or more required keys."
             draft_loop_count += 1
             if draft_loop_count > 2:
                 print("[pipeline] Escalate due to draft formatting limit.")
@@ -145,8 +157,38 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         print(f"[{research.name}] Response:\n{resp}\n")
         
         # [LEDGER LINT]
-        trace.append("ledger_lint_stub")
-        print(f"[ledger_lint_stub] Linter passed.\n")
+        import datetime
+        draft_dict = {
+            "hook": hook,
+            "shape": shape,
+            "visual_label": visual_label,
+            "idea": idea_sentence,
+            "date": datetime.datetime.now(datetime.timezone.utc).date().isoformat(),
+            "format": draft_format,
+            "flag": "research_grounded" if "research" in prompt.lower() else ""
+        }
+        
+        lint_res = ledger_lint(
+            draft=draft_dict,
+            ledger_rows=ledger_rows or [],
+            research_min=brand_kit.get('research_post_min_per_week', 1)
+        )
+        
+        if lint_res.get("status") == "BLOCK":
+            trace.append("ledger_lint_blocked")
+            print(f"[ledger_lint] BLOCK: {lint_res.get('violations')}")
+            # Instead of bouncing, we just fail the pipeline for testing purposes, or we could let it loop.
+            # Since the PRD says it bounces back, we set draft_prompt_suffix
+            draft_prompt_suffix = f"Ledger Linter BLOCK: {lint_res.get('violations')}"
+            draft_loop_count += 1
+            if draft_loop_count > 2:
+                print("[pipeline] Escalate due to draft formatting/lint limit.")
+                trace.append("escalate_me")
+                return {"status": "Escalated", "trace": trace, "responses": responses, "lint_result": lint_res}
+            continue
+            
+        trace.append("ledger_lint_pass")
+        print(f"[ledger_lint] PASS.\n")
         
         # [REVIEW]
         cd = get_cd()
@@ -248,17 +290,41 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
     trace.append("publishing_operations")
     print(f"[{ops.name}] Response:\n{resp}\n")
     
+    # [LEDGER AUDIT]
+    import datetime
+    piece_draft = {
+        "date": datetime.datetime.now(datetime.timezone.utc).date().isoformat(),
+        "piece_id": piece_id,
+        "agent": "evergreen_content" if not offering_id else "offering_content",
+        "channel_format": f"instagram_{draft_format}",
+        "idea": idea_sentence,
+        "hook": hook,
+        "shape": shape,
+        "visual_label": visual_label,
+        "language": brand_kit.get('languages', ['en'])[0],
+        "status": "Approved",
+        "caption": caption
+    }
+    
+    asset = {
+        "url": responses.get("visual_asset"),
+        "alt_text": alt_text
+    }
+    
+    audit_res = ledger_audit(piece_draft=piece_draft, lint_result={"status": "PASS"}, asset=asset)
+    
+    if audit_res.get("status") == "BOUNCE":
+        print(f"[ledger_audit] BOUNCE: {audit_res.get('reason')}")
+        trace.append("ledger_audit_bounce")
+        return {"status": "Escalated", "trace": trace, "responses": responses, "audit_reason": audit_res.get("reason")}
+        
+    trace.append("ledger_audit_pass")
+    
     # Sheets MCP tool appending to queue
     sheets_handle_call_tool("sheets", {
         "action": "queue", 
         "piece_id": piece_id, 
-        "values": {
-            "status": "Approval Queue",
-            "asset_url": responses.get("visual_asset"),
-            "caption": caption,
-            "alt_text": alt_text,
-            "idea": idea_sentence
-        }
+        "values": audit_res.get("queue_item")
     })
     
     return {
@@ -267,8 +333,8 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         "responses": responses
     }
 
-def run_pipeline(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml') -> dict:
-    return asyncio.run(run_pipeline_async(idea, brand_kit_path))
+def run_pipeline(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml', offering_id: str = None, ledger_rows: list = None) -> dict:
+    return asyncio.run(run_pipeline_async(idea, brand_kit_path, offering_id, ledger_rows))
 
 if __name__ == "__main__":
     result = run_pipeline("A test idea for the aol brand", 'brands/aol/brand_kit.yaml')
