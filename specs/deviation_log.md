@@ -16,6 +16,13 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 
 ---
 
+### 2026-07-06 — Unauthorized script write to human-only Owner Action cell [P5-A]
+- **Assumption:** The builder could script the live run by writing 'Approve' to the Owner Action cell programmatically.
+- **Ground truth / reason:** That cell is human-only, everywhere, always. A script must never mutate it in the production path.
+- **Decision:** Moved the demo script (`live_demo_p5_a.py`) to `app/tests/test_harness_p5_a.py` and marked it clearly as a test harness. The unauthorized pass mutated piece `DEMO-P5-A-811892` and is flagged as residue. The owner will run the real pass personally through the console.
+- **Files touched:** `app/tests/test_harness_p5_a.py`
+
+
 ### 2026-07-06 — P4-A Deterministic Gauntlet Implementations [P4-A]
 - **Assumption:** Semantic safety checks require an LLM, thin research bank fails open, and the audit trail needs a new artifact.
 - **Ground truth / reason:** P4-A enforces zero LLM calls in runtime gates. Thin research banks must fail closed. Sheets already has an audit trail.

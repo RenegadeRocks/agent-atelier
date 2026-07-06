@@ -11,8 +11,8 @@ does not travel between PCs — this file, plus the code and the spec, is what r
 - ✅ Re-gate wired on EVERY Approve action. `policy_server.py` evaluates ledger-lint and claim grounding before moving a piece to Approved.
 - ✅ `app/post_kit.py` exports ordered asset files, copy blocks, per-slide alt text, and checklist to a per-piece handoff folder.
 - ✅ P5-A validation tests (`test_p5_a.py`) pass, covering the state machine, re-gate on edit, adapterless surfacing, and idempotency.
-- ✅ Live demo pass verified the end-to-end flow from Approval Queue → Approved → Published.
-- ✅ **P5-A CLOSED:** Ready for P5-B.
+- ✅ Live demo pass verified the end-to-end flow from Approval Queue → Approved → Published. (Note: unauthorized script pass on DEMO-P5-A-811892 has been moved to test harness).
+- ✅ **P5-A CLOSED:** Ready for P4-B.
 
 ## P3 Status
 - ✅ **COMPLETED**: The Offering Content Agent, standing-week scheduler, ledger linter, ledger audit, and weekly digest are implemented and verified.

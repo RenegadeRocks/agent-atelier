@@ -3,7 +3,7 @@
 The live build checklist. **Update it at every contract hand-off** (build-protocol §1.7).
 Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-and-proceed.
 
-> **▶ NEXT CONTRACT: P5-B** — run `.agents/workflows/build-P5-B.md`.
+> **▶ NEXT CONTRACT: P4-B** — run `.agents/workflows/build-P4-B.md`.
 
 ## Contracts (P0 → P6)
 
