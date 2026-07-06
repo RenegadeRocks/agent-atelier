@@ -473,7 +473,7 @@ function renderPipeline() {
   if (!pieces.length) {
     $('#lanes').innerHTML =
       '<div class="empty-note lanes-empty">No pieces yet — the pipeline is quiet. ' +
-      'New work appears here the moment the Managing Editor assigns it.</div>';
+      'New work appears here the moment the Managing Editor assigns it. Onboard a new brand any time: <code>python onboard_brand.py &lt;pack-dir&gt;</code> — a five-minute guided interview.</div>';
     return;
   }
   $('#lanes').innerHTML = STATUSES.map((st) => {
@@ -505,7 +505,7 @@ function renderCompany() {
   };
   const quiet = brandPieces().length ? '' :
     '<div class="empty-note">The company is assembled but resting — no pieces yet. ' +
-    'The floor comes alive with the first assignment.</div>';
+    'The floor comes alive with the first assignment. Onboard a new brand any time: <code>python onboard_brand.py &lt;pack-dir&gt;</code> — a five-minute guided interview.</div>';
   $('#company').innerHTML = quiet +
     `<div class="org-root">${card('managing_editor')}</div>
      <div class="org-stem"></div>
