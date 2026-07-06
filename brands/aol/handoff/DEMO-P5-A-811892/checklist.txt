@@ -1,0 +1,6 @@
+1. Upload images in order (01-0N)
+2. Paste caption
+3. Add per-slide alt text (Advanced -> alt text)
+4. Publish
+5. Paste first-comment hashtags (if any)
+6. Return to Agent Atelier and 'Mark posted'

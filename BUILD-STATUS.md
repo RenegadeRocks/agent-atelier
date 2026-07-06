@@ -3,7 +3,7 @@
 The live build checklist. **Update it at every contract hand-off** (build-protocol §1.7).
 Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-and-proceed.
 
-> **▶ NEXT CONTRACT: P3** — run `.agents/workflows/build-P3.md`.
+> **▶ NEXT CONTRACT: P5-B** — run `.agents/workflows/build-P5-B.md`.
 
 ## Contracts (P0 → P6)
 
@@ -15,9 +15,9 @@ Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-a
 | 4 | P2-A | 2 | ✅ verified + committed + authorized | P1 brand runs entirely from `brand_kit.yaml`; a 2nd toy brand via kit only; missing-var blocks |
 | 5 | P2-B | 2 | ✅ verified + committed + authorized | new brand onboarded by interview, zero code changes, produces a piece |
 | 6 | P3   | 3 | ✅ verified + committed + authorized | a full week auto-plans/drafts/reviews/queues; rotation-violating draft rejected pre-CD; §9.5 backpressure pause |
-| 7 | P4-A | 4 | ⬜ | deterministic safety/claim scenarios pass; breaker fires; CI eval blocks a golden-set regression |
-| 8 | P4-B | 4 | ⬜ | publish-time referee catches a smuggled-CTA/tone near-miss; degrades to advisory cleanly |
-| 9 | P5-A | 5 | ⬜ | owner approves via Sheets + app; manual publish works; auto-publish gated, idempotent, audited |
+| 7 | P4-A | 4 | ✅ verified + committed + authorized | deterministic safety/claim scenarios pass; breaker fires; CI eval blocks a golden-set regression |
+| 8 | P4-B | 4 | ✅ verified + committed + authorized | publish-time referee catches a smuggled-CTA/tone near-miss; degrades to advisory cleanly |
+| 9 | P5-A | 5 | ✅ verified + committed + authorized | owner approves via Sheets + app; manual publish works; auto-publish gated, idempotent, audited |
 | 10| P5-B | 5 | ⬜ | Studio-Floor scenarios pass; live handoff/loop visible; intervention audited; trust never auto-flips |
 | 11| P6   | 6 | ⬜ | escape-rate audit reports CIs; CD↔owner calibration tracked; two brands on the same unchanged code |
 

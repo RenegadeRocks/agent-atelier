@@ -5,6 +5,15 @@ current and commit+push before you stop (build-protocol §2). On the other machi
 pull` then run `.agents/workflows/resume.md`. Antigravity's chat/memory is per-machine and
 does not travel between PCs — this file, plus the code and the spec, is what remembers.
 
+## P5-A Status
+- ✅ **COMPLETED**: The Owner-Action poller, approval protocol, manual Post Kit export, human-edit re-gating, and explicitly absent Instagram adapter are implemented and verified.
+- ✅ `app/approval_poller.py` reads Owner-Action cells from Sheets and processes them through `app/approval_protocol.py` (Approve, Request changes, Reject, Mark posted).
+- ✅ Re-gate wired on EVERY Approve action. `policy_server.py` evaluates ledger-lint and claim grounding before moving a piece to Approved.
+- ✅ `app/post_kit.py` exports ordered asset files, copy blocks, per-slide alt text, and checklist to a per-piece handoff folder.
+- ✅ P5-A validation tests (`test_p5_a.py`) pass, covering the state machine, re-gate on edit, adapterless surfacing, and idempotency.
+- ✅ Live demo pass verified the end-to-end flow from Approval Queue → Approved → Published.
+- ✅ **P5-A CLOSED:** Ready for P5-B.
+
 ## P3 Status
 - ✅ **COMPLETED**: The Offering Content Agent, standing-week scheduler, ledger linter, ledger audit, and weekly digest are implemented and verified.
 - ✅ `app/agents/offering_content.py`, `app/scheduler.py`, `app/tools/ledger_lint.py`, `app/tools/ledger_audit.py`, `app/tools/weekly_digest.py` created and integrated into `pipeline.py`.
