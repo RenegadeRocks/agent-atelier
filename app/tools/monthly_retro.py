@@ -6,8 +6,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
+import pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 from tools.export_floor_state import build_state
 from google.adk import runners
 from app.agents.config import validate_models_on_startup
