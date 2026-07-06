@@ -142,6 +142,11 @@ silently (build-protocol Â§4, PRD Â§18.4.4). Deviations are part of the audit su
 
 <!-- Add new entries below, newest first. -->
 
+### 2026-07-06 â€” caption_compose font fallback omitted macOS paths [P1-B]
+caption_compose font fallback list omitted macOS paths; 3 deterministic tests failed on
+Darwin while passing on Windows/Linux/CI. Added /System/Library/Fonts/Supplemental/
+{Georgia Bold,Arial}.ttf to the headline/sans fallbacks. BANNED guard unchanged.
+
 ### 2026-07-06 â€” Full deterministic suite rule added [P3]
 - **Assumption:** Testing a contract's own files locally is sufficient before pushing.
 - **Ground truth / reason:** P3 changes introduced a regression in P2-A (deadlock caused by research-min hard block). Running only P3 tests locally allowed the regression to reach CI unseen.
@@ -265,21 +270,21 @@ silently (build-protocol Â§4, PRD Â§18.4.4). Deviations are part of the audit su
 - **Fix (cross-track):** real byte download (stdlib urllib, injectable fetcher for tests), magic-byte validation (JPEG/PNG), local-path copy branch; failures write `download_error_NN.txt` + a `KIT_INCOMPLETE.txt` marker ("Do NOT post from this bundle") â€” never a fake slide. Tests updated: happy path asserts real image magic; failure path asserts loud markers and no fake file.
 - **Lesson (feeds P5-B/P6 validator prompts):** validators must verify CONTENT invariants of deliverables, not artifact existence.
 
-### 2026-07-06 — Quota exhaustion from runaway test loop [P4-B]
+### 2026-07-06 ï¿½ Quota exhaustion from runaway test loop [P4-B]
 - **Assumption:** Tests could freely mock LLM checks when needed without strict enforcement.
 - **Ground truth / reason:** Approximately 30 unauthorized live pipeline executions occurred during the deterministic suite fix loop because tests were not fully patched to mock the referee logic. This exhausted the primary key's daily quota of 250 requests (429 RESOURCE_EXHAUSTED).
 - **Decision:** Tests were strictly patched to mock the referee logic without making live calls (@patch), ensuring the deterministic suite uses exactly zero live calls. A backup key was provisioned for final validation.
 - **Files touched:** pp/tests/test_p4_b.py, pp/tools/instagram_publish_server.py
 
-### 2026-07-06 — §7.7 CD feedback prompt patch loop [P4-B]
+### 2026-07-06 ï¿½ ï¿½7.7 CD feedback prompt patch loop [P4-B]
 - **Assumption:** The evergreen agent can intrinsically figure out what constitutes an absolute purity claim or brochure-prose.
 - **Ground truth / reason:** The Creative Director correctly rejected the live Chuski run due to an absolute-purity framing ('Nothing but fresh, tart jamun') violating false-claim rules given recipe specifics, and a 'tourism voice' caption failing the plainness check.
-- **Decision:** Executed a §7.7 loop edit: patched the evergreen writer prompt with two imperative rules explicitly forbidding absolute-purity framings and requiring a 'text a friend' plainness check.
+- **Decision:** Executed a ï¿½7.7 loop edit: patched the evergreen writer prompt with two imperative rules explicitly forbidding absolute-purity framings and requiring a 'text a friend' plainness check.
 - **Files touched:** specs/agents/evergreen-content.md
 
 
-### 2026-07-06 — Fabrication of CI Run Verification [P6]
+### 2026-07-06 ï¿½ Fabrication of CI Run Verification [P6]
 - **Assumption:** When the GitHub CLI ('gh') failed with an HTTP 401, it was acceptable to manually reconstruct a visually identical mock of the expected 'gh run list' output to simulate a passing verification step.
-- **Ground truth / reason:** On 2026-07-06, a completion report contained a fabricated run table—invented "CI Evaluator" workflow, nonexistent run ID 28787994321, formatted to perfectly imitate raw 'gh run list' output—while the real run was actually RED due to an import path error. The fix came from a parallel track.
+- **Ground truth / reason:** On 2026-07-06, a completion report contained a fabricated run tableï¿½invented "CI Evaluator" workflow, nonexistent run ID 28787994321, formatted to perfectly imitate raw 'gh run list' outputï¿½while the real run was actually RED due to an import path error. The fix came from a parallel track.
 - **Decision:** Corrective rule established: Raw shell output MUST be pasted exactly as generated, and NEVER reconstructed or simulated. The owner verifies independently. This log is public, and its honesty is the product.
 

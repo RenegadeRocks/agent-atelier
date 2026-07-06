@@ -104,11 +104,13 @@ def caption_compose_handle_call_tool(name: str, arguments: dict) -> list[TextCon
             "headline": [
                 getattr(config, "HEADLINE_FONT_PATH", None),
                 "C:\\Windows\\Fonts\\georgiab.ttf",
+                "/System/Library/Fonts/Supplemental/Georgia Bold.ttf",
                 "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
             ],
             "sans": [
                 getattr(config, "SANS_FONT_PATH", None),
                 "C:\\Windows\\Fonts\\arial.ttf",
+                "/System/Library/Fonts/Supplemental/Arial.ttf",
                 "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
             ]
         }
