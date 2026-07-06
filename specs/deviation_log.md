@@ -253,3 +253,8 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 - Active-station prominence strengthened (solid signature-hue borders + tinted cards + state pills + idle recede) after owner found working agents "hardly visible, especially in light mode".
 - Demo-action safety: Floor Actions disabled with a visible reason whenever state is demo-sourced or the page runs on file:// — click-into-failure path removed.
 - Windows fix (cross-track catch by the P4-A builder, reported verbatim per protocol): all `read_text()` calls now pass explicit `encoding="utf-8"` (cp1252 'charmap' failure on the laptop).
+
+### 2026-07-06 — P5-A validator ESCAPE caught by owner eye-test: Post Kit slides were mocked [P5-A]
+- **What:** `app/post_kit.py` wrote the literal string "Mock image content for {url}" into every slide `.jpg` — a mock inside a sealed contract's production deliverable. The P5-A validator verified the bundle EXISTED but not its CONTENTS; the owner opened `01.jpg` and it wouldn't render.
+- **Fix (cross-track):** real byte download (stdlib urllib, injectable fetcher for tests), magic-byte validation (JPEG/PNG), local-path copy branch; failures write `download_error_NN.txt` + a `KIT_INCOMPLETE.txt` marker ("Do NOT post from this bundle") — never a fake slide. Tests updated: happy path asserts real image magic; failure path asserts loud markers and no fake file.
+- **Lesson (feeds P5-B/P6 validator prompts):** validators must verify CONTENT invariants of deliverables, not artifact existence.

@@ -131,20 +131,38 @@ def test_post_kit_export(tmpdir):
     os.chdir(str(tmpdir))
     
     try:
+        fake_jpeg = b"\xff\xd8\xff\xe0" + b"\x00" * 32  # valid JPEG magic
         handoff_dir = export_post_kit(
             piece_id="TEST-6",
             brand_id="test_brand",
             caption="Test Caption",
             asset_urls=["http://example.com/1.jpg", "http://example.com/2.jpg"],
-            alt_texts=["Alt 1", "Alt 2"]
+            alt_texts=["Alt 1", "Alt 2"],
+            fetch=lambda url: fake_jpeg,
         )
-        
+
         assert os.path.exists(handoff_dir)
         assert os.path.exists(os.path.join(handoff_dir, "01.jpg"))
         assert os.path.exists(os.path.join(handoff_dir, "02.jpg"))
+        with open(os.path.join(handoff_dir, "01.jpg"), "rb") as f:
+            assert f.read().startswith(b"\xff\xd8\xff")  # real image bytes, never a placeholder
+        assert not os.path.exists(os.path.join(handoff_dir, "KIT_INCOMPLETE.txt"))
         assert os.path.exists(os.path.join(handoff_dir, "caption.txt"))
         assert os.path.exists(os.path.join(handoff_dir, "alt_texts.txt"))
         assert os.path.exists(os.path.join(handoff_dir, "checklist.txt"))
+
+        # Non-image download must fail LOUDLY — no fake slide, an error file + marker.
+        bad_dir = export_post_kit(
+            piece_id="TEST-7",
+            brand_id="test_brand",
+            caption="c",
+            asset_urls=["http://example.com/broken.jpg"],
+            alt_texts=["a"],
+            fetch=lambda url: b"<html>404 not found</html>",
+        )
+        assert not os.path.exists(os.path.join(bad_dir, "01.jpg"))
+        assert os.path.exists(os.path.join(bad_dir, "download_error_01.txt"))
+        assert os.path.exists(os.path.join(bad_dir, "KIT_INCOMPLETE.txt"))
         
         with open(os.path.join(handoff_dir, "caption.txt"), "r") as f:
             assert f.read() == "Test Caption"
