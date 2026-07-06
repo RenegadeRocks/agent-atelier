@@ -81,7 +81,9 @@ Prefer to stop at a green test or a finished file, not mid-edit.
 ## 3. COMMITS (only when the owner asks to commit/push)
 
 Small, per-contract or per-sub-task commits. Suggested message shape:
-`P<id>: <what landed> — <gate state>`. Push before switching machines. Never force-push
+`P<id>: <what landed> — <gate state>`. 
+**Full Suite Rule**: Before any push, run the FULL deterministic suite — `python -m pytest app/tests -m "not live"` — the whole suite green is the bar, not the contract's own tests.
+Push before switching machines. Never force-push
 shared branches. Two PCs (office + home) share one remote; the repo is the single
 source of truth — chat history and tool "memories" do NOT travel, only committed files.
 

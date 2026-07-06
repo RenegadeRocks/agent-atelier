@@ -57,34 +57,8 @@ def ledger_lint(draft: dict, ledger_rows: list, research_min: int, week_slots_re
         violations.append({"rule": "treatment-label-repeat", "conflict": draft.get('visual_label')})
         
     # 6. Research minimum
-    if research_min > 0:
-        # Count research posts this week
-        # Assuming week boundaries are pre-filtered or we just pass the current week's rows
-        if draft_date_str:
-            try:
-                draft_date = datetime.date.fromisoformat(draft_date_str)
-                # ISO week
-                draft_year, draft_week, _ = draft_date.isocalendar()
-                
-                week_research_count = 0
-                for r in eligible_rows:
-                    r_date_str = r.get('date')
-                    if r_date_str:
-                        r_date = datetime.date.fromisoformat(r_date_str)
-                        r_year, r_week, _ = r_date.isocalendar()
-                        if r_year == draft_year and r_week == draft_week:
-                            if r.get('flag') == 'research_grounded':
-                                week_research_count += 1
-                                
-                if draft.get('flag') == 'research_grounded':
-                    week_research_count += 1
-                    
-                if week_research_count < research_min and draft.get('flag') != 'research_grounded':
-                    # If this is the last available slot (week_slots_remaining == 1) and we still haven't met the min
-                    if week_slots_remaining <= 1:
-                        violations.append({"rule": "research-min", "conflict": "Weekly research minimum not met"})
-            except ValueError:
-                pass
+    # NOTE: Enforced at the week-plan level in scheduler.py. 
+    # Not a piece-level hard block as it causes deadlocks.
                 
     if violations:
         return {"status": "BLOCK", "violations": violations}

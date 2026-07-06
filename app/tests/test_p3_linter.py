@@ -59,8 +59,7 @@ def test_linter_research_min():
     draft = {"hook": "new-hook", "shape": "mini-story", "visual_label": "candid joy", "idea": "new idea", "date": today_str, "flag": "none"}
     
     result = ledger_lint(draft, ledger_rows, research_min=1, week_slots_remaining=1)
-    assert result["status"] == "BLOCK"
-    assert any(v["rule"] == "research-min" for v in result["violations"])
+    assert result["status"] == "PASS" # Rule removed as a piece-level hard block
 
 def test_linter_visual_label_back_to_back():
     ledger_rows = [
