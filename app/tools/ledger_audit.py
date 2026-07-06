@@ -34,10 +34,13 @@ def ledger_audit(piece_draft: dict, lint_result: dict, asset: dict) -> dict:
     
     # 5. Write the audit entry
     audit_entry = {
-        "action": "QUEUE",
-        "actor_agent": "Publishing & Operations Agent",
-        "target": f"{piece_draft.get('piece_id')}#QUEUE",
-        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        "piece_id": piece_draft.get('piece_id'),
+        "verb": "QUEUE",
+        "status": "SUCCESS",
+        "detail": "Piece moved to Approval Queue",
+        "actor": "Publishing & Operations Agent",
+        "ts": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "operator_id": "system"
     }
     
     # 6. Build the handoff bundle + queue

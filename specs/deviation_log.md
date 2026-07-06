@@ -16,6 +16,13 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 
 ---
 
+### 2026-07-06 — P4-A Deterministic Gauntlet Implementations [P4-A]
+- **Assumption:** Semantic safety checks require an LLM, thin research bank fails open, and the audit trail needs a new artifact.
+- **Ground truth / reason:** P4-A enforces zero LLM calls in runtime gates. Thin research banks must fail closed. Sheets already has an audit trail.
+- **Decision:** Implemented deterministic string matching for safety rules in the P4-A gauntlet. Configured thin research bank to block instead of pass. Used local JSON/in-memory for Breaker state instead of a DB.
+- **Files touched:** `app/policy_server.py`, `app/circuit_breaker.py`, `app/tools/sheets_server.py`
+
+
 ### 2026-07-05 — Field scraping leak cleanup  [P1-B]
 - **Assumption:** Regex field scraping over agent prose correctly isolated drafted fields like `WORDS`.
 - **Ground truth / reason:** The E2E test runs leaked numeric fragments (e.g., "66", "74", "114") into the live production sheet for the `WORDS` field.

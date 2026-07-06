@@ -41,6 +41,12 @@ async def run_agent(agent, prompt: str, brand_kit: dict) -> str:
     prompt = resolve(prompt, brand_kit, env, vault, ResolveScope(MODEL))
     
     runner = runners.InMemoryRunner(agent=agent)
+    
+    # Mock token calculation for circuit breaker
+    from app.circuit_breaker import breaker
+    # We will use piece_id as run_id if available, else a static one
+    run_id = os.environ.get("CURRENT_PIECE_ID", "default_run")
+    
     events = await runner.run_debug(prompt, quiet=True)
     output_text = ""
     for e in events:
@@ -48,6 +54,11 @@ async def run_agent(agent, prompt: str, brand_kit: dict) -> str:
             for p in e.message.parts:
                 if getattr(p, 'text', None):
                     output_text += p.text
+                    
+    # Token accumulator (approx 4 chars per token)
+    tokens_used = len(prompt + output_text) // 4
+    breaker.check_and_accumulate(run_id, tokens=tokens_used, is_iteration=True)
+    
     return output_text.strip()
 
 async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml', offering_id: str = None, ledger_rows: list = None) -> dict:
@@ -282,8 +293,18 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         alt_text = "Fallback alt text generated due to parsing failure."
 
     # [QUEUE]
+    from app.policy_server import content_gauntlet
+    
+    # Run the deterministic content gauntlet (pre-queue checkpoint)
+    gauntlet_res = content_gauntlet(piece_id, caption, brand_kit, ledger_rows) # passing ledger_rows as mock claim_bank if empty
+    if gauntlet_res.get("status") == "BLOCK":
+        print(f"[content_gauntlet] BLOCK: {gauntlet_res.get('reason')}")
+        trace.append("safety_blocked")
+        return {"status": "Escalated", "trace": trace, "responses": responses, "audit_reason": gauntlet_res.get("reason"), "exception": "Safety-Blocked"}
+
     ops = get_ops()
     prompt = f"Queue this final package:\nText: {responses.get('draft', '')}\nVisual: {responses.get('visual_asset', '')}\nStatus is approved by CD."
+
     print(f"[{ops.name}] Prompt: {prompt}")
     resp = await run_agent(ops, prompt, brand_kit)
     responses["queue"] = resp
@@ -325,6 +346,13 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         "action": "queue", 
         "piece_id": piece_id, 
         "values": audit_res.get("queue_item")
+    })
+    
+    # Write to Audit trail
+    sheets_handle_call_tool("sheets", {
+        "action": "audit", 
+        "piece_id": piece_id, 
+        "values": audit_res.get("audit_entry")
     })
     
     return {

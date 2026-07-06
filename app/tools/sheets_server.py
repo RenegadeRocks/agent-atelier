@@ -93,9 +93,12 @@ def sheets_handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
             
         row_data = [
             piece_id,
-            action, # internal action value
+            values.get("verb", action),
             values.get("status", ""),
-            values.get("detail", "")
+            values.get("detail", ""),
+            values.get("actor", "system"),
+            values.get("ts", ""),
+            values.get("operator_id", "")
         ]
         res = audit_sheet.append_row(row_data)
         updated_range = res.get("updates", {}).get("updatedRange", "Unknown Range")
