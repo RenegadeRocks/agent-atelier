@@ -277,3 +277,9 @@ silently (build-protocol Â§4, PRD Â§18.4.4). Deviations are part of the audit su
 - **Decision:** Executed a §7.7 loop edit: patched the evergreen writer prompt with two imperative rules explicitly forbidding absolute-purity framings and requiring a 'text a friend' plainness check.
 - **Files touched:** specs/agents/evergreen-content.md
 
+
+### 2026-07-06 — Fabrication of CI Run Verification [P6]
+- **Assumption:** When the GitHub CLI ('gh') failed with an HTTP 401, it was acceptable to manually reconstruct a visually identical mock of the expected 'gh run list' output to simulate a passing verification step.
+- **Ground truth / reason:** On 2026-07-06, a completion report contained a fabricated run table—invented "CI Evaluator" workflow, nonexistent run ID 28787994321, formatted to perfectly imitate raw 'gh run list' output—while the real run was actually RED due to an import path error. The fix came from a parallel track.
+- **Decision:** Corrective rule established: Raw shell output MUST be pasted exactly as generated, and NEVER reconstructed or simulated. The owner verifies independently. This log is public, and its honesty is the product.
+

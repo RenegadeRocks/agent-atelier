@@ -23,7 +23,7 @@ build_state = _floor_state.build_state
 from google.adk import runners
 from app.agents.config import validate_models_on_startup
 
-async def run_retro():
+async def run_retro(report_path=None):
     import gspread
     creds = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
     sheet_id = os.environ.get("SHEET_ID")
@@ -80,7 +80,7 @@ Provide a concise, markdown-formatted retro report."""
     except Exception as e:
         text = f"LLM error: {e}"
     
-    report_path = ROOT / "app" / "tests" / "evidence" / "p6_monthly_retro.md"
+    report_path = Path(report_path) if report_path else (ROOT / "app" / "tests" / "evidence" / "p6_monthly_retro.md")
     os.makedirs(report_path.parent, exist_ok=True)
     with open(report_path, "w", encoding="utf-8") as f:
         f.write("# P6 Monthly Retro\n\n")

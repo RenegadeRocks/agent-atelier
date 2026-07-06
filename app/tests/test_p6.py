@@ -95,10 +95,11 @@ def test_p6_multi_brand_pipeline():
 
 
 @pytest.mark.asyncio
-async def test_p6_post_publish_audit_deterministic():
+async def test_p6_post_publish_audit_deterministic(tmp_path):
     """
     Scenario: Post-publication audit extracts sample and computes escape rate CI.
     Must be independent of the gates that produced the content.
+    RULE: Deterministic tests must write mock output ONLY to `tmp_path`, never to `app/tests/evidence/` to avoid test pollution.
     """
     import app.tools.post_publish_audit as audit
     from dataclasses import dataclass
@@ -135,19 +136,20 @@ async def test_p6_post_publish_audit_deterministic():
                 
         with patch('gspread.service_account', return_value=MockGspread().service_account("")), \
              patch('os.environ.get', side_effect=lambda k, d=None: "dummy" if k in ["GOOGLE_APPLICATION_CREDENTIALS", "SHEET_ID"] else d):
-            await audit.run_audit()
+            report_path = tmp_path / "p6_audit_report.md"
+            await audit.run_audit(report_path=report_path)
             
     # Check if report was generated
-    report_path = audit.ROOT / "app" / "tests" / "evidence" / "p6_audit_report.md"
     assert report_path.exists()
     content = report_path.read_text(encoding="utf-8")
     assert "Sample size:" in content
     assert "escape rate" in content.lower()
 
 @pytest.mark.asyncio
-async def test_p6_monthly_retro_deterministic():
+async def test_p6_monthly_retro_deterministic(tmp_path):
     """
     Scenario: Corrections mining + retro tuning extracts corrections and generates a triage report.
+    RULE: Deterministic tests must write mock output ONLY to `tmp_path`, never to `app/tests/evidence/` to avoid test pollution.
     """
     import app.tools.monthly_retro as retro
     from dataclasses import dataclass
@@ -183,10 +185,10 @@ async def test_p6_monthly_retro_deterministic():
                 
         with patch('gspread.service_account', return_value=MockGspread().service_account("")), \
              patch('os.environ.get', side_effect=lambda k, d=None: "dummy" if k in ["GOOGLE_APPLICATION_CREDENTIALS", "SHEET_ID"] else d):
-            await retro.run_retro()
+            report_path = tmp_path / "p6_monthly_retro.md"
+            await retro.run_retro(report_path=report_path)
             
     # Check if report was generated
-    report_path = retro.ROOT / "app" / "tests" / "evidence" / "p6_monthly_retro.md"
     assert report_path.exists()
     content = report_path.read_text(encoding="utf-8")
     assert "P6 Monthly Retro" in content

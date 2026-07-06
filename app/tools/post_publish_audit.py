@@ -41,7 +41,7 @@ def wilson_score_interval(p: float, n: int, z: float = 1.96):
     upper = (center_adjusted_prob + z*adjusted_std_dev) / denominator
     return max(0, lower), min(1, upper)
 
-async def run_audit():
+async def run_audit(report_path=None):
     import gspread
     creds = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
     sheet_id = os.environ.get("SHEET_ID")
@@ -125,7 +125,7 @@ Then provide a brief 1 sentence reason."""
     escape_rate = fails / len(target_pieces)
     lower, upper = wilson_score_interval(escape_rate, len(target_pieces))
     
-    report_path = ROOT / "app" / "tests" / "evidence" / "p6_audit_report.md"
+    report_path = Path(report_path) if report_path else (ROOT / "app" / "tests" / "evidence" / "p6_audit_report.md")
     os.makedirs(report_path.parent, exist_ok=True)
     with open(report_path, "w", encoding="utf-8") as f:
         f.write("# P6 Post-Publication Audit Report\n\n")
