@@ -241,7 +241,10 @@ function renderHeader() {
   const pieces = brandPieces();
   const motion = pieces.filter(inMotion).length;
   const needs = pieces.filter((p) => p.needs_you).length;
-  $('#inMotion').textContent = motion + ' in motion';
+  // echo the active-station brass so the eye connects counter -> station
+  const motionChip = $('#inMotion');
+  motionChip.textContent = (motion > 0 ? '● ' : '') + motion + ' in motion';
+  motionChip.classList.toggle('chip-motion', motion > 0);
   $('#needYou').textContent = '▲ ' + needs + ' need you';
 
   const rn = $('#rightNow');
@@ -282,14 +285,39 @@ function renderFloor() {
 
   $('#floorEmpty').hidden = brandPieces().length !== 0;
 
-  const setStation = (id, state, ico, label, stPieces) => {
+  // Layered active-state cues (owner eye-test round 2): state class drives
+  // the accent border + tinted card + ring; the pill is the loud text cue.
+  const ACTIVE_STATES = { working: 1, orchestrating: 1, reviewing: 1 };
+  const ATTN_STATES = { looping: 1, waiting: 1 };
+  const PILL_TEXT = {
+    working: '● WORKING', orchestrating: '◆ ORCHESTRATING', reviewing: '✶ REVIEWING',
+    looping: '⟲ REVISE LOOP', waiting: '▲ NEEDS YOU', blocked: '⛨ BLOCKED', paused: '‖ PAUSED',
+  };
+  const setStation = (id, state, ico, label, stPieces, pillText) => {
     const el = $('#st-' + id);
     if (!el) return;
     el.dataset.state = state;
+    el.classList.toggle('is-active', !!ACTIVE_STATES[state]);
+    el.classList.toggle('is-attn', !!ATTN_STATES[state]);
+    el.classList.toggle('is-blocked', state === 'blocked' || state === 'paused');
     const icoEl = el.querySelector('.st-ico');
     const labelEl = el.querySelector('.st-label');
     if (icoEl) icoEl.textContent = ico;
     if (labelEl) labelEl.textContent = label;
+    const head = el.querySelector('.st-head');
+    if (head) {
+      let pill = el.querySelector('.st-pill');
+      if (!pill) {
+        pill = document.createElement('span');
+        head.appendChild(pill);
+      }
+      const text = pillText || PILL_TEXT[state] || '';
+      pill.hidden = !text;
+      pill.textContent = text;
+      pill.className = 'st-pill' +
+        (ATTN_STATES[state] ? ' st-pill--attn' : '') +
+        (state === 'blocked' || state === 'paused' ? ' st-pill--blocked' : '');
+    }
     const wrap = el.querySelector('.st-pieces');
     if (wrap) wrap.innerHTML = (stPieces || []).map((p) => chipHtml(p, { short: true })).join('');
     el.classList.toggle('followdim', !!S.follow && !(stPieces || []).length && id !== 'record');
@@ -327,7 +355,8 @@ function renderFloor() {
     cd.length ? (maxRound >= 1 ? 'looping' : 'reviewing') : 'idle',
     cd.length ? (maxRound >= 1 ? '⟲' : '✶') : '·',
     cd.length ? (maxRound >= 1 ? `reviewing — revise ${maxRound}/${cap}` : 'reviewing') : 'Idle',
-    cd);
+    cd,
+    cd.length && maxRound >= 1 ? `⟲ REVISE ${maxRound}/${cap}` : undefined);
 
   const vis = byStation.visual || [];
   setStation('visual', vis.length ? 'working' : 'idle', vis.length ? '▣' : '·',
@@ -348,7 +377,8 @@ function renderFloor() {
   if (gateN) deskLabel = `Waiting on you ▲${gateN}`;
   else if (awaitPost) deskLabel = `awaiting your post (${awaitPost} approved)`;
   setStation('desk', (gateN || awaitPost) ? 'waiting' : 'idle',
-    (gateN || awaitPost) ? '▲' : '·', deskLabel, desk);
+    (gateN || awaitPost) ? '▲' : '·', deskLabel, desk,
+    gateN ? `▲ NEEDS YOU (${gateN})` : (awaitPost ? '▲ AWAITING POST' : undefined));
 
   S.cdRound = maxRound;
   S.cdCap = cap;

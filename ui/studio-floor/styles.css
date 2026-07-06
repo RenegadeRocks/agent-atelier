@@ -108,6 +108,11 @@ button { font: inherit; color: inherit; }
 .chip-ok { color: var(--green); border-color: var(--green); }
 .chip-tripped { color: var(--red); border-color: var(--red); font-weight: 600; }
 .chip-needs { color: var(--amber); border-color: var(--amber); }
+/* echoes the brass of active stations so the eye connects counter -> station */
+.chip-motion {
+  color: var(--brass); border-color: var(--brass); font-weight: 700;
+  background: color-mix(in srgb, var(--brass) 14%, var(--panel2));
+}
 
 .badge-demo {
   background: var(--amber); color: #1c1503; border-radius: 6px;
@@ -244,7 +249,7 @@ html[data-theme="light"] .count-chip { color: #fff; }
 .station.terminal { background: none; border: none; text-align: center; font-size: var(--fs-sm); padding: 0; }
 .station.followdim { opacity: 0.35; }
 
-.st-head { display: flex; gap: 7px; align-items: baseline; margin: 0; }
+.st-head { display: flex; gap: 7px; align-items: baseline; margin: 0; flex-wrap: wrap; }
 .st-glyph { color: var(--hue, var(--ink-dim)); font-size: 17px; }
 .st-name { font-family: var(--font-display); font-size: var(--fs); }
 .st-state { margin: 4px 0 0; font-size: var(--fs-sm); color: var(--ink-dim); display: flex; gap: 6px; align-items: center; }
@@ -261,18 +266,72 @@ html[data-theme="light"] .count-chip { color: #fff; }
 .station[data-state="blocked"] .st-state { color: var(--red); font-weight: 600; }
 .station[data-state="waiting"].human .st-state { color: var(--violet); font-weight: 600; }
 
-/* breathing brass "studio light" ring on active stations */
-.station[data-state="working"],
-.station[data-state="orchestrating"],
-.station[data-state="reviewing"] {
-  border-color: var(--brass);
+/* ---- ACTIVE stations must be unmistakable at a glance (owner eye-test):
+   layered cues, never colour alone — (a) solid accent border in the agent's
+   signature hue, (b) tinted card background per theme, (c) a high-contrast
+   state pill, (d) a ring: breathing halo in dark, solid double-ring in light
+   (glows wash out on paper). Under prefers-reduced-motion the static
+   border + ring + pill carry the full signal. ---- */
+.station.is-active {
+  border: 2.5px solid var(--hue, var(--brass));
+  background: color-mix(in srgb, var(--hue, var(--brass)) 12%, var(--panel2));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hue, var(--brass)) 38%, transparent);
   animation: breathe 2.6s ease-in-out infinite;
 }
-.station[data-state="blocked"] { border-color: var(--red); }
-@keyframes breathe {
-  0%, 100% { box-shadow: 0 0 0 0 var(--brass-soft); }
-  50% { box-shadow: 0 0 0 7px var(--brass-soft); }
+html[data-theme="light"] .station.is-active {
+  background: color-mix(in srgb, var(--hue, var(--brass)) 10%, var(--panel2));
+  box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--hue, var(--brass));
+  animation-name: ringpulse;
 }
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--hue, var(--brass)) 38%, transparent); }
+  50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--hue, var(--brass)) 20%, transparent); }
+}
+@keyframes ringpulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--hue, var(--brass)); }
+  50% { box-shadow: 0 0 0 2px var(--panel), 0 0 0 6px var(--hue, var(--brass)); }
+}
+
+/* attention states (loop / waiting-on-you): same layered treatment, amber —
+   violet at the human desk (its --attn override below) */
+.station.is-attn {
+  --attn: var(--amber);
+  border: 2.5px solid var(--attn);
+  background: color-mix(in srgb, var(--attn) 11%, var(--panel2));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--attn) 32%, transparent);
+}
+.station.human.is-attn { --attn: var(--violet); }
+html[data-theme="light"] .station.is-attn {
+  box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--attn);
+}
+.station.is-blocked {
+  border: 2.5px solid var(--red);
+  background: color-mix(in srgb, var(--red) 11%, var(--panel2));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 32%, transparent);
+}
+html[data-theme="light"] .station.is-blocked {
+  box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--red);
+}
+
+/* the state pill — high-contrast, reads at thumbnail size */
+.st-pill {
+  margin-left: auto; align-self: center;
+  font-size: 11.5px; font-weight: 800; letter-spacing: 0.07em;
+  padding: 2.5px 10px; border-radius: 999px; white-space: nowrap;
+  background: var(--hue, var(--brass)); color: var(--pill-ink);
+}
+html[data-theme="dark"] { --pill-ink: #12131A; }
+html[data-theme="light"] { --pill-ink: #FFFFFF; }
+.st-pill--attn { background: var(--attn, var(--amber)); }
+.st-pill--blocked { background: var(--red); }
+
+/* idle stations recede a touch so active ones pop — but stay readable */
+.station[data-state="idle"] {
+  border-color: color-mix(in srgb, var(--line) 62%, var(--panel2));
+  border-left-color: color-mix(in srgb, var(--hue, var(--line)) 45%, var(--panel2));
+}
+.station[data-state="idle"] .st-name { color: color-mix(in srgb, var(--ink) 78%, var(--panel2)); }
+.station[data-state="idle"] .st-glyph { opacity: 0.55; }
 
 .piece-chip {
   font-family: var(--font-mono); font-size: 12.5px;
