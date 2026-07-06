@@ -63,7 +63,7 @@ image_quality_tier: "medium"
 
 # --- Contact / CTA (used EXACTLY; never invented) ---------------------------
 cta_style: "soft"
-contact_whatsapp: ["+91 9501781623"]
+contact_whatsapp: ["+91 98290 44556"]
 contact_instagram: "@chuskiclub"
 cta_forbidden_phrases: 
   - "Hurry"
