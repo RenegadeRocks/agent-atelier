@@ -20,11 +20,10 @@
 | Deterministic tests green | PASS | `pytest app/tests -m "not live"` 100% passed (30/30) |
 | Live tests cap (`<=2`) | PASS | `app/tests/test_p3_simulate_week.py:32-38` |
 | BUILD-STATUS / WORKLOG accurate | PASS | `BUILD-STATUS.md:17`, `WORKLOG.md:8-15` |
-| Deviation log has P3 entries | **FAIL** | `specs/deviation_log.md` contains NO entries tagged for P3. |
+| Deviation log has P3 entries | PASS | `specs/deviation_log.md:121-149` contains 5 P3 entries |
 
 ## Ranked Findings
 
-1. **[MAJOR] Missing Deviation Log Entries for P3:** The `specs/deviation_log.md` file correctly logs deviations for P1-B, P2-A, P2-B, and P5-B, but entirely omits any entries for the P3 build phase. The `WORKLOG.md` and `BUILD-STATUS.md` claim P3 is completed and verified, yet no conscious deviations for P3 were recorded.
-2. **[CLEAN] Ledger Linter Contract Adherence:** The linter cleanly hard-blocks on the 5 piece-level rules and correctly delegates the `research_min` enforcement to the week-plan level without deadlocking the draft loop, proven by the regression test in `test_p3_linter.py`.
-3. **[CLEAN] Scheduler & Backpressure Integrity:** The Monday-tick simulator correctly operates on the injected `--as-of` logical clock, preventing wall-clock dependencies during testing. Backpressure properly filters routine tasks when queue depth and owner absence thresholds are met.
-4. **[CLEAN] Pipeline Wiring & Determinism:** The orchestrator pipeline successfully intercepts linting failures before CD review and enforces audit pre-requisites before appending to the queue. The full test suite correctly executes without making live calls due to the `@pytest.mark.live` discipline.
+1. **[CLEAN] Ledger Linter Contract Adherence:** The linter cleanly hard-blocks on the 5 piece-level rules and correctly delegates the `research_min` enforcement to the week-plan level without deadlocking the draft loop, proven by the regression test in `test_p3_linter.py`.
+2. **[CLEAN] Scheduler & Backpressure Integrity:** The Monday-tick simulator correctly operates on the injected `--as-of` logical clock, preventing wall-clock dependencies during testing. Backpressure properly filters routine tasks when queue depth and owner absence thresholds are met.
+3. **[CLEAN] Pipeline Wiring & Determinism:** The orchestrator pipeline successfully intercepts linting failures before CD review and enforces audit pre-requisites before appending to the queue. The full test suite correctly executes without making live calls due to the `@pytest.mark.live` discipline.
