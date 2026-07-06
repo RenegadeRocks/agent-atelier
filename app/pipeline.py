@@ -61,6 +61,12 @@ async def run_agent(agent, prompt: str, brand_kit: dict) -> str:
     
     return output_text.strip()
 
+async def default_semantic_review_judge(agent, prompt, brand_kit):
+    return await run_agent(agent, prompt, brand_kit)
+
+# Module-level variable to allow dependency injection during tests
+semantic_review_judge = default_semantic_review_judge
+
 async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_kit.yaml', offering_id: str = None, ledger_rows: list = []):
     print(f"--- STARTING PIPELINE WITH IDEA: {idea} ---")
     
@@ -212,7 +218,7 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         cd = get_cd()
         prompt = f"Review this draft:\n{responses.get('draft', '')}"
         print(f"[{cd.name}] Prompt: {prompt}")
-        resp = await run_agent(cd, prompt, brand_kit)
+        resp = await semantic_review_judge(cd, prompt, brand_kit)
         trace.append("creative_director")
         print(f"[{cd.name}] Response:\n{resp}\n")
         
@@ -270,11 +276,11 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         
         # [CD RENDER PASS]
         trace.append("cd_render_pass")
-        cd_agent = get_cd()
+        cd = get_cd()
         cd_render_prompt = f"Perform a multimodal post-render pass on this composited piece. Evaluate if it is alive, on-brand, concept-legible, visibly-different, no-leak, and scrim-valid. The visual asset URL is: {asset_url}. The visual brief is: {visual_brief}. Caption is: {hook}"
-        print(f"[{cd_agent.name} - Render Pass] Prompt: {cd_render_prompt}")
-        cd_render_resp = await run_agent(cd_agent, cd_render_prompt, brand_kit)
-        print(f"[{cd_agent.name} - Render Pass] Response:\n{cd_render_resp}\n")
+        print(f"[{cd.name} - Render Pass] Prompt: {cd_render_prompt}")
+        cd_render_resp = await semantic_review_judge(cd, cd_render_prompt, brand_kit)
+        print(f"[{cd.name} - Render Pass] Response:\n{cd_render_resp}\n")
         
         if "REJECT" in cd_render_resp.upper() or "REVISE" in cd_render_resp.upper():
             visual_prompt_suffix = f"CD Render Pass failed: {cd_render_resp}"

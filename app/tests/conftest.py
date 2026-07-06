@@ -11,3 +11,11 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "live" in item.keywords:
             item.add_marker(skip_live)
+
+@pytest.fixture(autouse=True)
+def mock_semantic_review_judge(request, monkeypatch):
+    if "live" not in request.keywords:
+        async def mock_judge(agent, prompt, brand_kit):
+            return "VERDICT: APPROVED (Stubbed for deterministic routing test)"
+        import app.pipeline
+        monkeypatch.setattr(app.pipeline, "semantic_review_judge", mock_judge)
