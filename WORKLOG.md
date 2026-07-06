@@ -10,4 +10,6 @@ does not travel between PCs — this file, plus the code and the spec, is what r
 - ✅ `brand_strategist.py`, `intake-interview` skill, and `source_ingest.py` completed.
 - ✅ Fixed `ResolveBlocked` on launch.
 - ✅ Fixed source ingestion scope defect to only read from `sources/`.
-- ⚠️ Walkthrough noted that `onboard_brand.py` does not output the file to disk directly. First-light guardrails successfully caught and added packaging rule.
+- ✅ Fixed `onboard_brand.py` missing save feature: It now saves kits to disk, parses them correctly, and defaults invalid kits to `.draft.yaml`.
+- ⚠️ **Deviation Log:** Added an automatic retry loop in `onboard_brand.py` interactive shell. On parse or validation failure, it intercepts the output and injects `specs/brand_kit.template.yaml` back to the Strategist up to 2 times, forcing strict adherence to the schema.
+- ✅ **P2-B CLOSED:** Kit persistence is live, schema validation enforces fail-closed, and faithfulness checks pass.

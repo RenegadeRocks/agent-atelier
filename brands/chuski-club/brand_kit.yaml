@@ -1,0 +1,182 @@
+brand_kit_version: 2
+
+# --- Identity ---------------------------------------------------------------
+brand_name: "Chuski Club"
+brand_short_name: "Chuski Club"
+tagline: "Grown up, but never boring."
+locale: "Jaipur, Rajasthan, India"
+languages: ["English", "Hindi"]
+timezone: "Asia/Kolkata"
+mission: "Make small-batch, seasonal fruit ice pops that are grown-up but never boring—celebrating real fruit and Jaipur nostalgia without neon syrups."
+brand_type: "ecommerce_dtc"
+
+# --- Audience ---------------------------------------------------------------
+audience_persona: "College students and friend groups with disposable income wanting a shared summer experience."
+audience_pains: 
+  - "Sweltering Jaipur heat"
+  - "Artificial neon-syrup popsicles"
+  - "Boring, non-aesthetic catering options for parties"
+scroll_test_persona: "A 22-year-old college student melting in their afternoon lecture, endlessly scrolling for weekend plans."
+
+# --- Intent (north-star capture, §7.1) ---------------------------------------
+intent_statement: "Chuski Club helps college students beat the heat so they feel glorious and refreshed; the next step is DM MELT to order"
+desired_feeling: "Glorious and refreshed in the 4pm heat"
+primary_cta: "DM 'MELT' to order"
+cta_destination: "dm"
+off_brand_notes: 
+  - "Corporate or premium 'whisky ad' aesthetics"
+  - "Guilt-inducing health/diet talk"
+
+# --- Brand voice (seeds brand_voice canon) ----------------------------------
+voice_descriptors: ["Sunny", "quick", "cheeky", "enthusiastic", "youthful"]
+voice_do: 
+  - "Talk like a friend"
+  - "Mix English and Hindi naturally"
+  - "Name the specific fruit, mandi, and tongue colors"
+voice_dont: 
+  - "Never guilt anyone about sugar"
+  - "Never pretend it's a health food"
+  - "No corporate/premium jargon"
+reading_level: "conversational"
+sample_lines_good: 
+  - "Phalsa season lasts fourteen days. Cancel your plans."
+  - "Your tongue is going to be purple in four minutes."
+sample_lines_bad: 
+  - "Indulge guilt-free in our sugar-conscious creations."
+  - "❄️🔥 BEAT THE HEAT NOW — LIMITED STOCK!!"
+
+# --- Visual identity (seeds brand_assets + visual canon + Caption-Composer) --
+logo_asset: "assets/chuski_club_logo.png"
+wordmark_text: "Chuski Club · Jaipur"
+palette_hex: ["#FF69B4", "#FFC000", "#98FF98", "#F5F5DC"]
+accent_dark_bg: "#F5F5DC"
+accent_light_bg: "#FF69B4"
+headline_font: "Chunky/Bold Sans"
+label_font: "Clean Sans"
+visual_register: "Bright, sun-drenched, joyful, slightly chaotic. Never moody or premium dark."
+visual_variety: "high"
+visual_strategy: "concept_led"
+people_pool: "assets/people/"
+product_pool: "assets/products/"
+image_provider: "gemini_image_pro"
+image_quality_tier: "medium"
+
+# --- Contact / CTA (used EXACTLY; never invented) ---------------------------
+cta_style: "soft"
+contact_whatsapp: ["+91 9501781623"]
+contact_instagram: "@chuskiclub"
+cta_forbidden_phrases: 
+  - "Hurry"
+  - "Limited stock"
+  - "Order before we sell out"
+  - "Offer ends soon"
+
+# --- Channels & cadence (seeds cadence_plan) --------------------------------
+channels: ["instagram", "whatsapp"]
+posts_per_week_target: 4
+standing_week: 
+  mon: { track: "evergreen", notes: "Jaipur summer nostalgia for college students" }
+  tue: { track: "offering:summer_dozen" }
+  fri: { track: "offering:pop_cart" }
+  sat: { track: "evergreen", notes: "Vibes / Behind the scenes at Mandi" }
+research_post_min_per_week: 0
+max_posts_per_week: 6
+campaign_max_posts_per_week: 8
+seasonal_calendar: []
+max_queue_depth: null
+owner_absence_pause_days: 7
+campaign_overrides_backpressure: false
+quiet_days: ["wed", "thu", "sun"]
+blackout_dates: []
+evergreen_rotation: "no_repeat_within: 3"
+
+# --- Intent & capacity (feed the §7.1.1 cadence proposal) --------------------
+posting_goal: "community"
+weekly_capacity: "sustainable"
+cadence_source: "owner_stated"
+
+# --- Compliance & safety (seed safety hard-rules + Policy Server) ------------
+claims_allowed: 
+  - "Made with real fruit from the mandi"
+  - "Delivered inside Jaipur"
+claims_forbidden: 
+  - "Any health or diet claim — 'sugar-free', 'low-calorie', 'guilt-free', 'healthy treat', 'safe for diabetics', 'aids hydration/prevents heatstroke'"
+  - "'100% natural' / 'no chemicals' / 'preservative-free' as absolutes"
+  - "Blanket allergy-safety claims — never 'nut-free kitchen', never 'safe for allergic kids'"
+  - "Invented awards, rankings, or 'Jaipur's best'"
+  - "Unverified eco-friendly, zero-waste, or sustainability claims"
+claims_forbidden_confirmed: true
+comparative_claims_allowed: false
+political_content_allowed: false
+non_disclosure_rules: 
+  - "Exact recipes and ratios (fruit:sugar:stabiliser) — trade secret"
+  - "Mandi supplier names and purchase prices — never a name or number"
+  - "Never reveal the exact production address, just say Jaipur"
+non_disclosure_rules_confirmed: true
+required_framing: 
+  - topic: "allergens (dairy pops, nut garnishes)"
+    framing: "name the allergen plainly on the same asset — 'contains milk', 'contains pistachio' — every time, no cute euphemisms"
+  - topic: "children"
+    framing: "speak to the adult buying for kids; never pester-power aimed at children"
+  - topic: "heat relief"
+    framing: "relief is a feeling, not medicine — 'cold and glorious' yes, hydration/health benefits never"
+required_framing_confirmed: true
+regulatory_notes: "Food safety guidelines apply; no medical or health claims."
+
+# --- Research policy (seeds research_bank) ----------------------------------
+source_allowlist: 
+  - "Official Chuski Club channels"
+  - "Local Jaipur weather/season reports"
+source_denylist: 
+  - "Medical/health blogs"
+  - "Competitor feeds"
+citation_required_for_claims: true
+require_second_source_for_quantitative: false
+claim_reverify_months: 12
+
+# --- Offerings (replaces hard-coded program briefs; §7.4) -------------------
+offerings: 
+  - id: "summer_dozen"
+    name: "The Summer Dozen"
+    one_liner: "A mixed box of twelve seasonal fruit pops, delivered frozen inside Jaipur the same evening. Monthly changing box art. Focus on the spontaneous joy of sharing with friends. Never claim it won't melt if left out."
+    is_flagship: true
+  - id: "pop_cart"
+    name: "The Pop Cart"
+    one_liner: "A pink-and-mango cart booked for 2 hours (unlimited pops) at birthdays, college fests, and mehendis. Focus on the aesthetic, camera-ready party upgrade. Always state it is strictly within a 25km radius of Jaipur."
+
+# --- Topical territory for the Evergreen agent (replaces hard-coded pillars) -
+evergreen_pillars: 
+  - "Jaipur summer nostalgia"
+  - "Mandi morning runs"
+  - "Shared joy with friends"
+local_detail_bank: 
+  - "4pm loo wind"
+  - "Bapu Bazaar's pink walls"
+  - "Chaupar kulfi bells"
+  - "Muhana Mandi"
+  - "Tonk Road cane-juice crushers"
+
+# --- Notifications & alerts (seeds the §14.4.1 model; §16.2 notify contract) -
+notifications:
+  channel: "none"
+  recipients: []
+  severity_floor: "action"
+  quiet_hours: { tz: "Asia/Kolkata", start: "21:00", end: "08:00" }
+  digest: { day: "fri", hour: "16:00" }
+  batch_max_wait_minutes: 120
+  batch_max_items: 6
+  reminder_after_hours: 24
+  critical_reminder_minutes: 60
+  max_sends_per_hour: 12
+
+# --- Publishing & approval --------------------------------------------------
+approval_mode: "human"
+auto_publish_enabled: false
+approver_allowlist: []
+delegation: null
+system_of_record: "google_sheets"
+trust_threshold: 
+  window_pieces: 20
+  min_approval_rate: 0.95
+  max_avg_human_edits: 0
+  zero_policy_violations: true

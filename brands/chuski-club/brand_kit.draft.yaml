@@ -1,0 +1,77 @@
+brand_kit_version: 2
+brand_name: Chuski Club
+brand_short_name: Chuski Club
+brand_type: Local D2C Food & Beverage / Event Catering
+locale: Jaipur, Rajasthan, India
+languages: [English, Hindi]
+mission: "Make small-batch, seasonal fruit ice pops that are grown-up but never boring—celebrating real fruit and Jaipur nostalgia without neon syrups."
+
+audience:
+  primary_persona: "College students and friend groups with disposable income wanting a shared summer experience."
+  pains: "Sweltering Jaipur heat; artificial neon-syrup popsicles; boring catering options."
+  scroll_test_persona: "A 22-year-old college student melting in their afternoon lecture, endlessly scrolling for weekend plans."
+
+voice:
+  descriptors: [Sunny, quick, cheeky, enthusiastic, youthful]
+  reading_level: 6
+  do: 
+    - "Talk like a friend"
+    - "Mix English and Hindi naturally"
+    - "Name the specific fruit, mandi, and tongue colors"
+  dont: 
+    - "Never guilt anyone about sugar"
+    - "Never pretend it's a health food"
+    - "No corporate/premium jargon"
+  sample_lines_good: 
+    - "Phalsa season lasts fourteen days. Cancel your plans."
+    - "Your tongue is going to be purple in four minutes."
+  sample_lines_bad: 
+    - "Indulge guilt-free in our sugar-conscious creations."
+    - "❄️🔥 BEAT THE HEAT NOW — LIMITED STOCK!!"
+
+visual:
+  logo_asset: "assets/chuski_club_logo.png"
+  palette: ["#FF69B4", "#FFC000", "#98FF98", "#F5F5DC"] # Pink, Yellow, Mint, Off-White
+  headline_font: "Chunky/Bold Sans"
+  strategy: "Mix of hard Jaipur sunshine photography and bold graphics with flat color backgrounds for a youthful, poster-like feel."
+  register: "Bright, sun-drenched, joyful, slightly chaotic. Never moody or premium dark."
+  image_provider: "gemini_image_pro"
+
+contact_and_cta:
+  whatsapp: "+91 9501781623"
+  instagram: "@chuskiclub"
+  cta_style: "DM 'MELT' to order"
+  cta_forbidden_phrases: ["Hurry", "Limited stock", "Order before we sell out", "Offer ends soon"]
+
+cadence:
+  channels: [Instagram, WhatsApp]
+  standing_week: [Monday, Tuesday, Friday, Saturday]
+  posts_per_week_target: 4
+  evergreen_pillars: ["Jaipur summer nostalgia", "Mandi morning runs", "Shared joy with friends"]
+
+safety:
+  claims_allowed: ["Made with real fruit from the mandi", "Delivered inside Jaipur"]
+  claims_forbidden:
+    - "Any health or diet claim — 'sugar-free', 'low-calorie', 'guilt-free', 'healthy treat', 'safe for diabetics', 'aids hydration/prevents heatstroke'"
+    - "'100% natural' / 'no chemicals' / 'preservative-free' as absolutes"
+    - "Blanket allergy-safety claims — never 'nut-free kitchen', never 'safe for allergic kids'"
+    - "Invented awards, rankings, or 'Jaipur's best'"
+    - "Unverified eco-friendly, zero-waste, or sustainability claims"
+  comparative_claims_allowed: false
+  political_content_allowed: false
+  non_disclosure_rules:
+    - "Exact recipes and ratios (fruit:sugar:stabiliser) — trade secret"
+    - "Mandi supplier names and purchase prices — never a name or number"
+  required_framing:
+    - topic: "allergens (dairy pops, nut garnishes)"
+      framing: "name the allergen plainly on the same asset — 'contains milk', 'contains pistachio' — every time, no cute euphemisms"
+    - topic: "children"
+      framing: "speak to the adult buying for kids; never pester-power aimed at children"
+    - topic: "heat relief"
+      framing: "relief is a feeling, not medicine — 'cold and glorious' yes, hydration/health benefits never"
+
+research_policy:
+  source_allowlist: ["Official Chuski Club channels", "Local Jaipur weather/season reports"]
+  source_denylist: ["Medical/health blogs", "Competitor feeds"]
+  claim_reverify_months: 12
+  require_second_source_for_quantitative: false

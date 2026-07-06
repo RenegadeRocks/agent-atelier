@@ -1,0 +1,102 @@
+brand_kit_version: 2
+status: active
+
+identity:
+  name: Chuski Club
+  short_name: Chuski Club
+  locale: Jaipur, Rajasthan, India
+  languages: English, Hindi (naturally mixed)
+  mission: To bring back the joy of nostalgic, seasonal fruit ice-pops—made with real ingredients, tied to the Rajasthan seasons, grown up but never boring.
+  brand_type: Local Food & Beverage
+
+audience:
+  persona: College students and friends hanging out, skipping class for a chuski, splitting a box on the terrace, making summer memories.
+  pains: Brutal summer heat; artificial, neon-syrup desserts that taste fake; boring party catering options.
+  scroll_test_persona: A 25-year-old scrolling Instagram on a hot Thursday afternoon, nostalgic for childhood summers, stopping for bright chaotic candy colors and relatable Jaipur heat commentary.
+
+voice:
+  descriptors: Sunny, quick, a little cheeky, nostalgic.
+  do: Be direct, name the specific fruit/season/color your tongue turns, write to make your younger cousin grin.
+  dont: Never guilt anyone about sugar, never pretend it's a health food, never punch at other brands.
+  sample_lines_good: 
+    - "Phalsa season lasts fourteen days. Cancel your plans."
+    - "Your tongue is going to be purple in four minutes."
+    - "Mango o'clock is 4pm sharp."
+  sample_lines_bad:
+    - "Indulge guilt-free in our sugar-conscious creations."
+    - "❄️🔥 BEAT THE HEAT NOW — LIMITED STOCK!!"
+
+visual:
+  strategy: Hard Jaipur sunshine, saturated candy color, pink city walls, a drip racing down someone's wrist, tongues mid-laugh. Never moody, dim, or "premium dark".
+  palette: 
+    - Hot Pink (#FF1493)
+    - Safeda Yellow (#FFCC00)
+    - Mint (#98FF98)
+    - Kulfi Stick White (#FDFDFD)
+  image_provider: gemini_image_pro
+  image_quality_tier: high
+
+contact:
+  contact_whatsapp: "+91 9501781623"
+  contact_instagram: "@chuskiclub"
+  cta_style: soft
+  primary_cta: "DM us 'MELT' for this week's box"
+  cta_forbidden_phrases: 
+    - "Link in bio"
+    - "Hurry"
+    - "Any FOMO-inducing phrases"
+
+channels_and_cadence:
+  channels: 
+    - Instagram Feed
+    - Instagram Reels
+    - Instagram Stories
+  posts_per_week_target: 4
+  standing_week:
+    monday: Evergreen (Back to College)
+    tuesday: Seasonal Highlight
+    thursday: Vibe Check (The Jaipur Heat)
+    saturday: Weekend Prep
+  local_detail_bank: 
+    - 4pm loo wind
+    - Bapu Bazaar pink walls at golden hour
+    - school van horn at 1:40pm
+    - Muhana Mandi at sunrise
+    - Haldi-yellow wedding tents
+    - power-cuts solved on the terrace
+
+offerings:
+  - id: summer-dozen
+    name: The Summer Dozen
+    brief: A mixed box of twelve seasonal fruit ice-pops. Delivered frozen inside Jaipur the same evening you order. The box art changes monthly and is highly collectable. Tone focus on group hangs and splitting a box.
+  - id: pop-cart
+    name: The Pop Cart
+    brief: Our signature pink-and-mango cart available for event bookings. Two hours of unlimited pops. Operates within a 25km radius. Tone highlight the joy, the brass bell, and the tired scooter vibe.
+
+safety:
+  claims_forbidden:
+    - "Any health or diet claim — 'sugar-free', 'low-calorie', 'guilt-free', 'healthy treat', 'safe for diabetics', 'aids hydration/prevents heatstroke'."
+    - "'100% natural' / 'no chemicals' / 'preservative-free' as absolutes (not certified — ceiling is 'small-batch, made from real fruit')."
+    - "Blanket allergy-safety claims — never 'nut-free kitchen', never 'safe for allergic kids'."
+    - "Invented awards, rankings, or 'Jaipur's best'."
+    - "Claims about formal municipal licenses, ISO certifications, or regulatory approvals."
+  non_disclosure_rules:
+    - "Exact recipes and ratios (fruit:sugar:stabiliser) — trade secret; ceiling is 'real fruit, pressed and frozen the same day'."
+    - "Mandi supplier names and purchase prices — never a name or number in words or image; ceiling is 'bought ripe, in season, at a fair price'."
+    - "Never reveal exact address of terrace/production kitchen, just say 'Jaipur'."
+  required_framing:
+    - topic: "allergens (dairy pops, nut garnishes)"
+      framing: "name the allergen plainly on the same asset — 'contains milk', 'contains pistachio' — every time, no cute euphemisms"
+    - topic: "children"
+      framing: "speak to the adult buying for kids; never pester-power aimed at children"
+    - topic: "heat relief"
+      framing: "relief is a feeling, not medicine — 'cold and glorious' yes, hydration/health benefits never"
+  claims_allowed: 
+    - "Made with real fruit sourced the same day"
+  comparative_claims_allowed: false
+  political_content_allowed: false
+
+research:
+  source_allowlist: N/A
+  source_denylist: N/A
+  claim_reverify_months: 12
