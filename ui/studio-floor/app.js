@@ -142,7 +142,22 @@ async function fetchJson(url) {
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
+function inlineDemoState() {
+  // Third fallback in the load order: the inline mirror of
+  // data/demo-state.json embedded in index.html, so double-clicking the
+  // file (file://, where fetch of local files is blocked) still works.
+  const el = document.getElementById('demo-state');
+  if (!el) return null;
+  try { return JSON.parse(el.textContent); } catch (err) { return null; }
+}
 async function poll() {
+  // Over file:// fetch is structurally blocked, so after the inline
+  // fixture has loaded there is nothing new a poll could ever see —
+  // skip the doomed fetches instead of spamming the console.
+  if (window.location.protocol === 'file:' && S.data) {
+    renderHeader();
+    return;
+  }
   let data = null; let demo = false;
   try {
     data = await fetchJson(STATE_URL);
@@ -152,12 +167,17 @@ async function poll() {
       data = await fetchJson(DEMO_URL);
       demo = true;
     } catch (err2) {
-      if (S.data) { S.offline = true; renderHeader(); return; }
-      S.loadFailed = true;
-      document.body.classList.remove('loading');
-      $('#offlineBanner').hidden = false;
-      $('#offlineBanner').textContent = '▲ Could not load any state (state.json or the demo fixture). Serve this folder with tools/floor_serve.py.';
-      return;
+      data = inlineDemoState();
+      if (data) {
+        demo = true;
+      } else {
+        if (S.data) { S.offline = true; renderHeader(); return; }
+        S.loadFailed = true;
+        document.body.classList.remove('loading');
+        $('#offlineBanner').hidden = false;
+        $('#offlineBanner').textContent = '▲ Could not load any state (state.json, the demo fixture, or the inline copy). Serve this folder with tools/floor_serve.py.';
+        return;
+      }
     }
   }
   S.offline = false;
@@ -414,6 +434,12 @@ function renderPipeline() {
   const pieces = S.follow
     ? brandPieces().filter((p) => p.piece_id === S.follow)
     : brandPieces();
+  if (!pieces.length) {
+    $('#lanes').innerHTML =
+      '<div class="empty-note lanes-empty">No pieces yet — the pipeline is quiet. ' +
+      'New work appears here the moment the Managing Editor assigns it.</div>';
+    return;
+  }
   $('#lanes').innerHTML = STATUSES.map((st) => {
     const lane = pieces.filter((p) => p.status === st);
     const cards = lane.map((p) => {
@@ -441,7 +467,10 @@ function renderCompany() {
       <div class="org-role">${esc(a.role)}</div>
     </div>`;
   };
-  $('#company').innerHTML =
+  const quiet = brandPieces().length ? '' :
+    '<div class="empty-note">The company is assembled but resting — no pieces yet. ' +
+    'The floor comes alive with the first assignment.</div>';
+  $('#company').innerHTML = quiet +
     `<div class="org-root">${card('managing_editor')}</div>
      <div class="org-stem"></div>
      <div class="org-row">${order.map((k) => card(k)).join('')}</div>

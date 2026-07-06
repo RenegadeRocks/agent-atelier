@@ -154,6 +154,22 @@ def test_demo_state_valid():
     assert len(demo["brands"]) == 3
 
 
+def test_inline_demo_state_mirrors_canonical_fixture():
+    """index.html embeds the demo fixture inline for file:// use (fetch of
+    local files is blocked there); it must stay equivalent, as parsed JSON,
+    to data/demo-state.json. Regenerate with:
+    python3 tools/export_floor_state.py --embed-demo"""
+    html = (UI_DIR / "index.html").read_text(encoding="utf-8")
+    m = re.search(
+        r'<script type="application/json" id="demo-state">(.*?)</script>', html, re.S)
+    assert m, "inline demo-state block missing from index.html"
+    inline = json.loads(m.group(1).replace("<\\/", "</"))
+    canonical = json.loads((UI_DIR / "data" / "demo-state.json").read_text(encoding="utf-8"))
+    assert inline == canonical, "inline demo state drifted — rerun --embed-demo"
+    # the inline block passes the same shape validator as any state
+    assert efs.validate_state(inline) == []
+
+
 # ---------- (3) action handler with a stub SheetClient ----------
 
 class StubClient:

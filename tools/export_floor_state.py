@@ -340,7 +340,29 @@ def write_state(state, path=STATE_PATH):
     return path
 
 
+def embed_demo():
+    """Regenerate the inline demo-state block in index.html from the
+    canonical ui/studio-floor/data/demo-state.json (file:// support —
+    fetch() of local files is blocked when index.html is double-clicked)."""
+    ui = ROOT / "ui" / "studio-floor"
+    demo = json.loads((ui / "data" / "demo-state.json").read_text(encoding="utf-8"))
+    # compact + </ escaped so the JSON can never close its <script> tag
+    payload = json.dumps(demo, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    index_path = ui / "index.html"
+    html = index_path.read_text(encoding="utf-8")
+    pattern = re.compile(
+        r'(<script type="application/json" id="demo-state">).*?(</script>)', re.S)
+    if not pattern.search(html):
+        raise SystemExit("embed_demo: no demo-state script block in index.html")
+    html = pattern.sub(lambda m: m.group(1) + payload + m.group(2), html, count=1)
+    index_path.write_text(html, encoding="utf-8")
+    print(f"embedded {len(payload)} bytes of demo state into {index_path}")
+    return 0
+
+
 def main():
+    if "--embed-demo" in sys.argv[1:]:
+        return embed_demo()
     creds = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
     if not creds or not Path(creds).exists():
         print("export_floor_state: GOOGLE_APPLICATION_CREDENTIALS not set/found — "
