@@ -1,108 +1,107 @@
-# Agent Atelier — build handoff folder
+# Agent Atelier
 
-This is a **ready-to-go project folder** for building Agent Atelier in **Google
-Antigravity**. Everything the build needs is here: the whole PRD (the spec), the authored
-`/specs` artifacts, the project DNA (`GEMINI.md`), and a **build harness** that drives the
-build one gated contract at a time so a ~2,840-line spec never has to be loaded whole
-(which would cause "context rot" and degrade quality).
+**An AI content company you can watch, interrupt, and audit.**
 
-You don't have to set anything up by hand. Antigravity reads these files **in place** and
-writes product code as it builds — it does not need to scaffold the governance.
+[![CI](https://github.com/RenegadeRocks/agent-atelier/actions/workflows/ci.yml/badge.svg)](https://github.com/RenegadeRocks/agent-atelier/actions)
 
----
+Tell it about your company in a guided interview. It plans your week, writes your
+posts, designs your images in your brand's own type system — and its own Creative
+Director rejects the weak work before you ever see it. **Nothing publishes without
+a human's click**, and autonomy isn't assumed: the system *earns* trust on a
+visible ladder, one approved piece at a time.
 
-## What's in here (short version)
+Three fictional brands run on this exact, unchanged code — a wellness center, a
+coffee roastery, and an ice-pop shop — each with its own voice, palette,
+brandmark, and safety rules, all of it configuration:
 
-- **`GEMINI.md` / `AGENTS.md`** — project DNA + conventions + the build loop. Antigravity
-  loads these first, every session. **Start by reading `GEMINI.md` §0.**
-- **`.agents/rules/build-protocol.md`** — the always-on build-loop rule (the "how").
-- **`.agents/workflows/build-P0.md … build-P6.md`** — one `/command` per contract.
-  Plus `resume.md` (switch PCs / pick up mid-contract) and `change-request.md` (change the
-  spec mid-build).
-- **`specs/PRD-Agentic-Content-Studio.md`** — the whole PRD, the source of truth.
-- **`specs/`** — the authored artifacts (agents, canon, skills, policies, resolver,
-  schema, golden set, secrets) + the derived `contracts/` + the `deviation_log.md`.
-- **`build-view/`** — a *derived* progressive-disclosure view of the PRD (core + per-section).
-- **`tools/build_view_split.py`** — regenerates `build-view/`, `specs/contracts/`, and the
-  per-contract workflows from the PRD. Re-run after any PRD edit.
-- **`BUILD-STATUS.md`** — which contract is done / next. **`WORKLOG.md`** — mid-contract
-  hand-off notes.
-- **`brands/aol/`** — a worked-example Brand Kit.
+| Art of Living Ludhiana | Kanva Coffee Works |
+|---|---|
+| ![AOL](https://storage.googleapis.com/agent-atelier-assets-satbir/composited_ce0fb209.jpg) | ![Kanva](https://storage.googleapis.com/agent-atelier-assets-satbir/composited_4066a680.jpg) |
 
-(Full annotated tree: `GEMINI.md` §9.)
+*Same engine. Zero code changes between brands.*
 
 ---
 
-## 1. Put it on GitHub (once)
+## What it does
 
-1. Create an **empty** private GitHub repo (no README/gitignore — this folder has them).
-2. Unzip this folder locally, then from inside `agent-atelier/`:
-   ```
-   git init
-   git add .
-   git commit -m "Agent Atelier build handoff (P0-ready)"
-   git branch -M main
-   git remote add origin <your-repo-url>
-   git push -u origin main
-   ```
+- **Brand onboarding by interview** — a Strategist agent ingests your brand's
+  story, drafts the profile, and explicitly asks you the safety rules (what may
+  never be claimed or disclosed — never guessed from marketing copy), probes a
+  violation on purpose, then saves a schema-validated `brand_kit.yaml`. Invalid
+  kits are quarantined, never activated.
+- **An eight-agent studio** — Managing Editor (orchestrates), content writers,
+  Research & Verification, a deterministic ledger-linter, the Creative Director
+  (two review gates plus a post-render pass with a capped revise loop and real
+  escalation), Visual Production (text-free images through an OCR gate,
+  composited with the brand's serif type system), Publishing & Ops.
+- **A deterministic safety floor** — fail-closed checks on forbidden claims,
+  non-disclosure rules, required framings, CTA bans, and claim grounding, with
+  zero LLM calls in any gate; a semantic referee sits above it and fails closed
+  in auto mode. A run-level circuit breaker stops runaways.
+- **The Studio Floor console** — a live operator view (agent floor, activity
+  feed, Needs-You tray, trust ladder). Approve / Request changes / Reject are
+  real actions: every click maps 1:1 to a human-only spreadsheet column and an
+  append-only audit trail. The orchestrator alone writes status; the console
+  can *structurally* never lie about it.
+- **A human-gated publish path** — approvals re-run the safety gauntlet, then a
+  Post Kit (assets, caption, per-slide alt text, checklist) is exported for
+  manual posting. Instagram auto-publish is deliberately absent at launch.
+- **A learning loop** — an independent post-publication audit re-judges shipped
+  pieces (measured escape rate: **5.6% on 18 pieces, 95% CI [1.0%, 25.8%]**)
+  and a monthly retro mines the owner's edits into concrete canon amendments.
 
-## 2. Build in Antigravity
+## Run it
 
-1. Open the **`agent-atelier/` folder** as the project in Antigravity.
-2. It auto-loads `GEMINI.md`, whose §0 tells the agent to read
-   `.agents/rules/build-protocol.md` first (each `build-*.md` workflow points there too).
-   So Antigravity already **knows the plan** the moment you open the folder — you just give
-   it the go-signal. **Your first message can be exactly:**
-   > *Read `GEMINI.md` and `.agents/rules/build-protocol.md`, check `BUILD-STATUS.md` for the
-   > next contract, then run `.agents/workflows/build-P0.md`.*
+See **[HANDOFF.md](HANDOFF.md)** — the whole system is five commands:
 
-   (After P0 is verified and you authorize the next one, the same message with `build-P1-A.md`,
-   and so on down `BUILD-STATUS.md`.) You never have to re-explain the project — it's all in
-   the repo.
-3. Check `BUILD-STATUS.md` for the next contract (it starts at **P0**), then run its
-   workflow — e.g. tell Antigravity: **"Run `.agents/workflows/build-P0.md`."**
-4. The workflow tells it exactly which files to load (a small slice, not the whole PRD),
-   to write tests first, build, VERIFY with evidence, then stop at the gate.
-5. **You authorize each next contract.** When P0's gate is green and committed, release
-   P1 by running `.agents/workflows/build-P1-A.md`. Repeat P0 → P6, in order.
+```bash
+python onboard_brand.py demo/brand-packs/chuski-club/   # 1. intake interview
+python -m app.scheduler --as-of 2026-07-06              # 2. plan the week
+# 3. produce a piece (live pipeline)
+python tools/export_floor_state.py && python tools/floor_serve.py   # 4. console → http://127.0.0.1:8787
+python -m app.approval_poller                           # 5. honor the human's decision
+```
 
-## 3. Two PCs (office ↔ home)
+No API keys? You can still run the full deterministic test suite
+(`python -m pytest app/tests -m "not live"`, 78 tests) and tour the console on
+demo data by double-clicking `ui/studio-floor/index.html`.
 
-The repo is the single source of truth — Antigravity's chat/memory does **not** travel
-between machines, but committed files do.
+## How it was built (and why the history is the point)
 
-- **Before you stop:** update `WORKLOG.md`, then `git add -A && git commit && git push`.
-- **On the other PC:** `git pull`, then `python3 tools/build_view_split.py --verify` (it
-  confirms the derived view matches the PRD you just pulled — if it reports drift, run
-  `python3 tools/build_view_split.py` to regenerate). Then run
-  **`.agents/workflows/resume.md`** if you were mid-contract (it re-loads only that
-  contract's scope and continues from WORKLOG's *next action* — it does not restart).
+This system was built **by AI coding agents, under supervision, in eleven gated
+contracts** derived from a ~2,800-line PRD — each contract closed only by an
+independent fresh-session validator plus green CI verified from raw evidence.
+The agents mocked deliverables, claimed false greens, hallucinated a file save,
+and once forged the evidence format itself. **Every incident was caught by a
+gate or the owner's eye, fixed, and logged publicly:**
 
-## 4. Two rules that keep it clean
+- [`specs/deviation_log.md`](specs/deviation_log.md) — the honest build record.
+- [`app/tests/evidence/`](app/tests/evidence/) — one validation verdict table
+  per contract, plus the escape-rate audit and the monthly retro.
+- [`specs/PRD-Agentic-Content-Studio.md`](specs/PRD-Agentic-Content-Studio.md)
+  — the source of truth (§19.1 defines the eleven contracts).
+- `.agents/` + `build-view/` + `tools/build_view_split.py` — the build harness
+  that drove it (progressive disclosure of the PRD, one contract at a time).
 
-- **`build-view/`, `specs/contracts/`, and `.agents/workflows/build-*.md` are DERIVED.**
-  Never hand-edit them. If you edit the PRD, regenerate — and verify the tree is in sync
-  (the verify writes nothing; wire it into CI / a pre-commit hook so a PRD edit can't be
-  committed without its regenerated derived files):
-  ```
-  python3 tools/build_view_split.py            # regenerate after a PRD edit
-  python3 tools/build_view_split.py --verify   # check the tree matches the PRD (CI / after git pull)
-  ```
-  Optional but recommended — install the pre-commit guard so this can't be forgotten
-  (one command, works on Windows / macOS / Linux):
-  ```
-  git config core.hooksPath tools/git-hooks
-  ```
-  **Windows note:** wherever these docs say `python3`, use `python` (the splitter runs on
-  either; the hook auto-detects).
-  **CI already enforces this server-side:** `.github/workflows/verify-build-view.yml` runs
-  `--verify` on every push/PR, so a PRD edit committed without its regenerated derived files
-  fails the check.
-- **Change the spec, not just the code.** If output is wrong, fix the spec artifact where
-  it lives and log it in `specs/deviation_log.md` — see `.agents/workflows/change-request.md`.
+## Repo map
 
-## Requirements
+| Path | What it is |
+|---|---|
+| `app/` | The product: pipeline, agents, scheduler, policy server, breaker, approval protocol/poller, Post Kit, audit & retro tools |
+| `app/tools/` | MCP-style tool servers (sheets, image gen, compositor with OCR gate, publish) |
+| `ui/studio-floor/` | The operator console (self-contained; no build step) |
+| `brands/` | Brand Kits — each company is one YAML file |
+| `demo/brand-packs/` | Intake source material for the demo brands |
+| `specs/` | PRD, agent instructions, canon, policies, schemas, golden set, deviation log |
+| `HANDOFF.md` | Quickstart + architecture + known-and-bounded gaps |
 
-- **Antigravity** (with Gemini + ADK) for the build.
-- **git** for the two-PC workflow.
-- **Python 3** (standard library only) to run the splitter.
+## Status & roadmap
+
+Feature-complete against the PRD (all eleven contracts validated). Sequenced
+next, per the PRD — not yet built, and never presented otherwise: a graphical
+Brand Desk for intake (today it's the terminal interview), live event streaming
+for the console (today it's an honest snapshot), and Instagram auto-publish
+(gated behind the trust ladder, off by design).
+
+*Built as the capstone for Kaggle's five-day Vibe Coding (Agents) course.
+All demo brands are fictional.*
