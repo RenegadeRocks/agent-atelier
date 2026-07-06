@@ -22,6 +22,12 @@ brandmark, and safety rules, all of it configuration:
 
 ---
 
+## Architecture
+
+![Agent Atelier architecture](docs/architecture.jpg)
+
+*Brand Kit (configuration) → an eight-agent studio → a governed pipeline with a deterministic safety floor and a Creative-Director taste gate → a human approval queue backed by Google Sheets. The studio is constant; the brand is configuration.*
+
 ## What it does
 
 - **Brand onboarding by interview** — a Strategist agent ingests your brand's
