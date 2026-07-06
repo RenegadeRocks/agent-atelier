@@ -75,7 +75,8 @@ def _assert_no_status_writer(client):
         name for name in dir(client)
         if not name.startswith("_") and "status" in name.lower()
     ]
-    assert not offenders, f"SheetClient exposes Status-writing surface: {offenders}"
+    if offenders:
+        raise TypeError(f"SheetClient exposes Status-writing surface: {offenders}")
 
 
 def _sheet_id():
