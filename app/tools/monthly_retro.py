@@ -10,7 +10,16 @@ import pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-from tools.export_floor_state import build_state
+# Load the floor-state projection by explicit file path: the top-level name
+# "tools" is shadowed by app/tools when app/ is on sys.path (pytest), so a
+# package import is ambiguous by construction.
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location(
+    "floor_state_projection", ROOT / "tools" / "export_floor_state.py"
+)
+_floor_state = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_floor_state)
+build_state = _floor_state.build_state
 from google.adk import runners
 from app.agents.config import validate_models_on_startup
 
