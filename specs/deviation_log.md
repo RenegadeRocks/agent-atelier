@@ -177,3 +177,21 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 - **Ground truth / reason:** The script ingested `intake-answers.md` alongside legitimate sources, leading to the Strategist pre-filling safety and intent fields directly from the answer sheet instead of eliciting them naturally.
 - **Decision:** Modified `onboard_brand.py` to only read from the `sources/` subdirectory of the provided brand pack. Added a deterministic test to ensure files outside `sources/` are ignored.
 - **Files touched:** `onboard_brand.py`, `app/tests/test_p2_b.py`
+
+### 2026-07-06 — Kit persistence hallucination and automatic retry loop [P2-B]
+- **Assumption:** The LLM's chat output implicitly saves the kit file to disk and perfectly adheres to the schema.
+- **Ground truth / reason:** The interactive chat script lacked an MCP file-writing tool, so the Strategist hallucinated the "securely saved" claim. The initial structure also occasionally failed strict validation.
+- **Decision:** `onboard_brand.py` CLI now parses the LLM output and handles persistence directly (the LLM never claims to save it). Implemented a template-injection auto-retry loop: on parse or validation failure, it intercepts the output and injects `specs/brand_kit.template.yaml` back to the Strategist, up to 2 retries, quarantining the kit as `.draft.yaml` on final failure.
+- **Files touched:** `onboard_brand.py`, `app/tests/test_p2_b.py`
+
+### 2026-07-06 — ResolveBlocked bootstrap fix [P2-B]
+- **Assumption:** All agent templates pass through the standard `resolve()` fail-closed pipeline.
+- **Ground truth / reason:** The pre-kit Strategist template uses `[[TOKENS]]` as literal instructions about the fields it's eliciting, which triggered a `ResolveBlocked` error during launch since the kit doesn't exist yet.
+- **Decision:** Kept `[[TOKENS]]` literal for the pre-kit Strategist during the onboarding launch phase while ensuring the core content pipeline stays strictly fail-closed for all other agents.
+- **Files touched:** `onboard_brand.py`, `app/tests/test_p2_b.py`
+
+### 2026-07-06 — P2-B Residue and Deferred Work [P2-B]
+- **Assumption:** No artifacts leak during tests or retries.
+- **Ground truth / reason:** The auto-retry verification produced quarantined drafts during the first parse-failure pass.
+- **Decision:** Kept quarantined drafts at `brands/unknown-brand/` and `brands/chuski-club/*.draft.yaml` as evidence. Disposition: delete `brands/unknown-brand/` at demo cleanup, keep the chuski `.draft.yaml` as the before/after exhibit.
+- **Files touched:** N/A
