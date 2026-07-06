@@ -4,6 +4,7 @@ from pathlib import Path
 from app.agents.creative_director import get_agent as get_cd
 from app.agents.config import validate_models_on_startup
 from google.adk import runners
+from app.pipeline import run_agent
 
 def load_golden_set(filepath: str) -> list[dict]:
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -38,8 +39,6 @@ async def evaluate_golden_set(filepath: str, brand_kit: dict):
     agreements = 0
     negatives = 0
     caught_negatives = 0
-    
-    from app.pipeline import run_agent
     
     for entry in entries:
         kind = entry.get("kind")

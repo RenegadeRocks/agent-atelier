@@ -21,8 +21,12 @@ silently (build-protocol §4, PRD §18.4.4). Deviations are part of the audit su
 - **Ground truth / reason:** P4-A enforces zero LLM calls in runtime gates. Thin research banks must fail closed. Sheets already has an audit trail.
 - **Decision:** Implemented deterministic string matching for safety rules in the P4-A gauntlet. Configured thin research bank to block instead of pass. Used local JSON/in-memory for Breaker state instead of a DB.
 - **Files touched:** `app/policy_server.py`, `app/circuit_breaker.py`, `app/tools/sheets_server.py`
-
-
+ 
+### 2026-07-06 — P4-A CI Eval Gate Baseline [P4-A]
+- **Assumption:** CI Eval Gate scores would pass the default thresholds right away.
+- **Ground truth / reason:** The CI eval gate harness was built for the `content_gauntlet`. We ran a live evaluation against the initial judge model (Gemini 3.0 Pro preview). The gate evaluates mechanistically correctly (proven via stubbed test) but the raw untuned judge returned a 0.0 negative catch rate (4 false approves, 33.3% agreement).
+- **Decision:** These scores are recorded here as the P4-B calibration baseline. The gate is shipped as a live-marked local harness rather than blocking the CI until P4-B tunes the rubric.
+- **Files touched:** `app/ci_eval_gate.py`, `app/tests/test_p4_ci_eval.py`
 ### 2026-07-05 — Field scraping leak cleanup  [P1-B]
 - **Assumption:** Regex field scraping over agent prose correctly isolated drafted fields like `WORDS`.
 - **Ground truth / reason:** The E2E test runs leaked numeric fragments (e.g., "66", "74", "114") into the live production sheet for the `WORDS` field.

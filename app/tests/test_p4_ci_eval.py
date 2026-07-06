@@ -22,7 +22,7 @@ def test_ci_eval_gate_stubbed():
     with patch("app.ci_eval_gate.run_agent") as mock_run:
         async def mock_run_coro(agent, prompt, brand_kit):
             # Stub verdicts to match golden set perfectly (100% agreement, 0 false approve)
-            if "gs-001" in prompt or "gs-002" in prompt:
+            if "observation->turn" in prompt or "claim->meaning" in prompt:
                 return "APPROVED"
             return "REJECTED"
         mock_run.side_effect = mock_run_coro
