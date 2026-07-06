@@ -1,9 +1,12 @@
 # BUILD-STATUS — Agent Atelier
 
-The live build checklist. **Update it at every contract hand-off** (build-protocol §1.7).
-Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-and-proceed.
+> **✅ BUILD COMPLETE (2026-07-06).** All eleven contracts (P0 → P6) are built, verified,
+> committed, and **independently validated**. CI green at HEAD. The system is
+> feature-complete vs the PRD (CONTRACT P6, clause 9). Remaining work is submission
+> material (writeup + ≤5-min video) and owner-approved polish only.
 
-> **▶ NEXT CONTRACT: P4-B** — run `.agents/workflows/build-P4-B.md`.
+Historical build order was fixed (§19.3), one contract at a time, lock-and-proceed. This
+file is kept as the final contract ledger.
 
 ## Contracts (P0 → P6)
 
@@ -20,30 +23,19 @@ Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-a
 | 9 | P5-A | 5 | ✅ verified + committed + authorized | owner approves via Sheets + app; manual publish works; auto-publish gated, idempotent, audited |
 | 10| P5-B | 5 | ✅ verified + committed + authorized | Studio-Floor scenarios pass; live handoff/loop visible; intervention audited; trust never auto-flips |
 | 11| P6   | 6 | ✅ verified + committed + authorized | Learning loop & multi-brand proof; audit script runs successfully |
-What P0 still has to do (its real ACTION): propose the tree for owner approval, add the
-**MCP tool stubs** (§16), wire **CI** (include `python3 tools/build_view_split.py --verify`
-so a PRD edit can't be committed without its regenerated derived files), confirm the
-ADK/Antigravity project layout (conform + log any deviation), commit. Then authorize P1.
 
-> **Naming caveat:** the proposed product source tree must not use directory names the
-> `.gitignore` excludes (`build/`, `dist/`, `node_modules/`) — source under those would be
-> silently untracked and lost on `git pull`. Use a package dir like `app/`.
+## Evidence
 
-## Demo discipline (start at P1-B — do not leave the video for the deadline)
+- Per-contract verdicts: `app/tests/evidence/p*_validation.md`
+- Post-publication audit (escape rate + CI): `app/tests/evidence/p6_audit_report.md`
+- Honest build record (every mock, false green, and fix): `specs/deviation_log.md`
+- Deterministic suite: `python -m pytest app/tests -m "not live"`
 
-`specs/demo_playbook.md` is the plan for the §21 ≤5-min video. Two build-time obligations:
-(1) the orchestrator tick + linter take an **injectable logical `now`** (`--as-of`) — it is
-required by P3's "run a simulated week" VERIFY and is what makes the demo fast; (2) every
-contract's VERIFY capture from P1-B onward is **screen-recorded** — each gate's evidence is
-a video segment (the shot list maps them). Demo brand inputs: `demo/brand-packs/`.
+## Build history (for reference)
 
-## Scope-cut order (only if the July-6 deadline bites; §19.2)
-
-Cut from the tail: **P6** → **P5-B** (Studio Floor console — demo-polish) → **P4-B**
-(publish-time semantic referee — the one soft gate). **P4-A** (the falsifiable governance
-floor) and **P5-A** (the publish path that must ship) never drop. The gates, not the
-time-boxes, are the schedule.
-
----
-
-**2026-07-06 — BUILD COMPLETE.** All eleven contracts sealed and independently validated (evidence: `app/tests/evidence/p*_validation.md`). Feature-complete vs the PRD per CONTRACT P6 clause 9. Remaining: submission materials (writeup + video) and owner-approved polish only.
+- The demo was captured contract-by-contract from P1-B onward; each gate's VERIFY evidence
+  is a recorded segment (`specs/demo_playbook.md`, `RECORDING-PLAYBOOK.md`).
+- The orchestrator tick + linter take an injectable logical `now` (`--as-of`) so a full week
+  can be simulated for the demo and for P3's VERIFY.
+- Scope-cut order was never triggered — all eleven contracts shipped. (Had the deadline bitten,
+  the planned tail-cut was P6 → P5-B → P4-B, with P4-A and P5-A never dropped.)
