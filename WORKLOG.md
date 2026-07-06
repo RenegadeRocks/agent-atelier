@@ -19,7 +19,16 @@ does not travel between PCs — this file, plus the code and the spec, is what r
 - ✅ `app/post_kit.py` exports ordered asset files, copy blocks, per-slide alt text, and checklist to a per-piece handoff folder.
 - ✅ P5-A validation tests (`test_p5_a.py`) pass, covering the state machine, re-gate on edit, adapterless surfacing, and idempotency.
 - ✅ Live demo pass verified the end-to-end flow from Approval Queue → Approved → Published. (Note: unauthorized script pass on DEMO-P5-A-811892 has been moved to test harness).
-- ✅ **P5-A CLOSED:** Ready for P4-B.
+- ✅ **P5-A CLOSED:** Ready for P5-B.
+
+## P5-B Status
+- ✅ **COMPLETED (Parallel Track)**: The Studio Floor UI is built and fully validated.
+- ✅ `app/tests/test_p5_b.py` covers all deterministic derivation and assertions on UI stubs.
+- ✅ `ui/studio-floor/` contains the full single-page app implementation.
+- ✅ **P5-B CLOSED:** Ready for P6 (Final Phase).
+
+## P6 Status
+- ⬜ **TODO**: Post-publication audit, CD↔owner calibration, and multi-brand validation.
 
 ## P3 Status
 - ✅ **COMPLETED**: The Offering Content Agent, standing-week scheduler, ledger linter, ledger audit, and weekly digest are implemented and verified.

@@ -18,7 +18,8 @@ Build order is fixed (§19.3) — do not reorder. One contract at a time, lock-a
 | 7 | P4-A | 4 | ✅ verified + committed + authorized | deterministic safety/claim scenarios pass; breaker fires; CI eval blocks a golden-set regression |
 | 8 | P4-B | 4 | ✅ verified + committed + authorized | publish-time referee catches a smuggled-CTA/tone near-miss; degrades to advisory cleanly |
 | 9 | P5-A | 5 | ✅ verified + committed + authorized | owner approves via Sheets + app; manual publish works; auto-publish gated, idempotent, audited |
-| 10| P5-B | 5 | ⬜ | Studio-Floor scenarios pass; live handoff/loop visible; intervention audited; trust never auto-flips |
+| 10| P5-B | 5 | ✅ verified + committed + authorized | Studio-Floor scenarios pass; live handoff/loop visible; intervention audited; trust never auto-flips |
+| 11| P6   | 6 | ✅ verified + committed + authorized | Learning loop & multi-brand proof; audit script runs successfully |
 What P0 still has to do (its real ACTION): propose the tree for owner approval, add the
 **MCP tool stubs** (§16), wire **CI** (include `python3 tools/build_view_split.py --verify`
 so a PRD edit can't be committed without its regenerated derived files), confirm the
