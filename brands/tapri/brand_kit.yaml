@@ -1,0 +1,186 @@
+# =============================================================================
+# brand_kit.template.yaml
+# Agent Atelier — the entire product-specific configuration surface (PRD §7.2)
+# =============================================================================
+
+brand_kit_version: 2
+
+# --- Identity ---------------------------------------------------------------
+brand_name: "Tapri Toast Club"
+brand_short_name: "Tapri"
+tagline: "Phones down while the toast is hot."
+locale: "near Sarafa, Indore"
+languages: ["English", "Hindi"]
+timezone: "Asia/Kolkata"
+mission: "To elevate the greatest food pairing in India by doing it properly, without the fancy café attitude."
+brand_type: "hospitality_local"
+
+# --- Audience ---------------------------------------------------------------
+audience_persona: "Indore locals, Holkar College students, night-shift coders."
+audience_pains: 
+  - "Paying ₹340 for café sourdough that tastes like regret"
+  - "Craving a hygienic, high-quality chai-and-toast break without the fussy, overpriced café atmosphere"
+scroll_test_persona: "A hungry 22-year-old developer scrolling Instagram at 4:30 PM, desperately needing a screen break and a perfect cup of chai."
+
+# --- Intent (north-star capture, §7.1) ---------------------------------------
+intent_statement: "Tapri Toast Club helps Indore locals enjoy a proper, uncompromising street food break so they feel grounded and satisfied; the next step is visit the counter."
+desired_feeling: "Grounded, hungry, and understood."
+primary_cta: "See you at the corner."
+cta_destination: "visit"
+off_brand_notes: 
+  - "Trying too hard to be aesthetically 'Instagrammable' rather than focusing on the food"
+  - "Fancy café vibes or corporate hospitality tones"
+
+# --- Brand voice (seeds brand_voice canon) ----------------------------------
+voice_descriptors: 
+  - "Young"
+  - "Loud"
+  - "Opinionated"
+  - "Fiercely local"
+  - "Unhinged about bread"
+voice_do: 
+  - "Speak passionately about real ingredients"
+  - "Treat 8 AM vs 5 PM chai with reverence"
+  - "Be blunt and unapologetic"
+voice_dont: 
+  - "No pretentious café jargon"
+  - "Don't apologize for indulgences"
+  - "Don't sound corporate"
+reading_level: "Casual, punchy, everyday Hindi/Indori slang"
+sample_lines_good: 
+  - "Butter is a food group and we are not taking questions. See you at the counter."
+  - "Aam-shrikhand toast is here for exactly three weeks. Don't say we didn't warn you."
+sample_lines_bad: 
+  - "Indulge in our bespoke artisanal sourdough pairings this morning."
+  - "Come try our delicious new menu items!"
+
+# --- Visual identity (seeds brand_assets + visual canon + Caption-Composer) --
+logo_asset: "assets/logo.png"
+wordmark_text: "Tapri Toast Club"
+palette_hex: ["#FCE588", "#2C2C2E"]
+accent_dark_bg: "#FCE588"
+accent_light_bg: "#2C2C2E"
+headline_font: "assets/fonts/headline_bold.ttf"
+label_font: "assets/fonts/label_sans.ttf"
+visual_register: "Bright, loud, appetizing advertising energy: flat bold butter-yellow color-block backgrounds, hard sun or crisp studio light, saturated golden toast and chai tones, poster-like composition. Food always on a plate or board. NEVER dim, moody, gritty or cinematic-dark."
+visual_variety: "balanced"
+visual_strategy: "concept_led"
+people_pool: "assets/people/"
+product_pool: "assets/products/"
+image_provider: "gemini_image_pro"
+image_quality_tier: "high"
+
+# --- Contact / CTA (used EXACTLY; never invented) ---------------------------
+cta_style: "direct"
+contact_whatsapp: ["+91 73140 22110"]
+contact_instagram: "@tapritoastclub"
+cta_forbidden_phrases: 
+  - "Link in bio"
+  - "Order now"
+  - "Swipe up"
+  - "Don't miss out"
+
+# --- Channels & cadence (seeds cadence_plan) --------------------------------
+channels: ["instagram"]
+posts_per_week_target: 3
+standing_week: 
+  mon: { track: "offering:daily_toast_chai" }
+  wed: { track: "offering:toast_subscription" }
+  fri: { track: "offering:weekend_tawa_box" }
+research_post_min_per_week: 0
+max_posts_per_week: 5
+campaign_max_posts_per_week: 8
+seasonal_calendar: []
+max_queue_depth: null
+owner_absence_pause_days: 7
+campaign_overrides_backpressure: false
+quiet_days: []
+blackout_dates: []
+evergreen_rotation: "no_repeat_within: 3"
+
+# --- Intent & capacity (feed the §7.1.1 cadence proposal) --------------------
+posting_goal: "community"
+weekly_capacity: "sustainable"
+cadence_source: "edited"
+
+# --- Compliance & safety (seed safety hard-rules + Policy Server) ------------
+claims_allowed: 
+  - "Phrases like 'slow overnight dough' and 'flip the timer twice'"
+claims_forbidden: 
+  - "Never make health, diet, digestion, or energy claims."
+  - "Never claim caffeine benefits."
+  - "Never use words like 'clean', 'natural', or 'preservative-free'."
+  - "Never use absolute claims like '100 percent'."
+  - "Never state or imply that food can be ordered via food delivery apps (Swiggy, Zomato, etc.)."
+claims_forbidden_confirmed: true
+comparative_claims_allowed: false
+political_content_allowed: false
+non_disclosure_rules: 
+  - "Sarafa is our neighbourhood, not our address. Never give out an exact street address."
+  - "Never reveal exact dough method/timings, spice mix, suppliers, prices, or exact sand-timer timings. IMPORTANT: the marketing phrases 'slow overnight dough' and 'flip the timer twice' are PRE-APPROVED brand lore and are never a breach - only actual numbers, durations, temperatures or step-by-step process details are."
+  - "The retired judge on stool #4 is brand lore; never name or depict a real person's likeness for him."
+non_disclosure_rules_confirmed: true
+required_framing: 
+  - topic: "Butter"
+    framing: "Frame butter as an indulgence, never healthy or guilt-free."
+  - topic: "Audience Age"
+    framing: "Chai content is for college-age/adults only, never aimed at school kids."
+  - topic: "Physical action on Tawa"
+    framing: "Never depict or describe grabbing toast straight off the hot tawa bare-handed."
+required_framing_confirmed: true
+regulatory_notes: "Local F&B. Strictly no health, medical, or nutritional claims."
+
+# --- Research policy (seeds research_bank) ----------------------------------
+source_allowlist: ["Internal brand lore"]
+source_denylist: ["External internet research", "Competitor menus"]
+citation_required_for_claims: false
+require_second_source_for_quantitative: false
+claim_reverify_months: 12
+
+# --- Offerings (replaces hard-coded program briefs; §7.4) -------------------
+offerings: 
+  - id: "daily_toast_chai"
+    name: "Daily Toast & Chai"
+    one_liner: "Masala cutting chai and thick-cut butter toast from slow overnight dough with seasonal mandi toppings."
+    is_flagship: true
+  - id: "toast_subscription"
+    name: "Toast Subscription"
+    one_liner: "Physical punch-card. Buy nine toasts, get the tenth free."
+  - id: "weekend_tawa_box"
+    name: "Weekend Tawa Box"
+    one_liner: "Assembly-at-home toast kit for weekend house parties."
+
+# --- Topical territory for the Evergreen agent (replaces hard-coded pillars) -
+evergreen_pillars: 
+  - "Indore food culture"
+  - "The daily ritual of Chai"
+  - "Uncompromising bread and butter standards"
+local_detail_bank: 
+  - "Sarafa food street vibes"
+  - "Holkar College students"
+  - "Rainy monsoons in Indore"
+
+# --- Notifications & alerts (seeds the §14.4.1 model; §16.2 notify contract) -
+notifications:
+  channel: "none"
+  recipients: []
+  severity_floor: "action"
+  quiet_hours: { tz: "Asia/Kolkata", start: "21:00", end: "08:00" }
+  digest: { day: "fri", hour: "16:00" }
+  batch_max_wait_minutes: 120
+  batch_max_items: 6
+  reminder_after_hours: 24
+  critical_reminder_minutes: 60
+  max_sends_per_hour: 12
+
+# --- Publishing & approval --------------------------------------------------
+approval_mode: "human"
+auto_publish_enabled: false
+approver_allowlist: []
+delegation: null
+system_of_record: "google_sheets"
+trust_threshold: 
+  window_pieces: 20
+  min_approval_rate: 0.95
+  max_avg_human_edits: 0
+  zero_policy_violations: true

@@ -296,3 +296,7 @@ Darwin while passing on Windows/Linux/CI. Added /System/Library/Fonts/Supplement
 ### 2026-07-07 — Render pass made TRULY multimodal + verdict-parse fix [post-P6 polish]
 - **What:** live runs exposed (1) the "multimodal" CD render pass sent only a text prompt containing a local file path — the CD correctly refused to approve blind, three times, escalating the run; (2) draft-review approval required the literal substring "APPROVED", so "Verdict: Approve" was falsely counted as a rejection (one wasted round).
 - **Fix:** `default_render_pass_judge` now calls the reasoning model directly with the COMPOSITED image attached as inline bytes (scrim/type actually inspectable); render prompt demands a `VERDICT:` line; new `verdict_approves()` judges only the verdict window and fails closed; conftest stubs the new judge for deterministic tests.
+
+### 2026-07-08 — Owner canon amendment: the place-dignity law [post-deadline polish]
+- **What:** live runs kept defaulting Indian locales to documentary-grit (dim rooms, weathered walls, dirty hands) even for joyful brands; the owner rejected a live Tapri render on these grounds and re-rendered it bright.
+- **Fix:** structural clause in the image server's [SYSTEM CONSTRAINT] + a Gate-0 'place-dignity' law in the CD render rubric: Indian settings are depicted vibrant, prosperous and well-lit unless a kit explicitly asks for grit. Same mechanism as the text-free and single-scene laws — owner correction became engine canon (§7.7 loop).
