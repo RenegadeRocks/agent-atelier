@@ -1,6 +1,6 @@
 # Agent Atelier
 
-**An AI content company you can watch, interrupt, and audit.**
+**Give your brand info once- 8 ADK agents create weekly Instagram content automatically. High quality, with AI-Slop gates firmly in place.**
 
 [![CI](https://github.com/RenegadeRocks/agent-atelier/actions/workflows/ci.yml/badge.svg)](https://github.com/RenegadeRocks/agent-atelier/actions)
 
