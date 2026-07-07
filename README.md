@@ -26,6 +26,8 @@ brandmark, and safety rules, all of it configuration:
 royal, one is a gang of friends on a scooter, and the only difference between
 them is a YAML file.*
 
+*live unedited run of app*: https://youtu.be/28pWi7AGeN8
+
 ---
 
 ## Architecture
