@@ -14,9 +14,10 @@ Three fictional brands run on this exact, unchanged code — a wellness center, 
 coffee roastery, and an ice-pop shop — each with its own voice, palette,
 brandmark, and safety rules, all of it configuration:
 
-| Art of Living Ludhiana | Kanva Coffee Works |
+| Art of Living Ludhiana | Chuski CLub Jaipur |
 |---|---|
-| ![AOL](https://storage.googleapis.com/agent-atelier-assets-satbir/composited_ce0fb209.jpg) | ![Kanva](https://storage.googleapis.com/agent-atelier-assets-satbir/composited_4066a680.jpg) |
+| ![AOL](https://storage.googleapis.com/agent-atelier-assets-satbir/composited_ce0fb209.jpg) | <img width="1080" height="1350" alt="chuski-hero-2" src="https://github.com/user-attachments/assets/0ea9c530-91ee-4c19-8dc5-ea42149ac775" />
+
 
 *Same engine. Zero code changes between brands.*
 
