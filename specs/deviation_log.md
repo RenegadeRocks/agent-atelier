@@ -292,3 +292,7 @@ Darwin while passing on Windows/Linux/CI. Added /System/Library/Fonts/Supplement
 ### 2026-07-07 — §7.7 canon patch: CD false-positives in live demo run [post-P6 polish]
 - **What:** a live Chuski run escalated at cap on two CD misreadings: (1) demanding the fail-closed safety fields inside the DRAFT JSON payload (they live in the Brand Kit); (2) treating "Muhana Mandi" as a supplier-name non-disclosure breach although it is a pre-approved `local_detail_bank` entry (R&V had verified it correctly — judge/verifier disagreement escalated exactly as designed).
 - **Fix:** two clarifying sentences appended to the CD's Gate-1 instruction (kit-not-payload; local_detail_bank pre-approval). Owner-approved.
+
+### 2026-07-07 — Render pass made TRULY multimodal + verdict-parse fix [post-P6 polish]
+- **What:** live runs exposed (1) the "multimodal" CD render pass sent only a text prompt containing a local file path — the CD correctly refused to approve blind, three times, escalating the run; (2) draft-review approval required the literal substring "APPROVED", so "Verdict: Approve" was falsely counted as a rejection (one wasted round).
+- **Fix:** `default_render_pass_judge` now calls the reasoning model directly with the COMPOSITED image attached as inline bytes (scrim/type actually inspectable); render prompt demands a `VERDICT:` line; new `verdict_approves()` judges only the verdict window and fails closed; conftest stubs the new judge for deterministic tests.

@@ -64,6 +64,57 @@ async def run_agent(agent, prompt: str, brand_kit: dict) -> str:
 async def default_semantic_review_judge(agent, prompt, brand_kit):
     return await run_agent(agent, prompt, brand_kit)
 
+
+def verdict_approves(resp: str) -> bool:
+    """True iff the verdict line approves. Robust to 'Approve'/'APPROVED'/bold/backticks.
+
+    Judges only the text near the VERDICT marker so explanatory prose that merely
+    mentions 'reject' can't flip the outcome; fail-closed when no verdict is found.
+    """
+    up = (resp or "").upper()
+    i = up.find("VERDICT")
+    window = up[i : i + 80] if i != -1 else up[:200]
+    if any(w in window for w in ("REJECT", "REVISE", "ESCALAT")):
+        return False
+    return "APPROV" in window
+
+
+async def default_render_pass_judge(agent, prompt, brand_kit, image_path):
+    """The REAL multimodal post-render pass: the CD receives the composited pixels.
+
+    Bypasses the ADK runner (text-only path) and calls the reasoning model
+    directly with the image attached as inline bytes.
+    """
+    env = os.environ
+    vault = get_vault()
+    instruction = resolve(agent.instruction, brand_kit, env, vault, ResolveScope(MODEL))
+    prompt = resolve(prompt, brand_kit, env, vault, ResolveScope(MODEL))
+    from google import genai
+    from google.genai import types as gtypes
+    from app.agents.config import REASONING_MODEL
+
+    with open(image_path, "rb") as f:
+        data = f.read()
+    client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
+    resp = client.models.generate_content(
+        model=REASONING_MODEL,
+        contents=[
+            instruction + "\n\n" + prompt,
+            gtypes.Part.from_bytes(data=data, mime_type="image/jpeg"),
+        ],
+    )
+    text = resp.text or ""
+    from app.circuit_breaker import breaker
+    breaker.check_and_accumulate(
+        os.environ.get("CURRENT_PIECE_ID", "default_run"),
+        tokens=len(prompt + text) // 4,
+        is_iteration=True,
+    )
+    return text
+
+
+render_pass_judge = default_render_pass_judge
+
 # Module-level variable to allow dependency injection during tests
 semantic_review_judge = default_semantic_review_judge
 
@@ -222,7 +273,7 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         trace.append("creative_director")
         print(f"[{cd.name}] Response:\n{resp}\n")
         
-        if "APPROVED" in resp.upper():
+        if verdict_approves(resp):
             approved_by_cd = True
             responses["review"] = resp
         else:
@@ -277,12 +328,12 @@ async def run_pipeline_async(idea: str, brand_kit_path: str = 'brands/aol/brand_
         # [CD RENDER PASS]
         trace.append("cd_render_pass")
         cd = get_cd()
-        cd_render_prompt = f"Perform a multimodal post-render pass on this composited piece. Evaluate if it is alive, on-brand, concept-legible, visibly-different, no-leak, and scrim-valid. The visual asset URL is: {asset_url}. The visual brief is: {visual_brief}. Caption is: {hook}"
+        cd_render_prompt = f"Perform a multimodal post-render pass on this composited piece. The final composited image is ATTACHED to this message — inspect the attached image directly; do not ask for a URL. Evaluate if it is alive, on-brand, concept-legible, visibly-different, no-leak, and scrim-valid (the brand type scrim must sit fully behind every line). End with a line: VERDICT: approve OR VERDICT: reject. The visual brief is: {visual_brief}. Caption is: {hook}"
         print(f"[{cd.name} - Render Pass] Prompt: {cd_render_prompt}")
-        cd_render_resp = await semantic_review_judge(cd, cd_render_prompt, brand_kit)
+        cd_render_resp = await render_pass_judge(cd, cd_render_prompt, brand_kit, comp_out["asset_url"])
         print(f"[{cd.name} - Render Pass] Response:\n{cd_render_resp}\n")
         
-        if "REJECT" in cd_render_resp.upper() or "REVISE" in cd_render_resp.upper():
+        if not verdict_approves(cd_render_resp):
             visual_prompt_suffix = f"CD Render Pass failed: {cd_render_resp}"
             visual_loop_count += 1
             print(f"[pipeline] CD Render pass failed. Loop count: {visual_loop_count}/3")

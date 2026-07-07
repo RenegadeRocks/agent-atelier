@@ -17,8 +17,11 @@ def mock_semantic_review_judge(request, monkeypatch):
     if "live" not in request.keywords:
         async def mock_judge(agent, prompt, brand_kit):
             return "VERDICT: APPROVED (Stubbed for deterministic routing test)"
+        async def mock_render_judge(agent, prompt, brand_kit, image_path):
+            return "VERDICT: APPROVED (Stubbed render pass)"
         try:
             import app.pipeline
             monkeypatch.setattr(app.pipeline, "semantic_review_judge", mock_judge)
+            monkeypatch.setattr(app.pipeline, "render_pass_judge", mock_render_judge)
         except ImportError:
             pass
