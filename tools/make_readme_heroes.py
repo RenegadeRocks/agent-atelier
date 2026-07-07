@@ -20,7 +20,9 @@ from app.tools import caption_compose_server as ccs  # noqa: E402
 from app.tools.image_generate_server import image_generate_handle_call_tool  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-KIT = yaml.safe_load((ROOT / "brands/chuski-club/brand_kit.yaml").read_text(encoding="utf-8"))
+
+def load_kit(rel):
+    return yaml.safe_load((ROOT / rel).read_text(encoding="utf-8"))
 
 # Owner art direction (2026-07-07): youthful, enthusiastic, college friends;
 # some frames use a FLAT, BOLD solid-color background area for the brand's
@@ -31,26 +33,30 @@ STYLE = (
 )
 HEROES = [
     {
-        "n": 4,
-        "hook": "Pick your fighter.",
-        "brief": STYLE
-        + "A video-game character-select scene made of ice pops: four fruit ice pops "
-        "in different bright colors standing upright in a row slightly in the "
-        "background, and ONE mango-yellow ice pop stepped forward front-and-center, "
-        "clearly the chosen fighter — standing taller, lit by a brighter dramatic "
-        "beam of sunlight, its shadow longer and bolder than the others. Flat bold "
-        "hot-pink wall behind, hard crisp shadows, playful heroic staging, "
-        "poster-like flat color-block minimalism, no people.",
+        "out": "chuski-hero-7.jpg",
+        "kit": "brands/chuski-club/brand_kit.yaml",
+        "hook": "Sharing is optional.",
+        "brief": (
+            "Bright high-key summer daylight, saturated candy colors, joyful and "
+            "youthful energy — NOT moody, NOT dim. Three Indian college friends "
+            "squeezed together laughing on one parked scooter against a completely "
+            "FLAT bold mango-yellow wall, each holding a different bright fruit ice "
+            "pop, one friend playfully guarding hers away from the others. Hard sun, "
+            "crisp shadows, candid mid-laugh energy, casual summer clothes, "
+            "poster-like flat color-block composition."
+        ),
     },
     {
-        "n": 5,
-        "hook": "Your tongue is going to be purple in four minutes.",
-        "brief": STYLE
-        + "One deep-purple jamun ice pop with a big playful bite already taken out of "
-        "it, two tiny glossy purple drips, against a completely FLAT bold bright "
-        "mint-green background filling the frame — strong color contrast against the "
-        "purple pop. Hard sunlight, crisp shadow, bold minimal poster composition, "
-        "the bitten pop as the single hero object, no people.",
+        "out": "kanva-hero-1.jpg",
+        "kit": "brands/kanva-coffee/brand_kit.yaml",
+        "hook": "Slow is the whole point.",
+        "brief": (
+            "Premium, royal, unhurried craft: a gleaming copper pour-over kettle "
+            "pouring one thin steady stream into a glass brewer, dramatic soft steam "
+            "rising, on dark polished walnut with a folded linen cloth, one warm "
+            "shaft of morning light from the side, deep controlled shadows, copper "
+            "and amber glow, tactile textures, magazine-quality still life."
+        ),
     },
 ]
 
@@ -68,14 +74,14 @@ def main() -> None:
     out_dir = ROOT / "docs" / "heroes"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    brand_kit_args = {
-        "wordmark_text": KIT.get("wordmark_text", "CHUSKI CLUB"),
-        "accent_light_bg": KIT.get("accent_light_bg"),
-        "accent_dark_bg": KIT.get("accent_dark_bg"),
-    }
-
     for hero in HEROES:
-        print(f"[heroes] generating hero {hero['n']}: {hero['hook']!r}")
+        kit = load_kit(hero["kit"])
+        brand_kit_args = {
+            "wordmark_text": kit.get("wordmark_text", ""),
+            "accent_light_bg": kit.get("accent_light_bg"),
+            "accent_dark_bg": kit.get("accent_dark_bg"),
+        }
+        print(f"[heroes] generating {hero['out']}: {hero['hook']!r}")
         gen = json.loads(
             image_generate_handle_call_tool("image_generate", {"prompt": hero["brief"]})[0].text
         )
@@ -89,7 +95,7 @@ def main() -> None:
                 },
             )[0].text
         )
-        dest = out_dir / f"chuski-hero-{hero['n']}.jpg"
+        dest = out_dir / hero["out"]
         shutil.copy(comp["asset_url"], dest)
         print(f"[heroes] wrote {dest}")
 
