@@ -34,28 +34,22 @@ HEROES = [
         "n": 4,
         "hook": "Pick your fighter.",
         "brief": STYLE
-        + "Five fruit ice pops in five different bright colors standing upright in a "
-        "neat row like a video-game character lineup, against a completely FLAT bold "
-        "hot-pink background filling the frame. Hard sun, long crisp graphic shadows, "
-        "poster-like flat color-block minimalism, no people.",
+        + "Five fruit ice pops in five different bright colors, standing perfectly "
+        "upright and evenly spaced in one straight front-facing row, wooden sticks "
+        "planted firmly into a clean surface at the bottom so every pop is clearly "
+        "grounded, all five fully inside the frame at the same size, against a "
+        "completely FLAT bold hot-pink wall. Hard sun from one side, five parallel "
+        "crisp shadows, poster-like flat color-block minimalism, no people.",
     },
     {
         "n": 5,
         "hook": "Your tongue is going to be purple in four minutes.",
         "brief": STYLE
         + "One deep-purple jamun ice pop with a big playful bite already taken out of "
-        "it, two tiny glossy purple drips, against a completely FLAT bold pale-lilac "
-        "background filling the frame. Hard sunlight, crisp shadow, bold minimal "
-        "poster composition, the bitten pop as the single hero object, no people.",
-    },
-    {
-        "n": 6,
-        "hook": "It's hot. Come eat ice.",
-        "brief": STYLE
-        + "A single mango-yellow ice pop perfectly centered with one glossy melting "
-        "drip running down its stick, against a completely FLAT bold electric-blue "
-        "background filling the frame. Hard summer sun, crisp graphic shadow, "
-        "ultra-minimal poster composition, no people.",
+        "it, two tiny glossy purple drips, against a completely FLAT bold bright "
+        "mint-green background filling the frame — strong color contrast against the "
+        "purple pop. Hard sunlight, crisp shadow, bold minimal poster composition, "
+        "the bitten pop as the single hero object, no people.",
     },
 ]
 
