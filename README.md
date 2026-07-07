@@ -62,11 +62,20 @@ them is a YAML file.*
   pieces (measured escape rate: **5.6% on 18 pieces, 95% CI [1.0%, 25.8%]**)
   and a monthly retro mines the owner's edits into concrete canon amendments.
 
+## Try it now — no install
+
+**Live console demo:** https://renegaderocks.github.io/agent-atelier/demo/ — the
+Studio Floor on bundled demo data (amber DEMO badge; actions honestly disabled).
+
 ## Run it
 
-See **[HANDOFF.md](HANDOFF.md)** — the whole system is five commands:
+See **[HANDOFF.md](HANDOFF.md)** — one-time setup, then five commands:
 
 ```bash
+# setup (once): Python 3.11+
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt                     # + .env per HANDOFF.md for live steps
+
 python onboard_brand.py demo/brand-packs/chuski-club/   # 1. intake interview
 python -m app.scheduler --as-of 2026-07-06              # 2. plan the week
 # 3. produce a piece (live pipeline)
