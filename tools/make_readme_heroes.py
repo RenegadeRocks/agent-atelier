@@ -31,28 +31,31 @@ STYLE = (
 )
 HEROES = [
     {
-        "hook": "Phalsa season lasts fourteen days. Cancel your plans.",
+        "n": 4,
+        "hook": "Pick your fighter.",
         "brief": STYLE
-        + "Three college friends mid-laugh, clinking fruit ice pops together like a "
-        "toast, in front of a completely FLAT, bold hot-pink painted wall that fills "
-        "the background edge to edge. Hard noon sun, crisp graphic shadows, Indian "
-        "college students in casual summer clothes, deep purple and mango-yellow ice "
-        "pops, poster-like flat color-block composition.",
+        + "Five fruit ice pops in five different bright colors standing upright in a "
+        "neat row like a video-game character lineup, against a completely FLAT bold "
+        "hot-pink background filling the frame. Hard sun, long crisp graphic shadows, "
+        "poster-like flat color-block minimalism, no people.",
     },
     {
-        "hook": "Real jamun leaves a mark.",
+        "n": 5,
+        "hook": "Your tongue is going to be purple in four minutes.",
         "brief": STYLE
-        + "A single hand holding a deep-purple jamun ice pop with one glossy drip "
-        "racing down the wrist, against a completely FLAT bold mango-yellow "
-        "background filling the whole frame. Hard sunlight, crisp shadow, bold "
-        "minimal poster composition, the pop as the single hero object.",
+        + "One deep-purple jamun ice pop with a big playful bite already taken out of "
+        "it, two tiny glossy purple drips, against a completely FLAT bold pale-lilac "
+        "background filling the frame. Hard sunlight, crisp shadow, bold minimal "
+        "poster composition, the bitten pop as the single hero object, no people.",
     },
     {
-        "hook": "Mango o'clock is 4pm sharp.",
+        "n": 6,
+        "hook": "It's hot. Come eat ice.",
         "brief": STYLE
-        + "Five fruit ice pops in different bright colors fanned out on crushed ice, "
-        "shot from above on a completely FLAT bold mint-green background, hard sun "
-        "and crisp graphic shadows, playful arrangement, poster-like minimalism.",
+        + "A single mango-yellow ice pop perfectly centered with one glossy melting "
+        "drip running down its stick, against a completely FLAT bold electric-blue "
+        "background filling the frame. Hard summer sun, crisp graphic shadow, "
+        "ultra-minimal poster composition, no people.",
     },
 ]
 
@@ -76,8 +79,8 @@ def main() -> None:
         "accent_dark_bg": KIT.get("accent_dark_bg"),
     }
 
-    for i, hero in enumerate(HEROES, 1):
-        print(f"[heroes] generating {i}/3: {hero['hook']!r}")
+    for hero in HEROES:
+        print(f"[heroes] generating hero {hero['n']}: {hero['hook']!r}")
         gen = json.loads(
             image_generate_handle_call_tool("image_generate", {"prompt": hero["brief"]})[0].text
         )
@@ -91,7 +94,7 @@ def main() -> None:
                 },
             )[0].text
         )
-        dest = out_dir / f"chuski-hero-{i}.jpg"
+        dest = out_dir / f"chuski-hero-{hero['n']}.jpg"
         shutil.copy(comp["asset_url"], dest)
         print(f"[heroes] wrote {dest}")
 
