@@ -14,12 +14,17 @@ Three fictional brands run on this exact, unchanged code — a wellness center, 
 coffee roastery, and an ice-pop shop — each with its own voice, palette,
 brandmark, and safety rules, all of it configuration:
 
-| Art of Living Ludhiana | Chuski CLub Jaipur |
+| Art of Living Ludhiana — calm | Kanva Coffee Works — premium |
 |---|---|
-| ![AOL](https://storage.googleapis.com/agent-atelier-assets-satbir/composited_ce0fb209.jpg) | <img width="1080" height="1350" alt="chuski-hero-2" src="https://github.com/user-attachments/assets/0ea9c530-91ee-4c19-8dc5-ea42149ac775" />
+| ![AOL — Leave the shop at the shop](https://storage.googleapis.com/agent-atelier-assets-satbir/composited_ce0fb209.jpg) | ![Kanva — Slow is the whole point](docs/heroes/kanva-hero-1.jpg) |
 
+| Chuski Club Jaipur — youthful | Chuski Club Jaipur — playful |
+|---|---|
+| ![Chuski — Real jamun leaves a mark](docs/heroes/chuski-hero-2.jpg) | ![Chuski — Sharing is optional](docs/heroes/chuski-hero-7.jpg) |
 
-*Same engine. Zero code changes between brands.*
+*Same engine. Zero code changes between brands — one brand is solemn, one is
+royal, one is a gang of friends on a scooter, and the only difference between
+them is a YAML file.*
 
 ---
 
