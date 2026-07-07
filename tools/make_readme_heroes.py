@@ -34,12 +34,13 @@ HEROES = [
         "n": 4,
         "hook": "Pick your fighter.",
         "brief": STYLE
-        + "Five fruit ice pops in five different bright colors, standing perfectly "
-        "upright and evenly spaced in one straight front-facing row, wooden sticks "
-        "planted firmly into a clean surface at the bottom so every pop is clearly "
-        "grounded, all five fully inside the frame at the same size, against a "
-        "completely FLAT bold hot-pink wall. Hard sun from one side, five parallel "
-        "crisp shadows, poster-like flat color-block minimalism, no people.",
+        + "A video-game character-select scene made of ice pops: four fruit ice pops "
+        "in different bright colors standing upright in a row slightly in the "
+        "background, and ONE mango-yellow ice pop stepped forward front-and-center, "
+        "clearly the chosen fighter — standing taller, lit by a brighter dramatic "
+        "beam of sunlight, its shadow longer and bolder than the others. Flat bold "
+        "hot-pink wall behind, hard crisp shadows, playful heroic staging, "
+        "poster-like flat color-block minimalism, no people.",
     },
     {
         "n": 5,
