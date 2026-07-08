@@ -10,6 +10,8 @@ Director rejects the weak work before you ever see it. **Nothing publishes witho
 a human's click**, and autonomy isn't assumed: the system *earns* trust on a
 visible ladder, one approved piece at a time.
 
+live unedited run of app: https://youtu.be/28pWi7AGeN8
+
 Three fictional brands run on this exact, unchanged code — a wellness center, a
 coffee roastery, and an ice-pop shop — each with its own voice, palette,
 brandmark, and safety rules, all of it configuration:
